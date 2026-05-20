@@ -10,3 +10,7 @@ inference/outputs/*
 inference/log/*
 
 outputs
+.venv
+.claude
+.codex
+.runs

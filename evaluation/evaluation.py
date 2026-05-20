@@ -3,10 +3,8 @@ import json
 import datetime
 import openpyxl
 import argparse
-import numpy as np
+from pathlib import Path
 from tqdm import tqdm
-from collections import defaultdict
-from openpyxl.styles import PatternFill, Font
 
 
 def datetime_to_float(dt):
@@ -195,24 +193,47 @@ def parse_option():
     parser.add_argument('--setting', type=str, default='single',
         help='four setting: single, multi_react_exec, multi_row_exec, multi_row_react_exec')
     parser.add_argument('--dataset', type=str, default="all_data_912", help='dataset name')
+    parser.add_argument('--source', choices=['outputs', 'inputs'], default='outputs',
+        help='evaluate generated outputs or original inputs')
+    parser.add_argument('--task-id', action='append', help='task id to evaluate; may be repeated')
+    parser.add_argument('--limit', type=int, default=None)
 
     opt = parser.parse_args()
 
     return opt
 
 
+def get_proc_path(dataset_path, setting, model, data_id, case_index, source='outputs'):
+    dataset_path = Path(dataset_path)
+    data_id = str(data_id)
+    if source == 'inputs':
+        return dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_input.xlsx'
+    return dataset_path / 'outputs' / f'{setting}_{model}' / f'{case_index}_{data_id}_output.xlsx'
+
+
 def evaluation(opt):
-    dataset_path = os.path.abspath(f'../data/{opt.dataset}')
-    with open(f'{dataset_path}/dataset.json', 'r') as fp:
+    dataset_path = Path(os.path.abspath(f'../data/{opt.dataset}'))
+    with open(dataset_path / 'dataset.json', 'r') as fp:
         dataset = json.load(fp)
+    if opt.task_id:
+        wanted = set(str(task_id) for task_id in opt.task_id)
+        dataset = [data for data in dataset if str(data['id']) in wanted]
+    if opt.limit is not None:
+        dataset = dataset[:opt.limit]
 
     eval_results = []
     for data in tqdm(dataset):
         test_case_results = []
         for test_case_idx in range(3):
-            gt_path = f"{dataset_path}/spreadsheet/{data['id']}/{test_case_idx + 1}_{data['id']}_answer.xlsx"
-            proc_path = f"{dataset_path}/spreadsheet/{data['id']}/{test_case_idx + 1}_{data['id']}_input.xlsx"
-            # proc_path = f"{dataset_path}/outputs/{opt.setting}_{opt.model}/{test_case_idx + 1}_{data['id']}_output.xlsx"
+            gt_path = dataset_path / 'spreadsheet' / str(data['id']) / f"{test_case_idx + 1}_{data['id']}_answer.xlsx"
+            proc_path = get_proc_path(
+                dataset_path,
+                opt.setting,
+                opt.model,
+                data['id'],
+                test_case_idx + 1,
+                opt.source,
+            )
             try:
                 result, _ = compare_workbooks(gt_path, proc_path, data['instruction_type'], data['answer_position'])
             except:
@@ -228,6 +249,7 @@ def evaluation(opt):
             'hard_restriction': hard_restriction,
         })
     
+    os.makedirs('../outputs', exist_ok=True)
     with open(f'../outputs/eval_{opt.setting}_{opt.model}.json', 'w') as fp:
         json.dump(eval_results, fp, indent=4)
 

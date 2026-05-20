@@ -128,6 +128,63 @@ bash scripts/inference_multiple_row_react_exec.sh
 You need to modify the model, api_key, and base_url parameters in the scripts.
 The code solution are saved in the ```inference/output``` folder and the result spreadsheet files are saved in the ```data/sample_data_200/outputs``` folder.
 
+### Agent + univer-cli Setting
+
+You can also evaluate an external coding agent such as Codex, Claude Code, or another CLI agent while using `univer-cli` as the spreadsheet execution layer.
+This path still accepts `.xlsx` inputs and produces `.xlsx` outputs for the existing evaluator.
+
+The runner creates an isolated working directory for each task, copies only the first input workbook into the authoring directory, asks the agent to use `univer run` to solve and verify the authoring workbook, then requires a final reusable `solution.js`. The runner replays that script against all three test cases and copies the exported files into `data/<dataset>/outputs/<setting>_<model>/`.
+
+Example:
+```
+cd inference
+AGENT_COMMAND='codex exec "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' MODEL=codex STREAM_AGENT_OUTPUT=1 bash scripts/inference_univer_agent.sh --limit 1
+```
+
+The agent command runs inside the task authoring directory and receives the generated prompt on stdin. The runner also writes the prompt to `prompt.md` and exposes these environment variables to the command:
+
+- `SPREADSHEETBENCH_PROMPT_FILE`
+- `SPREADSHEETBENCH_WORK_DIR`
+- `SPREADSHEETBENCH_TASK_ID`
+- `SPREADSHEETBENCH_SOLUTION_FILE`
+
+For CLIs that need a prompt file instead of stdin, read `SPREADSHEETBENCH_PROMPT_FILE` inside `AGENT_COMMAND`:
+```
+AGENT_COMMAND='claude -p "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' MODEL=claude bash scripts/inference_univer_agent.sh --task-id 59196
+```
+
+The command string also supports `{prompt_file}`, `{work_dir}`, `{task_id}`, and `{solution_file}` placeholders.
+
+For Claude Code, verbose stream JSON is useful when debugging agent behavior:
+```
+AGENT_COMMAND='claude -p "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")" --permission-mode bypassPermissions --no-session-persistence --output-format stream-json --verbose' \
+MODEL=claude \
+STREAM_AGENT_OUTPUT=1 \
+bash scripts/inference_univer_agent.sh --task-id 54513 --run-id claude-smoke-54513
+```
+
+Each task keeps these logs in `.runs/univer-agent/<run-id>/<task-id>/authoring/`:
+
+- `prompt.md`: generated agent prompt.
+- `agent.command.txt`: exact agent command.
+- `agent.stdout.txt`: raw agent stdout.
+- `agent.stderr.txt`: raw agent stderr.
+- `solution.js`: reusable script expected from the agent.
+
+Each replayed test case also keeps a `univer.log` under its `case_<n>/` directory.
+
+Useful runner options:
+```
+python univer_agent_runner.py \
+  --dataset sample_data_200 \
+  --setting univer_agent \
+  --model codex \
+  --agent-command 'codex exec "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' \
+  --stream-agent-output \
+  --task-id 59196 \
+  --cases 1,2,3
+```
+
 ## Evaluation
 
 ### Recalculate Spreadsheet Formulas
@@ -145,10 +202,11 @@ The script auto-detects the backend (LibreOffice on macOS/Linux, win32com on Win
 Using the following script to get the evaluation result:
 ```
 cd evaluation
-bash scripts/evaluation.sh
+python evaluation.py --dataset sample_data_200 --setting univer_agent --model codex
 ```
 
-You need to modify the setting (single, multi_react_exec, multi_row_exec, or multi_row_react_exec) and model parameters in evaluation.sh.
+By default, evaluation reads generated files from `data/<dataset>/outputs/<setting>_<model>/`.
+Use `--source inputs` only for baseline checks against the original input files.
 
 ## Acknowledge
 
