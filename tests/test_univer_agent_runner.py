@@ -68,6 +68,19 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         self.assertEqual(opt.workers, 5)
 
+    def test_discover_common_cases_accepts_init_workbooks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path = tmp_path / "data" / "verified"
+            for task_id in ("task-1", "task-2"):
+                spreadsheet_dir = dataset_path / "spreadsheet" / task_id
+                spreadsheet_dir.mkdir(parents=True)
+                (spreadsheet_dir / f"1_{task_id}_init.xlsx").write_bytes(b"input")
+
+            tasks = [{"id": "task-1"}, {"id": "task-2"}]
+
+            self.assertEqual(cli.discover_common_cases(dataset_path, tasks), [1])
+
     def test_run_tasks_starts_multiple_tasks_concurrently(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -175,6 +188,38 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertEqual(
                 test_case_input_path(dataset_path, task, 1),
                 spreadsheet_dir / "1_task-1_input.xlsx",
+            )
+
+    def test_prepare_authoring_workspace_accepts_init_workbook(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path = tmp_path / "data" / "verified"
+            spreadsheet_dir = dataset_path / "spreadsheet" / "task-1"
+            spreadsheet_dir.mkdir(parents=True)
+            (spreadsheet_dir / "1_task-1_init.xlsx").write_bytes(b"init")
+
+            task = {
+                "id": "task-1",
+                "instruction": "Fill B2.",
+                "instruction_type": "Cell-Level Manipulation",
+                "answer_position": "B2",
+                "spreadsheet_path": "spreadsheet/task-1",
+            }
+            config = RunnerConfig(
+                dataset_path=dataset_path,
+                run_root=tmp_path / "runs",
+                run_id="run-1",
+                setting="univer_agent",
+                model="codex",
+                agent_command="true",
+            )
+
+            workspace = prepare_authoring_workspace(config, task)
+
+            self.assertEqual((workspace.authoring_dir / "input.xlsx").read_bytes(), b"init")
+            self.assertEqual(
+                test_case_input_path(dataset_path, task, 1),
+                spreadsheet_dir / "1_task-1_init.xlsx",
             )
 
     def test_prepare_authoring_workspace_returns_absolute_agent_paths(self):

@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
+import tempfile
 
-from evaluation.evaluation import get_proc_path
+from evaluation.evaluation import discover_case_indices, get_ground_truth_path, get_proc_path
 
 
 class EvaluationPathTest(unittest.TestCase):
@@ -24,6 +25,30 @@ class EvaluationPathTest(unittest.TestCase):
             path,
             Path("/repo/data/sample_data_200/spreadsheet/59196/3_59196_input.xlsx"),
         )
+
+    def test_get_proc_path_can_read_verified_init_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_path = Path(tmp) / "data" / "verified"
+            spreadsheet_dir = dataset_path / "spreadsheet" / "task-1"
+            spreadsheet_dir.mkdir(parents=True)
+            (spreadsheet_dir / "1_task-1_init.xlsx").write_bytes(b"init")
+
+            path = get_proc_path(dataset_path, "single", "univer-cli", "task-1", 1, "inputs")
+
+            self.assertEqual(path, spreadsheet_dir / "1_task-1_init.xlsx")
+
+    def test_discover_case_indices_uses_golden_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_path = Path(tmp) / "data" / "verified"
+            spreadsheet_dir = dataset_path / "spreadsheet" / "task-1"
+            spreadsheet_dir.mkdir(parents=True)
+            (spreadsheet_dir / "1_task-1_golden.xlsx").write_bytes(b"answer")
+
+            self.assertEqual(discover_case_indices(dataset_path, "task-1"), [1])
+            self.assertEqual(
+                get_ground_truth_path(dataset_path, "task-1", 1),
+                spreadsheet_dir / "1_task-1_golden.xlsx",
+            )
 
 
 if __name__ == "__main__":

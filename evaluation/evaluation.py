@@ -207,8 +207,39 @@ def get_proc_path(dataset_path, setting, model, data_id, case_index, source='out
     dataset_path = Path(dataset_path)
     data_id = str(data_id)
     if source == 'inputs':
-        return dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_input.xlsx'
+        input_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_input.xlsx'
+        if input_path.is_file():
+            return input_path
+        init_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_init.xlsx'
+        if init_path.is_file():
+            return init_path
+        return input_path
     return dataset_path / 'outputs' / f'{setting}_{model}' / f'{case_index}_{data_id}_output.xlsx'
+
+
+def get_ground_truth_path(dataset_path, data_id, case_index):
+    dataset_path = Path(dataset_path)
+    data_id = str(data_id)
+    answer_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_answer.xlsx'
+    if answer_path.is_file():
+        return answer_path
+    golden_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_golden.xlsx'
+    if golden_path.is_file():
+        return golden_path
+    return answer_path
+
+
+def discover_case_indices(dataset_path, data_id):
+    dataset_path = Path(dataset_path)
+    data_id = str(data_id)
+    spreadsheet_dir = dataset_path / 'spreadsheet' / data_id
+    cases = []
+    for suffix in ('answer', 'golden'):
+        for answer_file in spreadsheet_dir.glob(f'*_{data_id}_{suffix}.xlsx'):
+            prefix = answer_file.name.split('_', 1)[0]
+            if prefix.isdigit():
+                cases.append(int(prefix))
+    return sorted(set(cases))
 
 
 def evaluation(opt):
@@ -224,14 +255,15 @@ def evaluation(opt):
     eval_results = []
     for data in tqdm(dataset):
         test_case_results = []
-        for test_case_idx in range(3):
-            gt_path = dataset_path / 'spreadsheet' / str(data['id']) / f"{test_case_idx + 1}_{data['id']}_answer.xlsx"
+        cases = discover_case_indices(dataset_path, data['id'])
+        for case_index in cases:
+            gt_path = get_ground_truth_path(dataset_path, data['id'], case_index)
             proc_path = get_proc_path(
                 dataset_path,
                 opt.setting,
                 opt.model,
                 data['id'],
-                test_case_idx + 1,
+                case_index,
                 opt.source,
             )
             try:
@@ -239,8 +271,8 @@ def evaluation(opt):
             except:
                 result = False
             test_case_results.append(int(result))
-        soft_restriction = test_case_results.count(1) / len(test_case_results)
-        hard_restriction = 0 if 0 in test_case_results else 1
+        soft_restriction = test_case_results.count(1) / len(test_case_results) if test_case_results else 0
+        hard_restriction = 0 if not test_case_results or 0 in test_case_results else 1
         eval_results.append({
             'id': data['id'],
             'instruction_type': data['instruction_type'],

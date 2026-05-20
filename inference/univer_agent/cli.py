@@ -25,13 +25,6 @@ def load_dataset(dataset_path: Path) -> List[Dict]:
         return json.load(fp)
 
 
-def parse_cases(raw: str) -> List[int]:
-    cases = [int(item.strip()) for item in raw.split(",") if item.strip()]
-    if not cases:
-        raise argparse.ArgumentTypeError("at least one case index is required")
-    return cases
-
-
 def select_tasks(dataset: List[Dict], task_ids: Optional[List[str]], limit: Optional[int]) -> List[Dict]:
     selected = dataset
     if task_ids:
@@ -40,6 +33,29 @@ def select_tasks(dataset: List[Dict], task_ids: Optional[List[str]], limit: Opti
     if limit is not None:
         selected = selected[:limit]
     return selected
+
+
+def discover_task_cases(dataset_path: Path, task: Dict) -> List[int]:
+    task_id = task_id_text(task)
+    spreadsheet_dir = dataset_path / str(task.get("spreadsheet_path", f"spreadsheet/{task_id}"))
+    cases = []
+    for suffix in ("input", "init"):
+        for input_file in spreadsheet_dir.glob(f"*_{task_id}_{suffix}.xlsx"):
+            prefix = input_file.name.split("_", 1)[0]
+            if prefix.isdigit():
+                cases.append(int(prefix))
+    return sorted(set(cases))
+
+
+def discover_common_cases(dataset_path: Path, tasks: List[Dict]) -> List[int]:
+    common_cases: Optional[set[int]] = None
+    for task in tasks:
+        task_cases = set(discover_task_cases(dataset_path, task))
+        if common_cases is None:
+            common_cases = task_cases
+        else:
+            common_cases &= task_cases
+    return sorted(common_cases or [])
 
 
 def default_run_id() -> str:
@@ -65,7 +81,6 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--univer-bin", default="univer")
     parser.add_argument("--task-id", action="append", help="task id to run; may be repeated")
     parser.add_argument("--limit", type=int, default=None)
-    parser.add_argument("--cases", type=parse_cases, default=parse_cases("1,2,3"))
     parser.add_argument("--workers", type=int, default=5, help="number of tasks to run concurrently")
     parser.add_argument("--skip-agent", action="store_true", help="reuse an existing solution.js")
     parser.add_argument("--keep-going", action="store_true")
@@ -195,6 +210,10 @@ def main(project_root: Optional[Path] = None) -> int:
     reset_run_dir(config)
 
     tasks = select_tasks(load_dataset(config.dataset_path), opt.task_id, opt.limit)
+    cases = discover_common_cases(config.dataset_path, tasks)
+    if not cases:
+        raise RunnerError("no common input cases found for selected tasks")
+
     metadata = {
         "run_id": config.run_id,
         "dataset": opt.dataset,
@@ -202,7 +221,7 @@ def main(project_root: Optional[Path] = None) -> int:
         "setting": config.setting,
         "model": config.model,
         "agent": opt.agent,
-        "cases": opt.cases,
+        "cases": cases,
         "run_root": str(config.run_root),
         "stream_agent_output": config.stream_agent_output,
         "workers": opt.workers,
@@ -210,13 +229,13 @@ def main(project_root: Optional[Path] = None) -> int:
         "cwd": os.getcwd(),
     }
     print(f"[run] id={config.run_id} dataset={opt.dataset} setting={config.setting} model={config.model} agent={opt.agent}")
-    print(f"[run] selected_tasks={len(tasks)} cases={','.join(str(case) for case in opt.cases)}")
+    print(f"[run] selected_tasks={len(tasks)} cases={','.join(str(case) for case in cases)}")
     print(f"[run] workers={opt.workers}")
     print(f"[run] summary={config.run_root / config.run_id / 'summary.json'}")
     summary = run_tasks(
         config,
         tasks,
-        opt.cases,
+        cases,
         skip_agent=opt.skip_agent,
         keep_going=opt.keep_going,
         workers=opt.workers,

@@ -14,7 +14,14 @@ def safe_task_dir_name(task_id: str) -> str:
 def test_case_input_path(dataset_path: Path, task: Dict, case_index: int) -> Path:
     task_id = task_id_text(task)
     spreadsheet_path = Path(task.get("spreadsheet_path", f"spreadsheet/{task_id}"))
-    return dataset_path / spreadsheet_path / f"{case_index}_{task_id}_input.xlsx"
+    spreadsheet_dir = dataset_path / spreadsheet_path
+    input_path = spreadsheet_dir / f"{case_index}_{task_id}_input.xlsx"
+    if input_path.is_file():
+        return input_path
+    init_path = spreadsheet_dir / f"{case_index}_{task_id}_init.xlsx"
+    if init_path.is_file():
+        return init_path
+    return input_path
 
 
 def output_xlsx_path(
