@@ -1,9 +1,13 @@
 import os
+import sys
+import threading
+import time
 import tempfile
 import unittest
 from io import StringIO
 from pathlib import Path
 from contextlib import redirect_stderr, redirect_stdout
+from unittest.mock import patch
 
 from inference.univer_agent import (
     RunnerConfig,
@@ -20,7 +24,8 @@ from inference.univer_agent.agents import (
     resolve_stream_agent_output,
     unsupported_agent_reason,
 )
-from inference.univer_agent.cli import reset_run_dir
+from inference.univer_agent import cli
+from inference.univer_agent.cli import parse_option, reset_run_dir
 
 
 class UniverAgentRunnerTest(unittest.TestCase):
@@ -56,6 +61,52 @@ class UniverAgentRunnerTest(unittest.TestCase):
             reset_run_dir(config)
 
             self.assertFalse((config.run_root / config.run_id).exists())
+
+    def test_parse_option_defaults_to_five_task_workers(self):
+        with patch.object(sys, "argv", ["prog"]):
+            opt = parse_option(Path.cwd())
+
+        self.assertEqual(opt.workers, 5)
+
+    def test_run_tasks_starts_multiple_tasks_concurrently(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            config = RunnerConfig(
+                dataset_path=tmp_path / "data",
+                run_root=tmp_path / "runs",
+                run_id="run-1",
+                setting="univer_agent",
+                model="codex",
+                agent_command="true",
+            )
+            tasks = [{"id": "task-1"}, {"id": "task-2"}, {"id": "task-3"}]
+            active = 0
+            max_active = 0
+            lock = threading.Lock()
+
+            def fake_run_task(_config, task, _cases, skip_agent=False):
+                nonlocal active, max_active
+                with lock:
+                    active += 1
+                    max_active = max(max_active, active)
+                time.sleep(0.05)
+                with lock:
+                    active -= 1
+                return {"id": str(task["id"]), "status": "ok"}
+
+            with patch.object(cli, "run_task", side_effect=fake_run_task):
+                summary = cli.run_tasks(
+                    config,
+                    tasks,
+                    cases=[1, 2, 3],
+                    skip_agent=False,
+                    keep_going=False,
+                    workers=2,
+                    metadata={},
+                )
+
+            self.assertGreater(max_active, 1)
+            self.assertEqual({item["id"] for item in summary}, {"task-1", "task-2", "task-3"})
 
     def test_build_agent_prompt_requires_iterative_run_workflow_and_final_solution(self):
         task = {

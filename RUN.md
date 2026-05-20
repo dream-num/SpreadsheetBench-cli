@@ -61,6 +61,14 @@ bash scripts/run_univer_agent_eval.sh --agent codex --limit 10 --run-id codex-fi
 bash scripts/run_univer_agent_eval.sh --agent codex --task-id 54513 --task-id 59196 --run-id codex-two-tasks
 ```
 
+控制 task 级并发数，默认是 5：
+
+```bash
+bash scripts/run_univer_agent_eval.sh --agent codex --limit 10 --workers 3 --run-id codex-first-10
+```
+
+并发只作用于不同 task。单个 task 内仍然按 `agent -> case 1 -> case 2 -> case 3` 顺序执行；evaluation 会等所有 inference task 结束后再运行。
+
 覆盖输出目录里的 model 标签：
 
 ```bash

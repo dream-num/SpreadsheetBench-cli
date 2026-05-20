@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import shutil
+from concurrent.futures import CancelledError, ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -65,6 +66,7 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--task-id", action="append", help="task id to run; may be repeated")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--cases", type=parse_cases, default=parse_cases("1,2,3"))
+    parser.add_argument("--workers", type=int, default=5, help="number of tasks to run concurrently")
     parser.add_argument("--skip-agent", action="store_true", help="reuse an existing solution.js")
     parser.add_argument("--keep-going", action="store_true")
     return parser.parse_args()
@@ -90,10 +92,86 @@ def reset_run_dir(config: RunnerConfig) -> None:
         shutil.rmtree(run_dir)
 
 
+def _run_task_for_summary(
+    config: RunnerConfig,
+    task: Dict,
+    cases: List[int],
+    skip_agent: bool,
+) -> tuple[Dict, Optional[BaseException]]:
+    try:
+        print(f"[task {task_id_text(task)}] start")
+        result = run_task(config, task, cases, skip_agent=skip_agent)
+        print(f"[task {task_id_text(task)}] status=ok")
+        return result, None
+    except Exception as exc:
+        result = {
+            "id": task_id_text(task),
+            "status": "error",
+            "error": str(exc),
+        }
+        print(f"[task {task_id_text(task)}] status=error error={exc}")
+        return result, exc
+
+
+def _completed_results(results: List[Optional[Dict]]) -> List[Dict]:
+    return [result for result in results if result is not None]
+
+
+def run_tasks(
+    config: RunnerConfig,
+    tasks: List[Dict],
+    cases: List[int],
+    skip_agent: bool,
+    keep_going: bool,
+    workers: int,
+    metadata: Dict,
+) -> List[Dict]:
+    if workers < 1:
+        raise RunnerError("--workers must be at least 1")
+
+    results: List[Optional[Dict]] = [None] * len(tasks)
+    if workers == 1 or len(tasks) <= 1:
+        for index, task in enumerate(tasks):
+            result, exc = _run_task_for_summary(config, task, cases, skip_agent)
+            results[index] = result
+            write_summary(config, _completed_results(results), metadata)
+            if exc and not keep_going:
+                raise exc
+        return _completed_results(results)
+
+    first_error: Optional[BaseException] = None
+    max_workers = min(workers, len(tasks))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_index = {
+            executor.submit(_run_task_for_summary, config, task, cases, skip_agent): index
+            for index, task in enumerate(tasks)
+        }
+        for future in as_completed(future_to_index):
+            index = future_to_index[future]
+            try:
+                result, exc = future.result()
+            except CancelledError:
+                continue
+            results[index] = result
+            write_summary(config, _completed_results(results), metadata)
+            if exc and not keep_going and first_error is None:
+                first_error = exc
+                for pending in future_to_index:
+                    if pending is not future:
+                        pending.cancel()
+
+    summary = _completed_results(results)
+    if first_error is not None:
+        raise first_error
+    return summary
+
+
 def main(project_root: Optional[Path] = None) -> int:
     project_root = project_root or Path(__file__).resolve().parents[2]
     opt = parse_option(project_root)
     dataset_path = opt.dataset_path or (project_root / "data" / opt.dataset)
+    if opt.workers < 1:
+        raise RunnerError("--workers must be at least 1")
     unsupported_reason = unsupported_agent_reason(opt.agent)
     if unsupported_reason:
         raise RunnerError(unsupported_reason)
@@ -127,32 +205,23 @@ def main(project_root: Optional[Path] = None) -> int:
         "cases": opt.cases,
         "run_root": str(config.run_root),
         "stream_agent_output": config.stream_agent_output,
+        "workers": opt.workers,
         "started_at": datetime.datetime.now().isoformat(timespec="seconds"),
         "cwd": os.getcwd(),
     }
     print(f"[run] id={config.run_id} dataset={opt.dataset} setting={config.setting} model={config.model} agent={opt.agent}")
     print(f"[run] selected_tasks={len(tasks)} cases={','.join(str(case) for case in opt.cases)}")
+    print(f"[run] workers={opt.workers}")
     print(f"[run] summary={config.run_root / config.run_id / 'summary.json'}")
-    summary = []
-    for task in tasks:
-        try:
-            print(f"[task {task_id_text(task)}] start")
-            result = run_task(config, task, opt.cases, skip_agent=opt.skip_agent)
-            print(f"[task {task_id_text(task)}] status=ok")
-        except Exception as exc:
-            result = {
-                "id": task_id_text(task),
-                "status": "error",
-                "error": str(exc),
-            }
-            print(f"[task {task_id_text(task)}] status=error error={exc}")
-            if not opt.keep_going:
-                summary.append(result)
-                metadata["finished_at"] = datetime.datetime.now().isoformat(timespec="seconds")
-                write_summary(config, summary, metadata)
-                raise
-        summary.append(result)
-        write_summary(config, summary, metadata)
+    summary = run_tasks(
+        config,
+        tasks,
+        opt.cases,
+        skip_agent=opt.skip_agent,
+        keep_going=opt.keep_going,
+        workers=opt.workers,
+        metadata=metadata,
+    )
     metadata["finished_at"] = datetime.datetime.now().isoformat(timespec="seconds")
     write_summary(config, summary, metadata)
     return 0
