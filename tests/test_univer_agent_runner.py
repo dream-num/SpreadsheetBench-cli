@@ -68,20 +68,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         self.assertEqual(opt.workers, 5)
 
-    def test_discover_common_cases_uses_only_cases_present_for_all_selected_tasks(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            dataset_path = tmp_path / "data" / "verified"
-            for task_id, cases in {"task-1": [1], "task-2": [1, 2]}.items():
-                spreadsheet_dir = dataset_path / "spreadsheet" / task_id
-                spreadsheet_dir.mkdir(parents=True)
-                for case_index in cases:
-                    (spreadsheet_dir / f"{case_index}_{task_id}_input.xlsx").write_bytes(b"input")
-
-            tasks = [{"id": "task-1"}, {"id": "task-2"}]
-
-            self.assertEqual(cli.discover_common_cases(dataset_path, tasks), [1])
-
     def test_run_tasks_starts_multiple_tasks_concurrently(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)

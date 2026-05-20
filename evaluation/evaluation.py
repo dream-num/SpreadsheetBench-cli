@@ -211,18 +211,6 @@ def get_proc_path(dataset_path, setting, model, data_id, case_index, source='out
     return dataset_path / 'outputs' / f'{setting}_{model}' / f'{case_index}_{data_id}_output.xlsx'
 
 
-def discover_case_indices(dataset_path, data_id):
-    dataset_path = Path(dataset_path)
-    data_id = str(data_id)
-    spreadsheet_dir = dataset_path / 'spreadsheet' / data_id
-    cases = []
-    for answer_file in spreadsheet_dir.glob(f'*_{data_id}_answer.xlsx'):
-        prefix = answer_file.name.split('_', 1)[0]
-        if prefix.isdigit():
-            cases.append(int(prefix))
-    return sorted(set(cases))
-
-
 def evaluation(opt):
     dataset_path = Path(os.path.abspath(f'../data/{opt.dataset}'))
     with open(dataset_path / 'dataset.json', 'r') as fp:
@@ -236,15 +224,14 @@ def evaluation(opt):
     eval_results = []
     for data in tqdm(dataset):
         test_case_results = []
-        cases = discover_case_indices(dataset_path, data['id'])
-        for case_index in cases:
-            gt_path = dataset_path / 'spreadsheet' / str(data['id']) / f"{case_index}_{data['id']}_answer.xlsx"
+        for test_case_idx in range(3):
+            gt_path = dataset_path / 'spreadsheet' / str(data['id']) / f"{test_case_idx + 1}_{data['id']}_answer.xlsx"
             proc_path = get_proc_path(
                 dataset_path,
                 opt.setting,
                 opt.model,
                 data['id'],
-                case_index,
+                test_case_idx + 1,
                 opt.source,
             )
             try:
@@ -252,7 +239,7 @@ def evaluation(opt):
             except:
                 result = False
             test_case_results.append(int(result))
-        soft_restriction = test_case_results.count(1) / len(test_case_results) if test_case_results else 0
+        soft_restriction = test_case_results.count(1) / len(test_case_results)
         hard_restriction = 0 if 0 in test_case_results else 1
         eval_results.append({
             'id': data['id'],
