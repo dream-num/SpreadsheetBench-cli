@@ -67,7 +67,7 @@ bash scripts/run_univer_agent_eval.sh --agent codex --task-id 54513 --task-id 59
 bash scripts/run_univer_agent_eval.sh --agent codex --limit 10 --workers 3 --run-id codex-first-10
 ```
 
-并发只作用于不同 task。单个 task 内仍然按 `agent -> case 1 -> case 2 -> case 3` 顺序执行；evaluation 会等所有 inference task 结束后再运行。
+并发只作用于不同 task。单个 task 内仍然按 `agent -> 已发现的 case` 顺序执行；evaluation 会等所有 inference task 结束后再运行。
 
 覆盖输出目录里的 model 标签：
 
@@ -145,8 +145,7 @@ input.xlsx          从 case 1 复制来的 authoring 输入
 
 ```text
 .runs/univer-agent/<run-id>/<task-id>/case_1/univer.log
-.runs/univer-agent/<run-id>/<task-id>/case_2/univer.log
-.runs/univer-agent/<run-id>/<task-id>/case_3/univer.log
+.runs/univer-agent/<run-id>/<task-id>/case_<n>/univer.log
 ```
 
 `univer.log` 会记录每一步 replay 命令：

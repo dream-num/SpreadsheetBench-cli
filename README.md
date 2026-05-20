@@ -133,7 +133,7 @@ The code solution are saved in the ```inference/output``` folder and the result 
 You can also evaluate an external coding agent such as Codex, Claude Code, or another CLI agent while using `univer-cli` as the spreadsheet execution layer.
 This path still accepts `.xlsx` inputs and produces `.xlsx` outputs for the existing evaluator.
 
-The runner creates an isolated working directory for each task, copies only the first input workbook into the authoring directory, asks the agent to use `univer run` to solve and verify the authoring workbook, then requires a final reusable `solution.js`. The runner replays that script against all three test cases and copies the exported files into `data/<dataset>/outputs/<setting>_<model>/`.
+The runner creates an isolated working directory for each task, copies only the first input workbook into the authoring directory, asks the agent to use `univer run` to solve and verify the authoring workbook, then requires a final reusable `solution.js`. The runner replays that script against the discovered test cases and copies the exported files into `data/<dataset>/outputs/<setting>_<model>/`.
 
 Example:
 ```
@@ -181,8 +181,7 @@ python univer_agent_runner.py \
   --model codex \
   --agent-command 'codex exec "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' \
   --stream-agent-output \
-  --task-id 59196 \
-  --cases 1,2,3
+  --task-id 59196
 ```
 
 ## Evaluation
