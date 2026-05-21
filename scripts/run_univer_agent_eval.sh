@@ -12,6 +12,7 @@ DATASET_NAME="${DATASET:-sample_data_200}"
 SETTING_NAME="${SETTING:-univer_agent}"
 AGENT_NAME=""
 MODEL_NAME="${MODEL:-}"
+ENV_FILE_NAME="${ENV_FILE:-}"
 SHOW_HELP=0
 EVAL_SELECTION_ARGS=()
 
@@ -39,6 +40,10 @@ while [ "$idx" -lt "$#" ]; do
             idx=$((idx + 1))
             MODEL_NAME="${ARGS[$idx]}"
             ;;
+        --env-file)
+            idx=$((idx + 1))
+            ENV_FILE_NAME="${ARGS[$idx]}"
+            ;;
         --task-id)
             idx=$((idx + 1))
             EVAL_SELECTION_ARGS+=(--task-id "${ARGS[$idx]}")
@@ -58,6 +63,9 @@ while [ "$idx" -lt "$#" ]; do
             ;;
         --model=* )
             MODEL_NAME="${arg#--model=}"
+            ;;
+        --env-file=* )
+            ENV_FILE_NAME="${arg#--env-file=}"
             ;;
         --task-id=* )
             EVAL_SELECTION_ARGS+=(--task-id "${arg#--task-id=}")
@@ -108,24 +116,47 @@ while [ "$idx" -lt "$#" ]; do
 done
 
 echo "[pipeline] inference start"
-bash inference/scripts/inference_univer_agent.sh "$@"
+if [ -n "$ENV_FILE_NAME" ]; then
+    ENV_FILE="$ENV_FILE_NAME" bash inference/scripts/inference_univer_agent.sh "$@"
+else
+    bash inference/scripts/inference_univer_agent.sh "$@"
+fi
 echo "[pipeline] inference done"
 
 echo "[pipeline] evaluation start"
+if [ -n "$RUN_ID_NAME" ]; then
+    EVAL_RUN_ID_ARGS=(--run-id "$RUN_ID_NAME")
+else
+    EVAL_RUN_ID_ARGS=()
+fi
 (
     cd evaluation
     "$PYTHON_BIN" evaluation.py \
         --dataset "$DATASET_NAME" \
         --setting "$SETTING_NAME" \
         --model "$MODEL_NAME" \
+        "${EVAL_RUN_ID_ARGS[@]}" \
         "${EVAL_SELECTION_ARGS[@]}"
 )
 echo "[pipeline] evaluation done"
 
-REPORT_PATH="outputs/eval_${SETTING_NAME}_${MODEL_NAME}.json"
 if [ -n "$RUN_ID_NAME" ]; then
-    echo "Run summary: .runs/univer-agent/${RUN_ID_NAME}/summary.json"
+    EVALUATION_REPORT_PATH="outputs/eval_${SETTING_NAME}_${MODEL_NAME}_${RUN_ID_NAME}.json"
 else
-    echo "Run summary: .runs/univer-agent/<run-id>/summary.json"
+    EVALUATION_REPORT_PATH="outputs/eval_${SETTING_NAME}_${MODEL_NAME}.json"
 fi
-echo "Evaluation report: ${REPORT_PATH}"
+if [ -n "$RUN_ID_NAME" ]; then
+    RUN_SUMMARY_PATH=".runs/univer-agent/${RUN_ID_NAME}/summary.json"
+else
+    RUN_SUMMARY_PATH=".runs/univer-agent/<run-id>/summary.json"
+fi
+echo "Run summary: ${RUN_SUMMARY_PATH}"
+echo "Evaluation report: ${EVALUATION_REPORT_PATH}"
+
+if [ -n "$RUN_ID_NAME" ]; then
+    UNIFIED_REPORT_PATH="report/${RUN_ID_NAME}.json"
+    "$PYTHON_BIN" scripts/build_univer_agent_report.py \
+        --summary "$RUN_SUMMARY_PATH" \
+        --evaluation "$EVALUATION_REPORT_PATH" \
+        --output "$UNIFIED_REPORT_PATH"
+fi

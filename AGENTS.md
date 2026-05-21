@@ -11,3 +11,6 @@
   - `all_data_912_v0.1`：完整数据集，912 道题。用户简写为 `all`、`full`、`912`、`all912` 或 `full912` 时，自动推断为该数据集。
   - `spreadsheetbench_verified_400`：SpreadsheetBench Verified 数据集，400 道题。用户简写为 `verified`、`verify`、`v400`、`verified400` 或 `400` 时，自动推断为该数据集。
 - 测试程序结束后，根据用户要求的详细程度，分析运行摘要、日志、生成的输出以及评测报告，如果agent运行特别慢或错误率很高，对agent日志和相关文件进行分析。
+
+# 语言
+- 对话始终使用中文

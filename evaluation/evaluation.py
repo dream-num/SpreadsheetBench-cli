@@ -197,10 +197,16 @@ def parse_option():
         help='evaluate generated outputs or original inputs')
     parser.add_argument('--task-id', action='append', help='task id to evaluate; may be repeated')
     parser.add_argument('--limit', type=int, default=None)
+    parser.add_argument('--run-id', default=None, help='write a run-specific evaluation report')
 
     opt = parser.parse_args()
 
     return opt
+
+
+def report_output_path(setting, model, run_id=None):
+    suffix = f"_{run_id}" if run_id else ""
+    return Path(f'../outputs/eval_{setting}_{model}{suffix}.json')
 
 
 def get_proc_path(dataset_path, setting, model, data_id, case_index, source='outputs'):
@@ -281,8 +287,9 @@ def evaluation(opt):
             'hard_restriction': hard_restriction,
         })
     
-    os.makedirs('../outputs', exist_ok=True)
-    with open(f'../outputs/eval_{opt.setting}_{opt.model}.json', 'w') as fp:
+    output_path = report_output_path(opt.setting, opt.model, opt.run_id)
+    os.makedirs(output_path.parent, exist_ok=True)
+    with open(output_path, 'w') as fp:
         json.dump(eval_results, fp, indent=4)
 
 

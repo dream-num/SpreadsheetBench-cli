@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 
 class RunnerError(RuntimeError):
@@ -13,12 +14,15 @@ class RunnerConfig:
     run_id: str
     setting: str
     model: str
-    agent_command: str
-    univer_bin: str = "univer"
-    solution_filename: str = "solution.js"
-    agent_timeout: int = 1800
+    agent: str = ""
+    agent_command: str = ""
+    agent_timeout: int = 300
     stream_agent_output: bool = False
+    docker_bin: str = "docker"
+    env_file: Optional[Path] = None
 
     def __post_init__(self):
         self.dataset_path = Path(self.dataset_path).expanduser().resolve()
         self.run_root = Path(self.run_root).expanduser().resolve()
+        if self.env_file is not None:
+            self.env_file = Path(self.env_file).expanduser().resolve()

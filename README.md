@@ -133,55 +133,85 @@ The code solution are saved in the ```inference/output``` folder and the result 
 You can also evaluate an external coding agent such as Codex, Claude Code, or another CLI agent while using `univer-cli` as the spreadsheet execution layer.
 This path still accepts `.xlsx` inputs and produces `.xlsx` outputs for the existing evaluator.
 
-The runner creates an isolated working directory for each task, copies only the first input workbook into the authoring directory, asks the agent to use `univer run` to solve and verify the authoring workbook, then requires a final reusable `solution.js`. The runner replays that script against the discovered test cases and copies the exported files into `data/<dataset>/outputs/<setting>_<model>/`.
+The runner uses a Docker-only task environment. For each task, the host creates a `/task` workspace, copies input workbooks into `cases/case_N/input.xlsx`, starts the solver image, checks `outputs/case_N/output.xlsx`, then copies those files into `data/<dataset>/outputs/<setting>_<model>/`. The host does not run workbook replay or consume `solution.js`.
 
-Example:
+Build the solver image:
+
 ```
-cd inference
-AGENT_COMMAND='codex exec "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' MODEL=codex STREAM_AGENT_OUTPUT=1 bash scripts/inference_univer_agent.sh --limit 1
-```
-
-The agent command runs inside the task authoring directory and receives the generated prompt on stdin. The runner also writes the prompt to `prompt.md` and exposes these environment variables to the command:
-
-- `SPREADSHEETBENCH_PROMPT_FILE`
-- `SPREADSHEETBENCH_WORK_DIR`
-- `SPREADSHEETBENCH_TASK_ID`
-- `SPREADSHEETBENCH_SOLUTION_FILE`
-
-For CLIs that need a prompt file instead of stdin, read `SPREADSHEETBENCH_PROMPT_FILE` inside `AGENT_COMMAND`:
-```
-AGENT_COMMAND='claude -p "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' MODEL=claude bash scripts/inference_univer_agent.sh --task-id 59196
+bash scripts/build_agent_docker.sh
 ```
 
-The command string also supports `{prompt_file}`, `{work_dir}`, `{task_id}`, and `{solution_file}` placeholders.
+Put API credentials and optional proxy settings in an env file. If `--env-file` is omitted, the runner uses `.env.agent` when it exists.
 
-For Claude Code, verbose stream JSON is useful when debugging agent behavior:
-```
-AGENT_COMMAND='claude -p "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")" --permission-mode bypassPermissions --no-session-persistence --output-format stream-json --verbose' \
-MODEL=claude \
-STREAM_AGENT_OUTPUT=1 \
-bash scripts/inference_univer_agent.sh --task-id 54513 --run-id claude-smoke-54513
+Recommended env files by agent:
+
+- `--agent codex`: prefer `.env.codex`.
+- `--agent claude`: prefer `.env.claude`.
+- `--agent-command`: pass the env file required by the custom command.
+
+Example `.env.claude`:
+
+```dotenv
+ANTHROPIC_AUTH_TOKEN=...
+ANTHROPIC_BASE_URL=...
+HTTP_PROXY=http://10.23.0.1:8080
+HTTPS_PROXY=http://10.23.0.1:8080
 ```
 
-Each task keeps these logs in `.runs/univer-agent/<run-id>/<task-id>/authoring/`:
+For Codex runs, prefer `.env.codex`:
+
+```bash
+bash scripts/run_univer_agent_eval.sh \
+  --agent codex \
+  --env-file .env.codex \
+  --dataset sample_data_200 \
+  --task-id 54513 \
+  --run-id codex-smoke-54513 \
+  --agent-timeout 600
+```
+
+`.env.codex` can reuse the local Codex ChatGPT login by setting `CODEX_AUTH_JSON` to `~/.codex/auth.json`; the runner mounts that file read-only into the container.
+
+Run a single task:
+
+```
+bash scripts/run_univer_agent_eval.sh \
+  --agent claude \
+  --env-file .env.claude \
+  --dataset sample_data_200 \
+  --task-id 54513 \
+  --run-id claude-smoke-54513 \
+  --agent-timeout 600
+```
+
+Task workspace layout:
+
+```text
+.runs/univer-agent/<run-id>/<task-id>/task/
+  prompt.md
+  cases/case_1/input.xlsx
+  outputs/case_1/output.xlsx
+  logs/
+  work/
+```
+
+Each task keeps Docker logs in `.runs/univer-agent/<run-id>/<task-id>/task/logs/`:
 
 - `prompt.md`: generated agent prompt.
-- `agent.command.txt`: exact agent command.
-- `agent.stdout.txt`: raw agent stdout.
-- `agent.stderr.txt`: raw agent stderr.
-- `solution.js`: reusable script expected from the agent.
-
-Each replayed test case also keeps a `univer.log` under its `case_<n>/` directory.
+- `docker.command.txt`: exact Docker command.
+- `docker.output.txt`: combined stdout/stderr log.
+- `docker.stdout.txt`: raw Docker stdout.
+- `docker.stderr.txt`: raw Docker stderr.
+- `docker.timing.json`: duration, exit code, timeout.
 
 Useful runner options:
 ```
-python univer_agent_runner.py \
-  --dataset sample_data_200 \
-  --setting univer_agent \
-  --model codex \
-  --agent-command 'codex exec "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"' \
-  --stream-agent-output \
-  --task-id 59196
+bash scripts/run_univer_agent_eval.sh \
+  --agent codex \
+  --dataset spreadsheetbench_verified_400 \
+  --limit 10 \
+  --env-file .env.codex \
+  --run-id codex-verified-smoke
 ```
 
 ## Evaluation

@@ -6,7 +6,6 @@ from typing import Dict, Optional
 @dataclass(frozen=True)
 class AgentPreset:
     model: str
-    command: str
     stream_agent_output: bool = False
     supported: bool = True
     unsupported_reason: str = ""
@@ -15,15 +14,13 @@ class AgentPreset:
 AGENT_PRESETS: Dict[str, AgentPreset] = {
     "codex": AgentPreset(
         model="codex",
-        command='codex exec "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"',
+        stream_agent_output=True,
     ),
     "claude": AgentPreset(
         model="claude",
-        command='claude -p "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")" --permission-mode bypassPermissions --no-session-persistence --output-format stream-json --verbose',
     ),
     "opencode": AgentPreset(
         model="opencode",
-        command='opencode run "$(cat "$SPREADSHEETBENCH_PROMPT_FILE")"',
         supported=False,
         unsupported_reason="opencode preset is not wired yet; use --agent-command for a custom command.",
     ),
@@ -50,10 +47,6 @@ def resolve_agent_command(agent: Optional[str], explicit_command: str) -> str:
     env_command = os.environ.get("AGENT_COMMAND", "")
     if env_command:
         return env_command
-
-    preset = AGENT_PRESETS.get(agent)
-    if preset:
-        return preset.command
 
     return ""
 

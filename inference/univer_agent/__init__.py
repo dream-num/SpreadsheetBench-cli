@@ -1,18 +1,16 @@
-from .agent import run_agent
 from .config import RunnerConfig, RunnerError
+from .docker_runner import DockerTaskWorkspace, prepare_docker_task_workspace
 from .paths import output_xlsx_path, task_id_text, test_case_input_path
 from .prompts import build_agent_prompt
 from .task import run_task
-from .workspace import TaskWorkspace, prepare_authoring_workspace
 
 __all__ = [
     "RunnerConfig",
     "RunnerError",
-    "TaskWorkspace",
+    "DockerTaskWorkspace",
     "build_agent_prompt",
     "output_xlsx_path",
-    "prepare_authoring_workspace",
-    "run_agent",
+    "prepare_docker_task_workspace",
     "run_task",
     "task_id_text",
     "test_case_input_path",

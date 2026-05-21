@@ -71,19 +71,18 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--setting", default="univer_agent")
     parser.add_argument("--model", default=None, help="output model label; defaults to the selected agent")
     parser.add_argument("--agent", default=None, choices=agent_choices())
-    parser.add_argument("--agent-command", default="", help="shell command for the agent")
-    parser.add_argument("--agent-timeout", type=int, default=1800)
+    parser.add_argument("--agent-command", default="", help="container-internal command for the agent")
+    parser.add_argument("--agent-timeout", type=int, default=300)
     parser.add_argument(
         "--stream-agent-output",
         action="store_true",
         help="tee agent stdout/stderr to the terminal while writing agent log files",
     )
-    parser.add_argument("--univer-bin", default="univer")
+    parser.add_argument("--docker-bin", default="docker")
+    parser.add_argument("--env-file", type=Path, default=None)
     parser.add_argument("--task-id", action="append", help="task id to run; may be repeated")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--workers", type=int, default=5, help="number of tasks to run concurrently")
-    parser.add_argument("--skip-agent", action="store_true", help="reuse an existing solution.js")
-    parser.add_argument("--keep-going", action="store_true")
     return parser.parse_args()
 
 
@@ -111,11 +110,10 @@ def _run_task_for_summary(
     config: RunnerConfig,
     task: Dict,
     cases: List[int],
-    skip_agent: bool,
 ) -> tuple[Dict, Optional[BaseException]]:
     try:
         print(f"[task {task_id_text(task)}] start")
-        result = run_task(config, task, cases, skip_agent=skip_agent)
+        result = run_task(config, task, cases)
         print(f"[task {task_id_text(task)}] status=ok")
         return result, None
     except Exception as exc:
@@ -136,8 +134,6 @@ def run_tasks(
     config: RunnerConfig,
     tasks: List[Dict],
     cases: List[int],
-    skip_agent: bool,
-    keep_going: bool,
     workers: int,
     metadata: Dict,
 ) -> List[Dict]:
@@ -147,18 +143,15 @@ def run_tasks(
     results: List[Optional[Dict]] = [None] * len(tasks)
     if workers == 1 or len(tasks) <= 1:
         for index, task in enumerate(tasks):
-            result, exc = _run_task_for_summary(config, task, cases, skip_agent)
+            result, exc = _run_task_for_summary(config, task, cases)
             results[index] = result
             write_summary(config, _completed_results(results), metadata)
-            if exc and not keep_going:
-                raise exc
         return _completed_results(results)
 
-    first_error: Optional[BaseException] = None
     max_workers = min(workers, len(tasks))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_index = {
-            executor.submit(_run_task_for_summary, config, task, cases, skip_agent): index
+            executor.submit(_run_task_for_summary, config, task, cases): index
             for index, task in enumerate(tasks)
         }
         for future in as_completed(future_to_index):
@@ -169,16 +162,8 @@ def run_tasks(
                 continue
             results[index] = result
             write_summary(config, _completed_results(results), metadata)
-            if exc and not keep_going and first_error is None:
-                first_error = exc
-                for pending in future_to_index:
-                    if pending is not future:
-                        pending.cancel()
 
-    summary = _completed_results(results)
-    if first_error is not None:
-        raise first_error
-    return summary
+    return _completed_results(results)
 
 
 def main(project_root: Optional[Path] = None) -> int:
@@ -193,8 +178,8 @@ def main(project_root: Optional[Path] = None) -> int:
     agent_command = resolve_agent_command(opt.agent, opt.agent_command)
     model = resolve_model(opt.agent, opt.model)
     stream_agent_output = resolve_stream_agent_output(opt.agent, opt.stream_agent_output)
-    if not agent_command and not opt.skip_agent:
-        raise RunnerError("--agent-command, AGENT_COMMAND, or --agent is required unless --skip-agent is set")
+    if not opt.agent and not agent_command:
+        raise RunnerError("--agent or --agent-command is required")
 
     config = RunnerConfig(
         dataset_path=dataset_path,
@@ -202,10 +187,12 @@ def main(project_root: Optional[Path] = None) -> int:
         run_id=opt.run_id,
         setting=opt.setting,
         model=model,
+        agent=opt.agent or "custom",
         agent_command=agent_command,
-        univer_bin=opt.univer_bin,
         agent_timeout=opt.agent_timeout,
         stream_agent_output=stream_agent_output,
+        docker_bin=opt.docker_bin,
+        env_file=opt.env_file,
     )
     reset_run_dir(config)
 
@@ -221,10 +208,15 @@ def main(project_root: Optional[Path] = None) -> int:
         "setting": config.setting,
         "model": config.model,
         "agent": opt.agent,
+        "agent_command": bool(agent_command),
         "cases": cases,
         "run_root": str(config.run_root),
         "stream_agent_output": config.stream_agent_output,
         "workers": opt.workers,
+        "docker_bin": config.docker_bin,
+        "docker_image": "spreadsheetbench-univer-cli-agent",
+        "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+        "env_file": str(config.env_file) if config.env_file else None,
         "started_at": datetime.datetime.now().isoformat(timespec="seconds"),
         "cwd": os.getcwd(),
     }
@@ -236,8 +228,6 @@ def main(project_root: Optional[Path] = None) -> int:
         config,
         tasks,
         cases,
-        skip_agent=opt.skip_agent,
-        keep_going=opt.keep_going,
         workers=opt.workers,
         metadata=metadata,
     )

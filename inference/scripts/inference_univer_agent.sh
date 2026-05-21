@@ -25,4 +25,14 @@ if [ "$STREAM_AGENT_OUTPUT" = "1" ]; then
     ARGS+=(--stream-agent-output)
 fi
 
+if [ -n "${DOCKER_BIN:-}" ]; then
+    ARGS+=(--docker-bin "$DOCKER_BIN")
+fi
+
+if [ -n "${ENV_FILE:-}" ]; then
+    ARGS+=(--env-file "$ENV_FILE")
+elif [ -f ".env.agent" ]; then
+    ARGS+=(--env-file ".env.agent")
+fi
+
 "$PYTHON_BIN" "${ARGS[@]}" "$@"

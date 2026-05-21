@@ -11,7 +11,11 @@ inference/outputs/*
 inference/log/*
 
 outputs
+report/
 .venv
 .claude
 .codex
 .runs
+.env.agent
+.env.codex
+.env.claude
