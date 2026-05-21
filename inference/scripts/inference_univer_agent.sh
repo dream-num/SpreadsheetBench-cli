@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-DATASET="${DATASET:-sample_data_200}"
+DATASET="${DATASET:-spreadsheetbench_verified_400}"
 SETTING="${SETTING:-univer_agent}"
 RUN_ROOT="${RUN_ROOT:-.runs/univer-agent}"
 STREAM_AGENT_OUTPUT="${STREAM_AGENT_OUTPUT:-0}"

@@ -14,7 +14,6 @@ class AgentPreset:
 AGENT_PRESETS: Dict[str, AgentPreset] = {
     "codex": AgentPreset(
         model="codex",
-        stream_agent_output=True,
     ),
     "claude": AgentPreset(
         model="claude",

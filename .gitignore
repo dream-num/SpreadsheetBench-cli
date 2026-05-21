@@ -19,3 +19,5 @@ report/
 .env.agent
 .env.codex
 .env.claude
+.env.claude-minimax
+.env.claude-deepseek-flash

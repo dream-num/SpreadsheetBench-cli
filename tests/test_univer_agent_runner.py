@@ -8,6 +8,7 @@ import threading
 import time
 import types
 import unittest
+import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,6 +16,7 @@ from openpyxl import Workbook
 
 from inference.univer_agent import RunnerConfig, output_xlsx_path, run_task, test_case_input_path
 from inference.univer_agent import cli
+from inference.univer_agent.agents import resolve_stream_agent_output
 from inference.univer_agent.cli import parse_option, reset_run_dir
 from inference.univer_agent.docker_runner import prepare_docker_task_workspace, run_task_container
 
@@ -107,9 +109,31 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         self.assertEqual(opt.workers, 5)
         self.assertEqual(opt.agent_timeout, 300)
+        self.assertEqual(opt.dataset, "spreadsheetbench_verified_400")
         self.assertFalse(hasattr(opt, "docker_image"))
         self.assertEqual(opt.docker_bin, "docker")
         self.assertIsNone(opt.env_file)
+
+    def test_parse_option_generates_run_id_from_agent_dataset_and_limit(self):
+        fake_now = datetime.datetime(2026, 5, 21, 14, 30, 0)
+
+        class FakeDateTime(datetime.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return fake_now
+
+        with patch.object(sys, "argv", ["prog", "--agent", "codex", "--limit", "50"]), patch.object(
+            cli.datetime,
+            "datetime",
+            FakeDateTime,
+        ):
+            opt = parse_option(Path.cwd())
+
+        self.assertEqual(opt.run_id, "codex-verified400-first50-20260521-143000")
+
+    def test_codex_does_not_stream_agent_output_by_default(self):
+        self.assertFalse(resolve_stream_agent_output("codex", False))
+        self.assertTrue(resolve_stream_agent_output("codex", True))
 
     def test_reset_run_dir_removes_existing_run_directory(self):
         with tempfile.TemporaryDirectory() as tmp:

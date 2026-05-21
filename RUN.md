@@ -57,8 +57,7 @@ Claude 推荐优先使用仓库根目录的 `.env.claude`：
 bash scripts/run_univer_agent_eval.sh \
   --agent claude \
   --env-file .env.claude \
-  --task-id 54513 \
-  --run-id claude-54513
+  --task-id 54513
 ```
 
 Codex 推荐优先使用仓库根目录的 `.env.codex`：
@@ -67,24 +66,35 @@ Codex 推荐优先使用仓库根目录的 `.env.codex`：
 bash scripts/run_univer_agent_eval.sh \
   --agent codex \
   --env-file .env.codex \
-  --task-id 54513 \
-  --run-id codex-54513
+  --task-id 54513
 ```
 
 `.env.codex` 会按本机 Codex 配置设置模型和代理，并通过 `CODEX_AUTH_JSON` 把本机 `~/.codex/auth.json` 只读挂载到容器内的 `CODEX_HOME/auth.json`。这样可以复用本机 ChatGPT 登录态，但不会把认证文件复制进镜像或 task workspace。容器内已经由 Docker 隔离，`.env.codex` 默认设置 `CODEX_BYPASS_SANDBOX=1`，避免 Codex CLI 在容器里再次启用 bubblewrap sandbox 导致命令无法运行。
 
 ## 快速开始
 
+默认数据集是 `spreadsheetbench_verified_400`。未显式传 `--run-id` 时，脚本会自动生成：
+
+```text
+<agent>-<dataset>-<scope>-YYYYMMDD-HHMMSS
+```
+
+例如：
+
+```text
+codex-verified400-first50-20260521-143000
+```
+
 用 Codex 跑一道题并自动评测：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --task-id 54513 --run-id codex-54513
+bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --task-id 54513
 ```
 
 用 Claude 跑一道题并自动评测：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent claude --env-file .env.claude --task-id 54513 --run-id claude-54513
+bash scripts/run_univer_agent_eval.sh --agent claude --env-file .env.claude --task-id 54513
 ```
 
 使用自定义容器内命令：
@@ -93,8 +103,7 @@ bash scripts/run_univer_agent_eval.sh --agent claude --env-file .env.claude --ta
 bash scripts/run_univer_agent_eval.sh \
   --agent-command 'my-agent --prompt-file "$SPREADSHEETBENCH_PROMPT_FILE"' \
   --model my-agent \
-  --task-id 54513 \
-  --run-id my-agent-54513
+  --task-id 54513
 ```
 
 ## 常用参数
@@ -102,25 +111,25 @@ bash scripts/run_univer_agent_eval.sh \
 指定数据集：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --dataset sample_data_200 --task-id 54513 --run-id codex-54513
+bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --dataset sample_data_200 --task-id 54513
 ```
 
 只跑前 N 道题：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --limit 10 --run-id codex-first-10
+bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --limit 10
 ```
 
 只跑指定题目：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --task-id 54513 --task-id 59196 --run-id codex-two-tasks
+bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --task-id 54513 --task-id 59196
 ```
 
 控制 task 级并发数，默认是 5：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --limit 10 --workers 3 --run-id codex-first-10
+bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --limit 10 --workers 3
 ```
 
 指定 Docker 命令：
@@ -130,14 +139,13 @@ bash scripts/run_univer_agent_eval.sh \
   --agent codex \
   --env-file .env.codex \
   --docker-bin docker \
-  --task-id 54513 \
-  --run-id codex-54513
+  --task-id 54513
 ```
 
 覆盖输出目录里的 model 标签：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --model codex-exp1 --task-id 54513 --run-id codex-exp1-54513
+bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --model codex-exp1 --task-id 54513
 ```
 
 最终输出会写到：

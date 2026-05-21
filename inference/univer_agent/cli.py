@@ -2,6 +2,7 @@ import argparse
 import datetime
 import json
 import os
+import re
 import shutil
 from concurrent.futures import CancelledError, ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -58,16 +59,45 @@ def discover_common_cases(dataset_path: Path, tasks: List[Dict]) -> List[int]:
     return sorted(common_cases or [])
 
 
-def default_run_id() -> str:
-    return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+DEFAULT_DATASET = "spreadsheetbench_verified_400"
+
+
+def run_id_dataset_label(dataset: str) -> str:
+    known_labels = {
+        "spreadsheetbench_verified_400": "verified400",
+        "sample_data_200": "sample200",
+        "all_data_912_v0.1": "all912",
+    }
+    if dataset in known_labels:
+        return known_labels[dataset]
+    return re.sub(r"[^a-z0-9]+", "-", dataset.lower()).strip("-")
+
+
+def run_id_scope_label(task_ids: Optional[List[str]], limit: Optional[int]) -> str:
+    if limit is not None:
+        return f"first{limit}"
+    if task_ids:
+        if len(task_ids) == 1:
+            task_label = re.sub(r"[^a-z0-9]+", "-", task_ids[0].lower()).strip("-")
+            return f"task{task_label}"
+        return f"tasks{len(task_ids)}"
+    return "all"
+
+
+def default_run_id(agent: Optional[str], dataset: str, task_ids: Optional[List[str]], limit: Optional[int]) -> str:
+    agent_label = agent or "agent"
+    dataset_label = run_id_dataset_label(dataset)
+    scope_label = run_id_scope_label(task_ids, limit)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    return f"{agent_label}-{dataset_label}-{scope_label}-{timestamp}"
 
 
 def parse_option(project_root: Path) -> argparse.Namespace:
     parser = argparse.ArgumentParser("Run SpreadsheetBench tasks with an agent plus univer-cli.")
-    parser.add_argument("--dataset", default="sample_data_200", help="dataset name under data/")
+    parser.add_argument("--dataset", default=DEFAULT_DATASET, help="dataset name under data/")
     parser.add_argument("--dataset-path", type=Path, default=None, help="explicit dataset path")
     parser.add_argument("--run-root", type=Path, default=project_root / ".runs" / "univer-agent")
-    parser.add_argument("--run-id", default=default_run_id())
+    parser.add_argument("--run-id", default=None)
     parser.add_argument("--setting", default="univer_agent")
     parser.add_argument("--model", default=None, help="output model label; defaults to the selected agent")
     parser.add_argument("--agent", default=None, choices=agent_choices())
@@ -83,7 +113,10 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--task-id", action="append", help="task id to run; may be repeated")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--workers", type=int, default=5, help="number of tasks to run concurrently")
-    return parser.parse_args()
+    opt = parser.parse_args()
+    if opt.run_id is None:
+        opt.run_id = default_run_id(opt.agent, opt.dataset, opt.task_id, opt.limit)
+    return opt
 
 
 def write_summary(config: RunnerConfig, summary: List[Dict], metadata: Optional[Dict] = None) -> None:

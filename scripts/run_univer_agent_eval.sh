@@ -8,13 +8,15 @@ if [ -z "${PYTHON_BIN:-}" ] && [ -x ".venv/bin/python" ]; then
 else
     PYTHON_BIN="${PYTHON_BIN:-python3}"
 fi
-DATASET_NAME="${DATASET:-sample_data_200}"
+DATASET_NAME="${DATASET:-spreadsheetbench_verified_400}"
 SETTING_NAME="${SETTING:-univer_agent}"
 AGENT_NAME=""
 MODEL_NAME="${MODEL:-}"
 ENV_FILE_NAME="${ENV_FILE:-}"
 SHOW_HELP=0
 EVAL_SELECTION_ARGS=()
+TASK_IDS=()
+LIMIT_VALUE=""
 
 ARGS=("$@")
 idx=0
@@ -47,10 +49,12 @@ while [ "$idx" -lt "$#" ]; do
         --task-id)
             idx=$((idx + 1))
             EVAL_SELECTION_ARGS+=(--task-id "${ARGS[$idx]}")
+            TASK_IDS+=("${ARGS[$idx]}")
             ;;
         --limit)
             idx=$((idx + 1))
             EVAL_SELECTION_ARGS+=(--limit "${ARGS[$idx]}")
+            LIMIT_VALUE="${ARGS[$idx]}"
             ;;
         --dataset=* )
             DATASET_NAME="${arg#--dataset=}"
@@ -69,9 +73,11 @@ while [ "$idx" -lt "$#" ]; do
             ;;
         --task-id=* )
             EVAL_SELECTION_ARGS+=(--task-id "${arg#--task-id=}")
+            TASK_IDS+=("${arg#--task-id=}")
             ;;
         --limit=* )
             EVAL_SELECTION_ARGS+=(--limit "${arg#--limit=}")
+            LIMIT_VALUE="${arg#--limit=}"
             ;;
     esac
     idx=$((idx + 1))
@@ -115,20 +121,58 @@ while [ "$idx" -lt "$#" ]; do
     idx=$((idx + 1))
 done
 
+run_id_dataset_label() {
+    case "$1" in
+        spreadsheetbench_verified_400)
+            echo "verified400"
+            ;;
+        sample_data_200)
+            echo "sample200"
+            ;;
+        all_data_912_v0.1)
+            echo "all912"
+            ;;
+        *)
+            echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-'
+            ;;
+    esac
+}
+
+run_id_scope_label() {
+    if [ -n "$LIMIT_VALUE" ]; then
+        echo "first${LIMIT_VALUE}"
+        return
+    fi
+    if [ "${#TASK_IDS[@]}" -eq 1 ]; then
+        echo "task${TASK_IDS[0]}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-'
+        return
+    fi
+    if [ "${#TASK_IDS[@]}" -gt 1 ]; then
+        echo "tasks${#TASK_IDS[@]}"
+        return
+    fi
+    echo "all"
+}
+
+if [ -z "$RUN_ID_NAME" ]; then
+    RUN_ID_AGENT_LABEL="${AGENT_NAME:-${MODEL_NAME:-agent}}"
+    RUN_ID_DATASET_LABEL="$(run_id_dataset_label "$DATASET_NAME")"
+    RUN_ID_SCOPE_LABEL="$(run_id_scope_label)"
+    RUN_ID_TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+    RUN_ID_NAME="${RUN_ID_AGENT_LABEL}-${RUN_ID_DATASET_LABEL}-${RUN_ID_SCOPE_LABEL}-${RUN_ID_TIMESTAMP}"
+    ARGS+=(--run-id "$RUN_ID_NAME")
+fi
+
 echo "[pipeline] inference start"
 if [ -n "$ENV_FILE_NAME" ]; then
-    ENV_FILE="$ENV_FILE_NAME" bash inference/scripts/inference_univer_agent.sh "$@"
+    ENV_FILE="$ENV_FILE_NAME" bash inference/scripts/inference_univer_agent.sh "${ARGS[@]}"
 else
-    bash inference/scripts/inference_univer_agent.sh "$@"
+    bash inference/scripts/inference_univer_agent.sh "${ARGS[@]}"
 fi
 echo "[pipeline] inference done"
 
 echo "[pipeline] evaluation start"
-if [ -n "$RUN_ID_NAME" ]; then
-    EVAL_RUN_ID_ARGS=(--run-id "$RUN_ID_NAME")
-else
-    EVAL_RUN_ID_ARGS=()
-fi
+EVAL_RUN_ID_ARGS=(--run-id "$RUN_ID_NAME")
 (
     cd evaluation
     "$PYTHON_BIN" evaluation.py \
@@ -140,23 +184,13 @@ fi
 )
 echo "[pipeline] evaluation done"
 
-if [ -n "$RUN_ID_NAME" ]; then
-    EVALUATION_REPORT_PATH="outputs/eval_${SETTING_NAME}_${MODEL_NAME}_${RUN_ID_NAME}.json"
-else
-    EVALUATION_REPORT_PATH="outputs/eval_${SETTING_NAME}_${MODEL_NAME}.json"
-fi
-if [ -n "$RUN_ID_NAME" ]; then
-    RUN_SUMMARY_PATH=".runs/univer-agent/${RUN_ID_NAME}/summary.json"
-else
-    RUN_SUMMARY_PATH=".runs/univer-agent/<run-id>/summary.json"
-fi
+EVALUATION_REPORT_PATH="outputs/eval_${SETTING_NAME}_${MODEL_NAME}_${RUN_ID_NAME}.json"
+RUN_SUMMARY_PATH=".runs/univer-agent/${RUN_ID_NAME}/summary.json"
 echo "Run summary: ${RUN_SUMMARY_PATH}"
 echo "Evaluation report: ${EVALUATION_REPORT_PATH}"
 
-if [ -n "$RUN_ID_NAME" ]; then
-    UNIFIED_REPORT_PATH="report/${RUN_ID_NAME}.json"
-    "$PYTHON_BIN" scripts/build_univer_agent_report.py \
-        --summary "$RUN_SUMMARY_PATH" \
-        --evaluation "$EVALUATION_REPORT_PATH" \
-        --output "$UNIFIED_REPORT_PATH"
-fi
+UNIFIED_REPORT_PATH="report/${RUN_ID_NAME}.json"
+"$PYTHON_BIN" scripts/build_univer_agent_report.py \
+    --summary "$RUN_SUMMARY_PATH" \
+    --evaluation "$EVALUATION_REPORT_PATH" \
+    --output "$UNIFIED_REPORT_PATH"
