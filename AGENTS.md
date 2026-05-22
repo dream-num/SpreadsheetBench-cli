@@ -9,9 +9,9 @@
 
 ## 数据集
 
-- `sample_data_200`：样例数据集，200 道题；默认数据集。用户简写为 `sample`、`sample200`、`200` 或 `s200` 时，自动推断为该数据集。
+- `sample_data_200`：样例数据集，200 道题。用户简写为 `sample`、`sample200`、`200` 或 `s200` 时，自动推断为该数据集。
 - `all_data_912_v0.1`：完整数据集，912 道题。用户简写为 `all`、`full`、`912`、`all912` 或 `full912` 时，自动推断为该数据集。
-- `spreadsheetbench_verified_400`：SpreadsheetBench Verified 数据集，400 道题。用户简写为 `verified`、`verify`、`v400`、`verified400` 或 `400` 时，自动推断为该数据集。
+- `spreadsheetbench_verified_400`：SpreadsheetBench Verified 数据集，400 道题；默认数据集。用户简写为 `verified`、`verify`、`v400`、`verified400` 或 `400` 时，自动推断为该数据集。
 
 ## 运行后分析
 
