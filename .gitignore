@@ -10,6 +10,7 @@ data/spreadsheetbench_verified_400
 inference/outputs/*
 inference/log/*
 
+debug
 outputs
 report/
 .venv

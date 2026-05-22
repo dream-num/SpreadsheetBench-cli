@@ -42,10 +42,11 @@ Request id: {task_id}
 Rules:
 - Load the `univer-cli` skill before inspecting or editing any workbook.
 - Only use files under /task.
-- The `.xlsx` inputs have already been imported to `.univer`; you can use the `.univer` files directly.
-- Prefer editing the listed `/task/cases/case_N/input.univer` workbook directly and exporting it to the required output path. Do not copy the workbook package just for routine edits.
+- You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+- The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+- Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+- Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
 - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
-- The original `.xlsx` files are still available as source references, but you normally do not need to import them yourself.
 - Create the required `output.xlsx` for every case. These files are the final deliverables.
 - Keep temporary scripts and intermediates under `/task/work/`.
 - Solve every case independently and only modify cells within `answer_position`.
