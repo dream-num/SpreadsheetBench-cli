@@ -18,6 +18,8 @@ report/
 .runs
 .env.agent
 .env.codex
+.env.codex-gpt-5.5-low
+.env.codex-gpt-5.3-codex-spark-high
 .env.claude
 .env.claude-minimax
 .env.claude-deepseek-flash

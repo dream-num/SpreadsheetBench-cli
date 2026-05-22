@@ -11,7 +11,7 @@ fi
 DATASET_NAME="${DATASET:-spreadsheetbench_verified_400}"
 SETTING_NAME="${SETTING:-univer_agent}"
 AGENT_NAME=""
-MODEL_NAME="${MODEL:-}"
+MODEL_NAME=""
 ENV_FILE_NAME="${ENV_FILE:-}"
 SHOW_HELP=0
 EVAL_SELECTION_ARGS=()
@@ -38,10 +38,6 @@ while [ "$idx" -lt "$#" ]; do
             idx=$((idx + 1))
             AGENT_NAME="${ARGS[$idx]}"
             ;;
-        --model)
-            idx=$((idx + 1))
-            MODEL_NAME="${ARGS[$idx]}"
-            ;;
         --env-file)
             idx=$((idx + 1))
             ENV_FILE_NAME="${ARGS[$idx]}"
@@ -65,9 +61,6 @@ while [ "$idx" -lt "$#" ]; do
         --agent=* )
             AGENT_NAME="${arg#--agent=}"
             ;;
-        --model=* )
-            MODEL_NAME="${arg#--model=}"
-            ;;
         --env-file=* )
             ENV_FILE_NAME="${arg#--env-file=}"
             ;;
@@ -88,21 +81,32 @@ if [ "$SHOW_HELP" = "1" ]; then
     exit 0
 fi
 
+if [ -z "$ENV_FILE_NAME" ] && [ -f ".env.agent" ]; then
+    ENV_FILE_NAME=".env.agent"
+fi
+
+env_file_value() {
+    if [ -z "$ENV_FILE_NAME" ] || [ ! -f "$ENV_FILE_NAME" ]; then
+        return
+    fi
+    awk -F= -v key="$1" '
+        $0 !~ /^[[:space:]]*#/ && $1 == key {
+            value = substr($0, index($0, "=") + 1)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+            gsub(/^["'\'']|["'\'']$/, "", value)
+            print value
+            exit
+        }
+    ' "$ENV_FILE_NAME"
+}
+
+if [ "$AGENT_NAME" = "codex" ]; then
+    MODEL_NAME="$(env_file_value CODEX_MODEL)"
+elif [ "$AGENT_NAME" = "claude" ]; then
+    MODEL_NAME="$(env_file_value ANTHROPIC_MODEL)"
+fi
 if [ -z "$MODEL_NAME" ]; then
-    case "$AGENT_NAME" in
-        codex)
-            MODEL_NAME="codex"
-            ;;
-        claude)
-            MODEL_NAME="claude"
-            ;;
-        opencode)
-            MODEL_NAME="opencode"
-            ;;
-        *)
-            MODEL_NAME="agent"
-            ;;
-    esac
+    MODEL_NAME="${AGENT_NAME:-agent}"
 fi
 
 RUN_ID_NAME=""
@@ -138,6 +142,10 @@ run_id_dataset_label() {
     esac
 }
 
+run_id_safe_label() {
+    echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-*//; s/-*$//'
+}
+
 run_id_scope_label() {
     if [ -n "$LIMIT_VALUE" ]; then
         echo "first${LIMIT_VALUE}"
@@ -155,11 +163,12 @@ run_id_scope_label() {
 }
 
 if [ -z "$RUN_ID_NAME" ]; then
-    RUN_ID_AGENT_LABEL="${AGENT_NAME:-${MODEL_NAME:-agent}}"
+    RUN_ID_AGENT_LABEL="$(run_id_safe_label "${AGENT_NAME:-agent}")"
+    RUN_ID_MODEL_LABEL="$(run_id_safe_label "${MODEL_NAME:-agent}")"
     RUN_ID_DATASET_LABEL="$(run_id_dataset_label "$DATASET_NAME")"
     RUN_ID_SCOPE_LABEL="$(run_id_scope_label)"
     RUN_ID_TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-    RUN_ID_NAME="${RUN_ID_AGENT_LABEL}-${RUN_ID_DATASET_LABEL}-${RUN_ID_SCOPE_LABEL}-${RUN_ID_TIMESTAMP}"
+    RUN_ID_NAME="${RUN_ID_AGENT_LABEL}-${RUN_ID_MODEL_LABEL}-${RUN_ID_DATASET_LABEL}-${RUN_ID_SCOPE_LABEL}-${RUN_ID_TIMESTAMP}"
     ARGS+=(--run-id "$RUN_ID_NAME")
 fi
 
@@ -175,10 +184,9 @@ echo "[pipeline] evaluation start"
 EVAL_RUN_ID_ARGS=(--run-id "$RUN_ID_NAME")
 (
     cd evaluation
-    "$PYTHON_BIN" evaluation.py \
+    EVALUATION_MODEL="$MODEL_NAME" "$PYTHON_BIN" evaluation.py \
         --dataset "$DATASET_NAME" \
         --setting "$SETTING_NAME" \
-        --model "$MODEL_NAME" \
         "${EVAL_RUN_ID_ARGS[@]}" \
         "${EVAL_SELECTION_ARGS[@]}"
 )

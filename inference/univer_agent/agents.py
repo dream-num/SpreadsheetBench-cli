@@ -50,21 +50,6 @@ def resolve_agent_command(agent: Optional[str], explicit_command: str) -> str:
     return ""
 
 
-def resolve_model(agent: Optional[str], explicit_model: Optional[str]) -> str:
-    if explicit_model:
-        return explicit_model
-
-    env_model = os.environ.get("MODEL", "")
-    if env_model:
-        return env_model
-
-    preset = AGENT_PRESETS.get(agent)
-    if preset:
-        return preset.model
-
-    return "agent"
-
-
 def resolve_stream_agent_output(agent: Optional[str], explicit_stream: bool) -> bool:
     if explicit_stream:
         return True

@@ -51,6 +51,11 @@ ANTHROPIC_API_KEY=...
 - `--agent claude`：优先显式使用 `.env.claude`。
 - 自定义 `--agent-command`：按该命令需要显式传对应 env 文件。
 
+模型只从 env-file 读取，并同时作为实际调用模型、输出目录标签、评测报告标签和默认 `run-id` 的 model 段：
+
+- Codex：读取 `CODEX_MODEL`。
+- Claude Code：读取 `ANTHROPIC_MODEL`。
+
 Claude 推荐优先使用仓库根目录的 `.env.claude`：
 
 ```bash
@@ -76,13 +81,13 @@ bash scripts/run_univer_agent_eval.sh \
 默认数据集是 `spreadsheetbench_verified_400`。未显式传 `--run-id` 时，脚本会自动生成：
 
 ```text
-<agent>-<dataset>-<scope>-YYYYMMDD-HHMMSS
+<agent>-<model>-<dataset>-<scope>-YYYYMMDD-HHMMSS
 ```
 
 例如：
 
 ```text
-codex-verified400-first50-20260521-143000
+codex-gpt-5-3-codex-spark-verified400-first50-20260521-143000
 ```
 
 用 Codex 跑一道题并自动评测：
@@ -102,7 +107,7 @@ bash scripts/run_univer_agent_eval.sh --agent claude --env-file .env.claude --ta
 ```bash
 bash scripts/run_univer_agent_eval.sh \
   --agent-command 'my-agent --prompt-file "$SPREADSHEETBENCH_PROMPT_FILE"' \
-  --model my-agent \
+  --env-file .env.my-agent \
   --task-id 54513
 ```
 
@@ -140,12 +145,6 @@ bash scripts/run_univer_agent_eval.sh \
   --env-file .env.codex \
   --docker-bin docker \
   --task-id 54513
-```
-
-覆盖输出目录里的 model 标签：
-
-```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --model codex-exp1 --task-id 54513
 ```
 
 最终输出会写到：

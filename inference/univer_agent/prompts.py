@@ -43,6 +43,8 @@ Rules:
 - Load the `univer-cli` skill before inspecting or editing any workbook.
 - Only use files under /task.
 - The `.xlsx` inputs have already been imported to `.univer`; you can use the `.univer` files directly.
+- Prefer editing the listed `/task/cases/case_N/input.univer` workbook directly and exporting it to the required output path. Do not copy the workbook package just for routine edits.
+- If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
 - The original `.xlsx` files are still available as source references, but you normally do not need to import them yourself.
 - Create the required `output.xlsx` for every case. These files are the final deliverables.
 - Keep temporary scripts and intermediates under `/task/work/`.

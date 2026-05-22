@@ -17,10 +17,6 @@ ARGS=(
     --agent-command "${AGENT_COMMAND:-}"
 )
 
-if [ -n "${MODEL:-}" ]; then
-    ARGS+=(--model "$MODEL")
-fi
-
 if [ "$STREAM_AGENT_OUTPUT" = "1" ]; then
     ARGS+=(--stream-agent-output)
 fi

@@ -189,7 +189,6 @@ def compare_workbooks(gt_file, proc_file, instruction_type, answer_position):
 def parse_option():
     parser = argparse.ArgumentParser("command line arguments for evaluation.")
     
-    parser.add_argument('--model', type=str, default='llama', help='model name')
     parser.add_argument('--setting', type=str, default='single',
         help='four setting: single, multi_react_exec, multi_row_exec, multi_row_react_exec')
     parser.add_argument('--dataset', type=str, default="all_data_912", help='dataset name')
@@ -200,6 +199,7 @@ def parse_option():
     parser.add_argument('--run-id', default=None, help='write a run-specific evaluation report')
 
     opt = parser.parse_args()
+    opt.model = os.environ.get("EVALUATION_MODEL", "llama")
 
     return opt
 

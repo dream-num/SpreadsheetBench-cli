@@ -4,18 +4,18 @@ import json
 import os
 import re
 import shutil
-from concurrent.futures import CancelledError, ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, CancelledError, ThreadPoolExecutor, wait
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from .agents import (
     agent_choices,
     resolve_agent_command,
-    resolve_model,
     resolve_stream_agent_output,
     unsupported_agent_reason,
 )
 from .config import RunnerConfig, RunnerError
+from .docker_runner import parse_env_file, stop_run_containers
 from .paths import task_id_text
 from .task import run_task
 
@@ -62,6 +62,10 @@ def discover_common_cases(dataset_path: Path, tasks: List[Dict]) -> List[int]:
 DEFAULT_DATASET = "spreadsheetbench_verified_400"
 
 
+def run_id_safe_label(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or "agent"
+
+
 def run_id_dataset_label(dataset: str) -> str:
     known_labels = {
         "spreadsheetbench_verified_400": "verified400",
@@ -70,7 +74,7 @@ def run_id_dataset_label(dataset: str) -> str:
     }
     if dataset in known_labels:
         return known_labels[dataset]
-    return re.sub(r"[^a-z0-9]+", "-", dataset.lower()).strip("-")
+    return run_id_safe_label(dataset)
 
 
 def run_id_scope_label(task_ids: Optional[List[str]], limit: Optional[int]) -> str:
@@ -78,18 +82,48 @@ def run_id_scope_label(task_ids: Optional[List[str]], limit: Optional[int]) -> s
         return f"first{limit}"
     if task_ids:
         if len(task_ids) == 1:
-            task_label = re.sub(r"[^a-z0-9]+", "-", task_ids[0].lower()).strip("-")
+            task_label = run_id_safe_label(task_ids[0])
             return f"task{task_label}"
         return f"tasks{len(task_ids)}"
     return "all"
 
 
-def default_run_id(agent: Optional[str], dataset: str, task_ids: Optional[List[str]], limit: Optional[int]) -> str:
-    agent_label = agent or "agent"
+def default_run_id(
+    agent: Optional[str],
+    model: Optional[str],
+    dataset: str,
+    task_ids: Optional[List[str]],
+    limit: Optional[int],
+) -> str:
+    agent_label = run_id_safe_label(agent or "agent")
+    model_label = run_id_safe_label(model or "agent")
     dataset_label = run_id_dataset_label(dataset)
     scope_label = run_id_scope_label(task_ids, limit)
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    return f"{agent_label}-{dataset_label}-{scope_label}-{timestamp}"
+    return f"{agent_label}-{model_label}-{dataset_label}-{scope_label}-{timestamp}"
+
+
+def env_file_model(agent: Optional[str], env_file: Optional[Path]) -> Optional[str]:
+    if env_file is None:
+        return None
+    try:
+        values = parse_env_file(env_file)
+    except RunnerError:
+        return None
+    if agent == "codex":
+        return values.get("CODEX_MODEL")
+    if agent == "claude":
+        return values.get("ANTHROPIC_MODEL")
+    return None
+
+
+def effective_model(agent: Optional[str], env_file: Optional[Path]) -> str:
+    model = env_file_model(agent, env_file)
+    if model:
+        return model
+    if agent:
+        return agent
+    return "agent"
 
 
 def parse_option(project_root: Path) -> argparse.Namespace:
@@ -99,7 +133,6 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--run-root", type=Path, default=project_root / ".runs" / "univer-agent")
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--setting", default="univer_agent")
-    parser.add_argument("--model", default=None, help="output model label; defaults to the selected agent")
     parser.add_argument("--agent", default=None, choices=agent_choices())
     parser.add_argument("--agent-command", default="", help="container-internal command for the agent")
     parser.add_argument("--agent-timeout", type=int, default=300)
@@ -114,8 +147,10 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--workers", type=int, default=5, help="number of tasks to run concurrently")
     opt = parser.parse_args()
+    model = effective_model(opt.agent, opt.env_file)
     if opt.run_id is None:
-        opt.run_id = default_run_id(opt.agent, opt.dataset, opt.task_id, opt.limit)
+        opt.run_id = default_run_id(opt.agent, model, opt.dataset, opt.task_id, opt.limit)
+    opt.model = model
     return opt
 
 
@@ -175,26 +210,68 @@ def run_tasks(
 
     results: List[Optional[Dict]] = [None] * len(tasks)
     if workers == 1 or len(tasks) <= 1:
-        for index, task in enumerate(tasks):
-            result, exc = _run_task_for_summary(config, task, cases)
-            results[index] = result
+        current_index: Optional[int] = None
+        try:
+            for index, task in enumerate(tasks):
+                current_index = index
+                result, exc = _run_task_for_summary(config, task, cases)
+                results[index] = result
+                write_summary(config, _completed_results(results), metadata)
+        except KeyboardInterrupt:
+            if current_index is not None and results[current_index] is None:
+                results[current_index] = {
+                    "id": task_id_text(tasks[current_index]),
+                    "status": "error",
+                    "error": "Interrupted by user",
+                }
+            stopped = stop_run_containers(config)
+            metadata["interrupted_at"] = datetime.datetime.now().isoformat(timespec="seconds")
+            metadata["interrupted"] = True
+            metadata["stopped_containers"] = stopped
             write_summary(config, _completed_results(results), metadata)
+            raise
         return _completed_results(results)
 
     max_workers = min(workers, len(tasks))
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_index = {
-            executor.submit(_run_task_for_summary, config, task, cases): index
-            for index, task in enumerate(tasks)
-        }
-        for future in as_completed(future_to_index):
-            index = future_to_index[future]
-            try:
-                result, exc = future.result()
-            except CancelledError:
-                continue
-            results[index] = result
-            write_summary(config, _completed_results(results), metadata)
+    executor = ThreadPoolExecutor(max_workers=max_workers)
+    future_to_index = {}
+    next_index = 0
+    while next_index < max_workers:
+        future_to_index[executor.submit(_run_task_for_summary, config, tasks[next_index], cases)] = next_index
+        next_index += 1
+    try:
+        while future_to_index:
+            done, _pending = wait(future_to_index, return_when=FIRST_COMPLETED)
+            for future in done:
+                index = future_to_index.pop(future)
+                try:
+                    result, exc = future.result()
+                except CancelledError:
+                    continue
+                results[index] = result
+                write_summary(config, _completed_results(results), metadata)
+                if next_index < len(tasks):
+                    future_to_index[executor.submit(_run_task_for_summary, config, tasks[next_index], cases)] = next_index
+                    next_index += 1
+    except KeyboardInterrupt:
+        for future in future_to_index:
+            future.cancel()
+        for future, index in future_to_index.items():
+            if results[index] is None:
+                results[index] = {
+                    "id": task_id_text(tasks[index]),
+                    "status": "error",
+                    "error": "Interrupted by user",
+                }
+        stopped = stop_run_containers(config)
+        executor.shutdown(wait=True, cancel_futures=True)
+        metadata["interrupted_at"] = datetime.datetime.now().isoformat(timespec="seconds")
+        metadata["interrupted"] = True
+        metadata["stopped_containers"] = stopped
+        write_summary(config, _completed_results(results), metadata)
+        raise
+    else:
+        executor.shutdown(wait=True)
 
     return _completed_results(results)
 
@@ -209,7 +286,7 @@ def main(project_root: Optional[Path] = None) -> int:
     if unsupported_reason:
         raise RunnerError(unsupported_reason)
     agent_command = resolve_agent_command(opt.agent, opt.agent_command)
-    model = resolve_model(opt.agent, opt.model)
+    model = opt.model
     stream_agent_output = resolve_stream_agent_output(opt.agent, opt.stream_agent_output)
     if not opt.agent and not agent_command:
         raise RunnerError("--agent or --agent-command is required")
@@ -257,13 +334,27 @@ def main(project_root: Optional[Path] = None) -> int:
     print(f"[run] selected_tasks={len(tasks)} cases={','.join(str(case) for case in cases)}")
     print(f"[run] workers={opt.workers}")
     print(f"[run] summary={config.run_root / config.run_id / 'summary.json'}")
-    summary = run_tasks(
-        config,
-        tasks,
-        cases,
-        workers=opt.workers,
-        metadata=metadata,
-    )
+    try:
+        summary = run_tasks(
+            config,
+            tasks,
+            cases,
+            workers=opt.workers,
+            metadata=metadata,
+        )
+    except KeyboardInterrupt:
+        metadata["finished_at"] = datetime.datetime.now().isoformat(timespec="seconds")
+        metadata["interrupted"] = True
+        existing_summary = []
+        summary_path = config.run_root / config.run_id / "summary.json"
+        if summary_path.is_file():
+            try:
+                existing_summary = json.loads(summary_path.read_text(encoding="utf-8")).get("tasks", [])
+            except json.JSONDecodeError:
+                existing_summary = []
+        write_summary(config, existing_summary, metadata)
+        print(f"[run] interrupted; stopped containers for run_id={config.run_id}")
+        return 130
     metadata["finished_at"] = datetime.datetime.now().isoformat(timespec="seconds")
     write_summary(config, summary, metadata)
     return 0

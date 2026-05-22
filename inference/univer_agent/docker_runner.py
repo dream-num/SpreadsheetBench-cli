@@ -145,13 +145,44 @@ def docker_container_name(config: RunnerConfig, workspace: DockerTaskWorkspace) 
     return f"spreadsheetbench-cli-{docker_name_part(config.run_id)}-{docker_name_part(workspace.task_id)}"
 
 
+def docker_container_name_prefix(config: RunnerConfig) -> str:
+    return f"spreadsheetbench-cli-{docker_name_part(config.run_id)}-"
+
+
+def stop_docker_container(config: RunnerConfig, container_name: str) -> None:
+    subprocess.run(
+        [config.docker_bin, "stop", container_name],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+
+
+def stop_run_containers(config: RunnerConfig) -> List[str]:
+    prefix = docker_container_name_prefix(config)
+    result = subprocess.run(
+        [config.docker_bin, "ps", "--format", "{{.Names}}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return []
+
+    names = [name.strip() for name in result.stdout.splitlines() if name.strip().startswith(prefix)]
+    for name in names:
+        stop_docker_container(config, name)
+    return names
+
+
 def docker_command(config: RunnerConfig, workspace: DockerTaskWorkspace) -> List[str]:
+    container_name = docker_container_name(config, workspace)
     command = [
         config.docker_bin,
         "run",
         "--rm",
         "--name",
-        docker_container_name(config, workspace),
+        container_name,
     ]
     if config.env_file is not None:
         command.extend(["--env-file", str(config.env_file)])
@@ -192,6 +223,7 @@ def write_timing(
     status: str,
     error: Optional[str] = None,
 ) -> None:
+    log_dir.mkdir(parents=True, exist_ok=True)
     payload = {
         "status": status,
         "started_at": started_at.isoformat(timespec="seconds"),
@@ -236,6 +268,7 @@ def stream_pipe_to_logs(
 def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> None:
     log_dir = workspace.container_task_dir / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
+    container_name = docker_container_name(config, workspace)
     command = docker_command(config, workspace)
     command_text = " ".join(shlex.quote(arg) for arg in command)
     (log_dir / "docker.command.txt").write_text(command_text + "\n", encoding="utf-8")
@@ -257,6 +290,7 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
     output_path = log_dir / "docker.output.txt"
     timed_out = False
     returncode: Optional[int] = None
+    process: Optional[subprocess.Popen] = None
 
     try:
         with stdout_path.open("w", encoding="utf-8") as stdout_file, stderr_path.open(
@@ -298,7 +332,16 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
 
             stdout_thread.join()
             stderr_thread.join()
-    except Exception as exc:
+    except BaseException as exc:
+        interrupted = isinstance(exc, KeyboardInterrupt)
+        if process is not None and process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+        stop_docker_container(config, container_name)
         finished_at = datetime.datetime.now()
         duration_seconds = round(time.monotonic() - started, 3)
         write_timing(
@@ -309,7 +352,7 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
             returncode=returncode,
             timed_out=timed_out,
             timeout_seconds=config.agent_timeout,
-            status="error",
+            status="interrupted" if interrupted else "error",
             error=str(exc),
         )
         raise

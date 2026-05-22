@@ -231,7 +231,7 @@ The script auto-detects the backend (LibreOffice on macOS/Linux, win32com on Win
 Using the following script to get the evaluation result:
 ```
 cd evaluation
-python evaluation.py --dataset sample_data_200 --setting univer_agent --model codex
+EVALUATION_MODEL=codex python evaluation.py --dataset sample_data_200 --setting univer_agent
 ```
 
 By default, evaluation reads generated files from `data/<dataset>/outputs/<setting>_<model>/`.

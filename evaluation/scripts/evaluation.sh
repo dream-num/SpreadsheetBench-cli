@@ -1,2 +1,1 @@
-python evaluation.py --setting single \
-    --model MODEL
+EVALUATION_MODEL=MODEL python evaluation.py --setting single
