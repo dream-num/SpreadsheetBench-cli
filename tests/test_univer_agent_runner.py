@@ -258,6 +258,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving", prompt_text)
             self.assertIn("Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx`", prompt_text)
             self.assertIn("The final `.xlsx` must be produced by running `univer export`", prompt_text)
+            self.assertIn("If the instruction asks for VBA or a macro, implement the described workbook effect directly", prompt_text)
             self.assertNotIn("The original `.xlsx` files are still available as source references", prompt_text)
             self.assertNotIn("copy that case's `input.univer` into `/task/work/`", prompt_text)
             self.assertTrue((task_root / "outputs" / "case_1").is_dir())

@@ -50,6 +50,7 @@ Rules:
 - Create the required `output.xlsx` for every case. These files are the final deliverables.
 - Keep temporary scripts and intermediates under `/task/work/`.
 - Solve every case independently and only modify cells within `answer_position`.
+- If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
 """
 
 
