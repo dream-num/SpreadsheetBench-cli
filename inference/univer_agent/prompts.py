@@ -47,6 +47,14 @@ Rules:
 - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
 - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
 - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+- Univer Sheets cell value rules:
+  1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type: 1=STRING, 2=NUMBER, 3=BOOLEAN, 4=FORCE_STRING), `f` (formula), `p` (rich text), `s` (style/number format), and `custom` (custom data).
+  2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not treat `getValues()` + `setValues()` as a general read/write pattern.
+  3. Choose reads by intent: display values use `getValues()` or `getDisplayValues()`; raw values without model preservation use `getRawValues()`; complete cell models use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`.
+  4. Choose writes by intent: simple new values may be plain `string`, `number`, or `boolean`; explicit types, formulas, dates, formats, rich text, or forced text should use complete `ICellData`; formulas use `setFormula('=A1+B1')` or `{{ f: '=A1+B1' }}`; literal formula text uses `{{ v: '=A1+B1', t: 4 }}`; leading-zero IDs or codes use `{{ v: '00123', t: 4 }}`.
+  5. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{{ v: serial, t: 2, s: {{ n: {{ pattern: 'yyyy-mm-dd' }} }} }}`; percent `{{ v: 0.25, t: 2, s: {{ n: {{ pattern: '0%' }} }} }}`; currency `{{ v: 1234.5, t: 2, s: {{ n: {{ pattern: '$#,##0.00' }} }} }}`.
+  6. When reading existing cells and writing them elsewhere: display-only copies may use `getValues()`/`getDisplayValues()` -> `setValues()`; raw-value-only copies may use `getRawValues()` -> `setValues()`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+  7. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
 - Create the required `output.xlsx` for every case. These files are the final deliverables.
 - Keep temporary scripts and intermediates under `/task/work/`.
 - Solve every case independently and only modify cells within `answer_position`.
