@@ -1,143 +1,146 @@
-# 262-17: univer export 将无类型 dataValidation 导出为非法 type=""
+# univer export 将无类型 dataValidation 导出为非法 `type=""`
 
-## 背景
+## 问题描述
 
-- task-id: `262-17`
-- run-id: `codex-gpt-5-5-verified400-first80-20260523-163607`
-- dataset: `spreadsheetbench_verified_400`
-- agent: `codex`, model `gpt-5.5`
-- instruction_type: `Sheet-Level Manipulation`
-- answer_position: `Sheet1'!A1:F14`
-- 推理状态: `ok`
-- 评测结果: `test_case_results: [0]`
-- 耗时: `131.32s`
+`univer export` 在导出包含 data validation 的 `.xlsx` 工作簿时，会把源文件中没有显式 `type` 属性的 data validation 规则导出为：
 
-题目要求对 `Sheet1!A1:F14` 按动态定位到的 `Task` 和 `Responsibility` 两列升序排序。当前 run 的最终输出在单元格值层面与 golden 一致，但导出的 `.xlsx` 含非法 data validation XML，导致 `openpyxl` 无法读取 workbook，评测失败。
-
-## 现象
-
-当前输出：
-
-```text
-data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_262-17_output.xlsx
+```xml
+<dataValidation type="" .../>
 ```
 
-用 XML 直接解析 `Sheet1!A1:F14`，output 与 golden 单元格值一致：
+但 `type=""` 不是合法的 OOXML data validation 类型。源文件中的这条规则是省略 `type` 属性，这是合法表示；导出后写成空字符串会导致严格的 XLSX 读取器无法读取工作簿。
 
-```text
-value compare Sheet1 A1:F14 output XML vs golden display-ish raw
-diff_count 0
+## 实际表现
+
+`univer import` 和 `univer export` 都返回成功：
+
+```bash
+univer import input.xlsx input.univer --json
+univer export input.univer exported.xlsx --json
 ```
 
-但 `openpyxl.load_workbook()` 读取 output 失败：
-
-```text
-ValueError: Unable to read workbook: could not read worksheets from data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_262-17_output.xlsx.
-This is most probably because the workbook source files contain some invalid XML.
-ValueError: Value must be one of {'decimal', 'textLength', 'custom', 'whole', 'list', 'date', 'time'}
-```
-
-根因 XML 在 `xl/worksheets/sheet1.xml`：
+但导出的 `exported.xlsx` 中，`xl/worksheets/sheet1.xml` 包含非法 XML：
 
 ```xml
 <dataValidation type="" error="Date Format should be DD-MM-YYYY" prompt="Date Format should be DD-MM-YYYY" errorTitle="Invalid Date Format" promptTitle="Invalid Date Format" showInputMessage="1" showErrorMessage="1" sqref="D1:E1"/>
 ```
 
-OOXML 中空字符串不是合法 data validation `type`。原始 xlsx / golden 对同一个 rule 的表示是省略 `type` 属性，而不是写 `type=""`。
-
-## 独立复现
-
-复现目录：
+使用 `openpyxl` 读取导出文件会失败：
 
 ```text
-debug-tmp/data-validation-empty-type-repro/
+ValueError: Unable to read workbook: could not read worksheets from exported.xlsx.
+This is most probably because the workbook source files contain some invalid XML.
+
+ValueError: Value must be one of {'decimal', 'textLength', 'custom', 'whole', 'list', 'date', 'time'}
 ```
 
-复现文件：
+## 期望表现
 
-```text
-debug-tmp/data-validation-empty-type-repro/input.xlsx
-debug-tmp/data-validation-empty-type-repro/input.univer
-debug-tmp/data-validation-empty-type-repro/exported.xlsx
+如果源文件中的 data validation rule 没有显式 `type`，导出的 OOXML 应该同样省略 `type` 属性。
+
+期望类似：
+
+```xml
+<dataValidation showInputMessage="1" showErrorMessage="1" errorTitle="Invalid Date Format" error="Date Format should be DD-MM-YYYY" promptTitle="Date Format should be DD-MM-YYYY" sqref="D1:E1"/>
 ```
 
-复现步骤不依赖 agent 排序脚本，也不修改 workbook 内容，只做 import + export：
+不应导出为：
+
+```xml
+<dataValidation type="" .../>
+```
+
+导出的 `.xlsx` 应能被 `openpyxl` 等 Excel-compatible parser 正常读取。
+
+## 最小复现步骤
+
+复现需要附件中的 `input.xlsx`。
 
 ```bash
-mkdir -p debug-tmp/data-validation-empty-type-repro
-cp .runs/univer-agent/codex-gpt-5-5-verified400-first80-20260523-163607/262-17/task/cases/case_1/input.xlsx debug-tmp/data-validation-empty-type-repro/input.xlsx
-univer import debug-tmp/data-validation-empty-type-repro/input.xlsx debug-tmp/data-validation-empty-type-repro/input.univer --json
-univer export debug-tmp/data-validation-empty-type-repro/input.univer debug-tmp/data-validation-empty-type-repro/exported.xlsx --json
+univer import input.xlsx input.univer --json
+univer export input.univer exported.xlsx --json
 ```
 
-实际结果：
+检查 worksheet XML：
 
-```text
-univer import ... -> success true
-univer export ... -> success true
+```bash
+unzip -p input.xlsx xl/worksheets/sheet1.xml | grep dataValidation
+unzip -p exported.xlsx xl/worksheets/sheet1.xml | grep dataValidation
 ```
 
-原始输入可被 `openpyxl` 读取：
+也可以用 `openpyxl` 验证：
+
+```python
+from openpyxl import load_workbook
+
+load_workbook("input.xlsx")      # OK
+load_workbook("exported.xlsx")   # Fails
+```
+
+本地实际验证结果：
 
 ```text
 input: openpyxl_ok ['Sheet1', 'Sheet2']
+exported: openpyxl_error ValueError Unable to read workbook: could not read worksheets from exported.xlsx.
 ```
 
-导出文件无法被 `openpyxl` 读取：
+## 根因线索
 
-```text
-exported: openpyxl_error ValueError Unable to read workbook: could not read worksheets from debug-tmp/data-validation-empty-type-repro/exported.xlsx.
-```
-
-原始 `input.xlsx` 的 `xl/worksheets/sheet1.xml` 中，第一条 data validation 没有 `type` 属性：
+源文件中 `D1:E1` 上有一条 data validation rule，它没有 `type` 属性：
 
 ```xml
 <dataValidation showInputMessage="1" showErrorMessage="1" errorTitle="Invalid Date Format" error="Date Format should be DD-MM-YYYY" promptTitle="Date Format should be DD-MM-YYYY" sqref="D1:E1" .../>
 ```
 
-经 `univer import` + `univer export` 后，`exported.xlsx` 变成非法空类型：
+经过 `univer import` + `univer export` 后，这条 rule 变成：
 
 ```xml
 <dataValidation type="" error="Date Format should be DD-MM-YYYY" prompt="Date Format should be DD-MM-YYYY" errorTitle="Invalid Date Format" promptTitle="Invalid Date Format" showInputMessage="1" showErrorMessage="1" sqref="D1:E1"/>
 ```
 
-## 根因判断
+这看起来是 export serialization 问题：未设置或空的 validation type 应该在导出 OOXML 时省略，而不是序列化为空字符串。
 
-这是 `univer-cli` / export 链路问题，不是 agent 排序内容错误：
+## 影响范围
 
-1. 不编辑 workbook，仅 import + export 即可复现。
-2. 输入 xlsx 合法，`openpyxl` 可读。
-3. 输出 xlsx 中 `dataValidation type=""` 非法，`openpyxl` 无法读取。
-4. 当前失败 case 的 `Sheet1!A1:F14` 单元格值与 golden 一致，失败核心是导出文件结构兼容性。
+即使 `univer export` 返回成功，导出的 `.xlsx` 也可能无法被严格的 XLSX consumer 读取，例如 `openpyxl`。
 
-## 与旧 issue 的关系
+这会影响依赖导出文件做后续校验、评测或自动处理的工作流。
 
-旧 issue：
+## 附件 / 复现文件
+
+本地已准备复现包：
 
 ```text
-issue/262-17-export-drawing-crash-date-fallback.md
+debug-tmp/data-validation-empty-type-repro/repro-files.zip
 ```
 
-记录的是早期 `univer export` drawing/shape nil pointer panic，以及 agent fallback 导致日期损坏。当前问题不同：
+包内包含：
 
-- drawing export crash 已在后续版本修复。
-- 现在 export 命令返回成功。
-- 新问题是导出的 xlsx 含非法 data validation XML。
+```text
+input.xlsx
+exported.xlsx
+```
 
-因此本 issue 应独立跟踪。
+其中：
 
-## 候选修复方向
+- `input.xlsx` 是源文件，`openpyxl` 可读取。
+- `exported.xlsx` 是 `univer import` 后不做任何编辑、直接 `univer export` 得到的文件，`openpyxl` 读取失败。
 
-CLI / export 侧：
+## 关联背景：SpreadsheetBench
 
-- 当 data validation rule 的 type 为空或未设置时，导出 OOXML 应省略 `type` 属性。
-- 不应导出 `type=""`。
-- 增加回归测试：导入包含无 `type` data validation 的 xlsx 后再导出，导出的 xlsx 应能被 `openpyxl` 读取。
+这个问题是在分析 SpreadsheetBench 任务 `262-17` 时发现的。
 
-评测 / runner 侧：
+关联 run：
 
-- 对这类失败应记录 openpyxl 读取失败的底层 XML 原因，避免误判为 agent 内容错误。
+```text
+run-id: codex-gpt-5-5-verified400-first80-20260523-163607
+task-id: 262-17
+```
 
-agent / prompt 侧：
+该任务中，最终输出的 `Sheet1!A1:F14` 单元格值与 golden 完全一致；直接解析 XML 对比时 `diff_count=0`。但评测失败，因为导出的 `.xlsx` 无法被 `openpyxl` 读取。
 
-- 这不是 agent 可稳定规避的问题。即使 agent 正确编辑并验证 workbook-visible 值，最终 `univer export` 仍可能生成非法 xlsx。
+本地详细记录：
+
+```text
+issue/262-17-export-invalid-data-validation-empty-type.md
+```
