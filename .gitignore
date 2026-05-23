@@ -11,6 +11,7 @@ inference/outputs/*
 inference/log/*
 
 debug
+debug-tmp
 outputs
 report/
 .venv
@@ -18,6 +19,8 @@ report/
 .codex
 .runs
 .worktree
+
+
 .env.agent
 .env.codex
 .env.codex-gpt-5.5-low
