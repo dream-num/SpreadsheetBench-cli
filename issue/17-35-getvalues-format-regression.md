@@ -75,7 +75,16 @@ C列保留 000000000
    - 没有保留编号列 `000000000`。
    - 没有稳定保留金额列完整欧元格式。
 
-3. agent 虽然先通过 `pipe out --type rawValue` 导出了 raw 数据到 `/task/work/*.json`，但最终脚本没有使用这些 raw 文件，也没有在 `univer run` 内使用 `getRawValues()`。
+3. `pipe out --type rawValue` 的命名容易让 agent 误判它等同于 facade `getRawValues()`，但当前实现并不等同。
+   - 当前实际对应关系：
+     - `pipe out --type rawValue` == `range.getValues()`
+     - `pipe out --type displayValue` == `range.getDisplayValues()`
+     - `pipe out --type formula` == `range.getFormulas()`
+   - 因此 agent 先用 `pipe out --type rawValue` 看到的日期/格式化值，不能推断 `univer run` 脚本里的 `getRawValues()` 会返回相同形态。
+   - 在日期、百分比、货币、编号格式等场景中，这个差异会很大。例如日期单元格 `A1 = 45658` 且 number format 为 `yyyy-MM-DD` 时：
+     - `getValue()` / `getValues()` / `getDisplayValue()` / `pipe out --type rawValue` 可能显示为 `2025-01-01`
+     - `getRawValue()` / `getRawValues()` 返回 `45658`
+   - 这个命名/API 语义差异会诱导 agent 在 `pipe out` 验证后错误改用 facade `getRawValues()`，从而把日期变成 serial、金额变成裸数字、格式化编号变成无格式值。
 
 4. 日志中还有一个过程问题：agent 首次执行 `univer run --file /task/work/filter_dates.js` 时脚本尚未创建，出现 `ENOENT`，随后自行恢复。这个问题没有直接导致评测失败，但属于执行顺序不稳。
 
@@ -106,7 +115,7 @@ C列保留 000000000
      它返回 facade/view 层值，可能受 number format、interceptor、显示逻辑影响，也不会保留 t/f/p/s/custom 等字段。
      不要把 getValues() + setValues() 当成通用读写方案。
 
-  3. 读取时按意图选择：
+  3. 读取时按意图选择；注意 `pipe out --type rawValue` 当前不等于 facade `getRawValues()`：
      - 展示值：getValues() 或 getDisplayValues()
      - 原始值但不保留模型：getRawValues()
      - 完整单元格模型：getCellDatas()
@@ -145,6 +154,12 @@ C列保留 000000000
 - `setValues()` 写 raw values。
 - `setNumberFormats()` 写回格式。
 - 验证导出的 `.xlsx` 中日期、金额、编号列类型和格式，而不仅验证行数。
+
+CLI / 文档侧也应考虑：
+
+- 将 `pipe out --type rawValue` 改名或补充说明，避免 agent 把它和 facade `getRawValues()` 关联起来。
+- 如果需要真正的 facade raw 值，应提供明确选项，例如 `--type modelRawValue` / `--type facadeRawValue`，或在 help 中写明当前 `rawValue` 实际调用 `range.getValues()`。
+- 在 `univer help pipe out` 和 `univer-cli` skill 中明确列出 `pipe out` 三种 type 与 facade API 的对应关系。
 
 ## 风险
 
