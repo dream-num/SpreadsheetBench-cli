@@ -141,12 +141,12 @@ Build the solver image:
 bash scripts/build_agent_docker.sh
 ```
 
-Put API credentials and optional proxy settings in an env file. If `--env-file` is omitted, the runner uses `.env.agent` when it exists.
+Put API credentials and optional proxy settings in an env file. If `--env-file` is omitted, the runner uses `.env.<agent>`, for example `.env.codex` or `.env.claude`. If that file does not exist, the run fails before starting inference.
 
 Recommended env files by agent:
 
-- `--agent codex`: prefer `.env.codex`.
-- `--agent claude`: prefer `.env.claude`.
+- `--agent codex`: defaults to `.env.codex`; missing file is an error.
+- `--agent claude`: defaults to `.env.claude`; missing file is an error.
 - `--agent-command`: pass the env file required by the custom command.
 
 Example `.env.claude`:
@@ -158,7 +158,7 @@ HTTP_PROXY=http://10.23.0.1:8080
 HTTPS_PROXY=http://10.23.0.1:8080
 ```
 
-For Codex runs, prefer `.env.codex`:
+For Codex runs, `.env.codex` is used by default:
 
 ```bash
 bash scripts/run_univer_agent_eval.sh \

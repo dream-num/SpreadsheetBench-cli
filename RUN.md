@@ -42,13 +42,14 @@ ANTHROPIC_API_KEY=...
 默认 env-file 规则：
 
 - 如果命令行传了 `--env-file <path>`，使用该文件。
-- 如果没有显式传 `--env-file`，且仓库根目录存在 `.env.agent`，inference 脚本会自动使用 `.env.agent`。
+- 如果没有显式传 `--env-file`，inference 脚本会自动使用该 agent 对应文件，例如 `.env.codex` 或 `.env.claude`。
+- 如果对应 `.env.<agent>` 不存在，脚本会在启动 inference 前报错退出，避免误用空环境运行。
 - runner 只把 env 文件路径传给 `docker run --env-file`，不会把 env 文件复制到 `/task`，也不会记录文件内容。
 
 不同 agent 的推荐 env-file：
 
-- `--agent codex`：优先显式使用 `.env.codex`。
-- `--agent claude`：优先显式使用 `.env.claude`。
+- `--agent codex`：默认使用 `.env.codex`，缺失时报错。
+- `--agent claude`：默认使用 `.env.claude`，缺失时报错。
 - 自定义 `--agent-command`：按该命令需要显式传对应 env 文件。
 
 模型只从 env-file 读取，并同时作为实际调用模型、输出目录标签、评测报告标签和默认 `run-id` 的 model 段：
@@ -56,7 +57,7 @@ ANTHROPIC_API_KEY=...
 - Codex：读取 `CODEX_MODEL`。
 - Claude Code：读取 `ANTHROPIC_MODEL`。
 
-Claude 推荐优先使用仓库根目录的 `.env.claude`：
+Claude 默认使用仓库根目录的 `.env.claude`：
 
 ```bash
 bash scripts/run_univer_agent_eval.sh \
@@ -65,7 +66,7 @@ bash scripts/run_univer_agent_eval.sh \
   --task-id 54513
 ```
 
-Codex 推荐优先使用仓库根目录的 `.env.codex`：
+Codex 默认使用仓库根目录的 `.env.codex`：
 
 ```bash
 bash scripts/run_univer_agent_eval.sh \
@@ -175,7 +176,7 @@ Docker 只挂载当前 task 目录：
 ```bash
 docker run --rm \
   --name spreadsheetbench-cli-<run-id>-<task-id> \
-  --env-file /abs/path/.env.agent \
+  --env-file /abs/path/.env.codex \
   -v /abs/path/.runs/univer-agent/<run-id>/<task-id>/task:/task \
   spreadsheetbench-univer-cli-agent \
   --agent codex

@@ -81,8 +81,12 @@ if [ "$SHOW_HELP" = "1" ]; then
     exit 0
 fi
 
-if [ -z "$ENV_FILE_NAME" ] && [ -f ".env.agent" ]; then
-    ENV_FILE_NAME=".env.agent"
+if [ -z "$ENV_FILE_NAME" ] && [ -n "$AGENT_NAME" ] && [ -f ".env.${AGENT_NAME}" ]; then
+    ENV_FILE_NAME=".env.${AGENT_NAME}"
+fi
+if [ -z "$ENV_FILE_NAME" ] && [ -n "$AGENT_NAME" ]; then
+    echo "missing default env file: .env.${AGENT_NAME}; create it or pass --env-file <path>" >&2
+    exit 2
 fi
 
 env_file_value() {

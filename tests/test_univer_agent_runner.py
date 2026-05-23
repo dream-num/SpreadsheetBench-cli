@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -227,6 +228,39 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("CODEX_BYPASS_SANDBOX", run_task_script)
         self.assertIn("--dangerously-bypass-approvals-and-sandbox", run_task_script)
 
+    def test_shell_wrappers_default_to_agent_specific_env_files(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        script_texts = [
+            (repo_root / "scripts" / "run_univer_agent_eval.sh").read_text(encoding="utf-8"),
+            (repo_root / "inference" / "scripts" / "inference_univer_agent.sh").read_text(encoding="utf-8"),
+        ]
+
+        for script_text in script_texts:
+            self.assertNotIn(".env.agent", script_text)
+            self.assertIn(".env.${AGENT_NAME}", script_text)
+
+    def test_shell_wrapper_errors_when_agent_env_file_is_missing(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        env = os.environ.copy()
+        env.pop("ENV_FILE", None)
+        result = subprocess.run(
+            [
+                "bash",
+                "scripts/run_univer_agent_eval.sh",
+                "--agent",
+                "missingagent",
+                "--run-id",
+                "missing-env-test",
+            ],
+            cwd=repo_root,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("missing default env file: .env.missingagent", result.stderr)
+
     def test_prepare_docker_task_workspace_copies_only_inputs_and_prompt(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -265,7 +299,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1, 2))
-            env_file = tmp_path / ".env.agent"
+            env_file = tmp_path / ".env.codex"
             env_file.write_text("OPENAI_API_KEY=secret\n", encoding="utf-8")
             config = self.make_config(tmp_path, dataset_path, env_file=env_file)
             captured_args = {}
