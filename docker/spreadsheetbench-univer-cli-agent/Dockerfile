@@ -18,6 +18,11 @@ USER node
 RUN mkdir -p /home/node/.codex/skills /home/node/.claude/skills \
     && npx -y skills add dream-num/skills --global --yes --agent codex claude-code
 
+RUN tmp="$(mktemp -d)" \
+    && univer new "$tmp/warmup.univer" >/dev/null \
+    && univer inspect workbook "$tmp/warmup.univer" >/dev/null \
+    && rm -rf "$tmp"
+
 COPY entrypoint.sh /usr/local/bin/spreadsheetbench-agent-entrypoint
 COPY run-task.sh /usr/local/bin/spreadsheetbench-agent-task
 
