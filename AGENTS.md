@@ -27,6 +27,7 @@
 - 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：优先用 `openpyxl` 直接读取 output 和 golden 的 `.xlsx`，检查 `answer_position` 内的值、公式、数字格式、样式、空白区、工作表结构、排序、截断、导出结果或范围外污染；只有需要 Univer 可见状态或 CLI 行为对照时，再把 `.xlsx` 临时导入为 `.univer` 辅助检查。
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
+- 已知例外：`spreadsheetbench_verified_400` 的 `283-32` 是题目 `answer_position` 使用整列范围 `A:G` 而当前评测程序无法解析导致的评测程序问题；agent 输出值与 golden 一致。逐题错因分析时跳过该题，不归因给 agent 或 `univer-cli`。
 
 ## 修复与实验原则
 
