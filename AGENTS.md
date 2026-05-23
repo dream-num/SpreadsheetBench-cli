@@ -24,7 +24,7 @@
   4. 判断失败类型：理解错误、范围/边界错误、值类型或格式错误、工具链错误、超时/网络问题。
 - 逐题详细分析时，每次只分析一道题，并明确区分问题归因：agent 自身题意理解/推理/验证问题，`univer-cli` 命令或 API 问题，skill 指引问题，prompt/runner/评测流程问题，或数据/题目歧义等其它问题。
 - 逐题分析必须写出 agent 操作时的卡点：是否有命令误用、失败重试、API 探测、硬编码范围、排序/截断前后顺序风险、验证不足、耗时异常、或接近违反 `answer_position`/文件访问约束的行为。
-- 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：必要时把 output 和 golden 临时导入为 `.univer` 后检查 `answer_position`，并说明值、公式、格式、空白区、工作表结构、排序、截断、导出结果或范围外污染是否存在问题或残余风险。
+- 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：优先用 `openpyxl` 直接读取 output 和 golden 的 `.xlsx`，检查 `answer_position` 内的值、公式、数字格式、样式、空白区、工作表结构、排序、截断、导出结果或范围外污染；只有需要 Univer 可见状态或 CLI 行为对照时，再把 `.xlsx` 临时导入为 `.univer` 辅助检查。
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
 
