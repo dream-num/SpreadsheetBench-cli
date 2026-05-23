@@ -6,7 +6,7 @@
 host runner -> /task workspace -> Docker solver -> outputs/case_N/output.xlsx -> evaluation/report
 ```
 
-host runner 不执行 workbook import、replay、export。为对标 main 分支的 SpreadsheetBench prompt 口径，host runner 会从 case 1 input workbook 读取前几行生成 `spreadsheet_content`，并把 dataset 中的 `answer_position` 放进 prompt。`solution.js` 或其他临时脚本只属于容器内部实现细节，外部 runner 不关心。
+host runner 只负责准备 `/task`、把 `input.xlsx` 预导入为 `input.univer`、收集输出和执行评测；解题、修改 workbook、导出 `output.xlsx` 都在 Docker solver 内完成。为对标 main 分支的 SpreadsheetBench prompt 口径，host runner 会从 case 1 input workbook 读取前几行生成 `spreadsheet_content`，并把 dataset 中的 `answer_position` 放进 prompt。`solution.js` 或其他临时脚本只属于容器内部实现细节，外部 runner 不关心。
 
 ## 构建解题镜像
 
@@ -57,22 +57,16 @@ ANTHROPIC_API_KEY=...
 - Codex：读取 `CODEX_MODEL`。
 - Claude Code：读取 `ANTHROPIC_MODEL`。
 
-Claude 默认使用仓库根目录的 `.env.claude`：
+Claude 默认使用仓库根目录的 `.env.claude`，通常不需要显式传 `--env-file`：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh \
-  --agent claude \
-  --env-file .env.claude \
-  --task-id 54513
+bash scripts/run_univer_agent_eval.sh --agent claude --task-id 54513
 ```
 
-Codex 默认使用仓库根目录的 `.env.codex`：
+Codex 默认使用仓库根目录的 `.env.codex`，通常不需要显式传 `--env-file`：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh \
-  --agent codex \
-  --env-file .env.codex \
-  --task-id 54513
+bash scripts/run_univer_agent_eval.sh --agent codex --task-id 54513
 ```
 
 `.env.codex` 会按本机 Codex 配置设置模型和代理，并通过 `CODEX_AUTH_JSON` 把本机 `~/.codex/auth.json` 只读挂载到容器内的 `CODEX_HOME/auth.json`。这样可以复用本机 ChatGPT 登录态，但不会把认证文件复制进镜像或 task workspace。容器内已经由 Docker 隔离，`.env.codex` 默认设置 `CODEX_BYPASS_SANDBOX=1`，避免 Codex CLI 在容器里再次启用 bubblewrap sandbox 导致命令无法运行。
@@ -94,13 +88,32 @@ codex-gpt-5-3-codex-spark-verified400-first50-20260521-143000
 用 Codex 跑一道题并自动评测：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --task-id 54513
+bash scripts/run_univer_agent_eval.sh --agent codex --task-id 54513
 ```
 
 用 Claude 跑一道题并自动评测：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent claude --env-file .env.claude --task-id 54513
+bash scripts/run_univer_agent_eval.sh --agent claude --task-id 54513
+```
+
+用 Codex 跑默认数据集前 80 题并自动评测：
+
+```bash
+bash scripts/run_univer_agent_eval.sh --agent codex --limit 80
+```
+
+用 Claude 跑默认数据集前 80 题并自动评测：
+
+```bash
+bash scripts/run_univer_agent_eval.sh --agent claude --limit 80
+```
+
+前 80 题并发跑 10 个 task：
+
+```bash
+bash scripts/run_univer_agent_eval.sh --agent codex --limit 80 --workers 10
+bash scripts/run_univer_agent_eval.sh --agent claude --limit 80 --workers 10
 ```
 
 使用自定义容器内命令：
@@ -117,35 +130,31 @@ bash scripts/run_univer_agent_eval.sh \
 指定数据集：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --dataset sample_data_200 --task-id 54513
+bash scripts/run_univer_agent_eval.sh --agent codex --dataset sample_data_200 --task-id 54513
 ```
 
 只跑前 N 道题：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --limit 10
+bash scripts/run_univer_agent_eval.sh --agent codex --limit 10
 ```
 
 只跑指定题目：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --task-id 54513 --task-id 59196
+bash scripts/run_univer_agent_eval.sh --agent codex --task-id 54513 --task-id 59196
 ```
 
 控制 task 级并发数，默认是 5：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh --agent codex --env-file .env.codex --limit 10 --workers 3
+bash scripts/run_univer_agent_eval.sh --agent codex --limit 10 --workers 3
 ```
 
 指定 Docker 命令：
 
 ```bash
-bash scripts/run_univer_agent_eval.sh \
-  --agent codex \
-  --env-file .env.codex \
-  --docker-bin docker \
-  --task-id 54513
+bash scripts/run_univer_agent_eval.sh --agent codex --docker-bin docker --task-id 54513
 ```
 
 最终输出会写到：
@@ -163,7 +172,9 @@ host runner 为每个 task 创建独立目录：
   prompt.md
   cases/
     case_1/input.xlsx
+    case_1/input.univer
     case_2/input.xlsx
+    case_2/input.univer
   outputs/
     case_1/
     case_2/
@@ -210,7 +221,7 @@ output_path
 
 `spreadsheet_content` 来自 case 1 input workbook 的前 5 行。host runner 不会生成 `workbook_context.md`，也不会挂载 answer 文件。
 
-容器不能访问 answer 文件、dataset 根目录、其他 task workspace 或 report。agent 可以在容器内自行使用 `univer inspect/search/pipe/run/help` 或读取当前 task 的 `input.xlsx`。
+容器不能访问 answer 文件、dataset 根目录、其他 task workspace 或 report。agent 应使用当前 task 内预导入的 `input.univer`，并通过 `univer inspect/search/pipe/run/help/export` 完成修改和导出。
 
 ## 日志和结果
 
@@ -248,7 +259,8 @@ report/<run-id>.json
 先看总 summary：
 
 ```bash
-cat .runs/univer-agent/<run-id>/summary.json
+jq '{metadata, counts: (.tasks | group_by(.status) | map({status: .[0].status, count: length})), tasks: [.tasks[] | {id, status, duration_seconds, error}]}' \
+  .runs/univer-agent/<run-id>/summary.json
 ```
 
 如果 Docker 阶段失败：
@@ -267,9 +279,9 @@ find .runs/univer-agent/<run-id>/<task-id>/task/outputs -maxdepth 3 -type f
 
 如果 evaluation 不通过，看报告和标准输出文件：
 
-```text
-outputs/eval_<setting>_<model>_<run-id>.json
-data/<dataset>/outputs/<setting>_<model>/<case>_<task-id>_output.xlsx
+```bash
+jq '.accuracy, .evaluate.results' report/<run-id>.json
+ls data/<dataset>/outputs/<setting>_<model>/<case>_<task-id>_output.xlsx
 ```
 
 answer 文件只用于人工离线排查，不会挂载进 Docker 容器。
