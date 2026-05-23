@@ -14,6 +14,33 @@
 
 题目要求按 `Task` 升序，再按 `Responsibility` 升序，对 `Sheet1!A1:F14` 排序。题目提到 VBA/macro，但期望结果是 workbook 可见排序效果，不是把 VBA 代码写入单元格。
 
+## 补充验证结论
+
+2026-05-23 重新验证了该 export drawing crash 的版本范围：
+
+- `univer` CLI `0.1.11`：可复现。使用最小复现包执行 `univer export ./input.univer ./output.xlsx --json` 会触发 Go 侧 nil pointer panic，栈指向 `HandleExportShapeDrawing` / `ExportDrawing`。
+- `univer` CLI `0.1.14`：该 drawing export crash 已修复。同一个最小复现包可成功导出 `.xlsx`，不再出现 `HandleExportShapeDrawing` / `ExportDrawing` panic。
+
+验证用的最小复现文件在：
+
+```text
+debug-tmp/export-crash-repro/
+debug-tmp/export-crash-repro/univer-export-drawing-crash-repro.zip
+```
+
+升级到 `0.1.14` 后，重新跑 crash 相关三题：
+
+```text
+run-id: codex-verified400-exportcrash-related3-u014-20260523-1142
+262-17: runner ok, eval 0
+279-23: runner ok, eval 1
+333-29: runner ok, eval 1
+```
+
+三题日志中均未再出现 `HandleExportShapeDrawing`、`ExportDrawing`、`panic` 或 `file export conversion failed`。
+
+注意：`0.1.14` 修复的是本 issue 的 drawing export crash。`262-17` 在新版本下仍评测失败，但失败原因已经变成 agent 使用 `getValues()` + `setValues()` 排序整块区域导致日期 serial 损坏；此外导出的 xlsx 仍包含 `dataValidation type=""`，会导致 `openpyxl` 无法读取。这是后续独立问题，不再是原来的 drawing export panic。
+
 ## 现象
 
 agent 在原 workbook 上正确实现了排序逻辑，并通过 `pipe out` 对比了排序后的 `Sheet1` 与 `Sheet2` 预期文本：
