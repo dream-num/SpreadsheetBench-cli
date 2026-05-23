@@ -54,6 +54,28 @@ Rules:
 - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json`; use `pipe out --format json --type formula` for formulas; if needed, use `univer run` to return explicit `{{ row1, col1, value, formula }}` objects.
 - Note: `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer run-script `getRawValues()` behavior from `pipe out --type rawValue`, especially for dates, currency, percentages, and formatted IDs.
 - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+- Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+- For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+- For rich text or partial text highlighting, use the official rich text builder API. Example:
+  ```ts
+  const richText = univerAPI.newRichText()
+    .insertText('Hello World')
+    .setStyle(0, 5, {{ bl: 1, cl: {{ rgb: '#ff0000' }} }});
+  sheet.getRange('A1').setRichTextValueForCell(richText);
+  ```
+  For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+- `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+  ```ts
+  const cleanText = (v) => String(v ?? '').replace(/\\u00A0/g, ' ').replace(/\\r\\n/g, '\\n').replace(/\\r/g, '\\n').trim();
+  const isBlank = (v) => cleanText(v) === '';
+  const parseNumberLoose = (v) => {{
+    const s = cleanText(v).replace(/,/g, '');
+    if (s === '') return null;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }};
+  ```
+  Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
 - Univer Sheets cell value rules:
   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type: 1=STRING, 2=NUMBER, 3=BOOLEAN, 4=FORCE_STRING), `f` (formula), `p` (rich text), `s` (style/number format), and `custom` (custom data).
   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not treat `getValues()` + `setValues()` as a general read/write pattern.
