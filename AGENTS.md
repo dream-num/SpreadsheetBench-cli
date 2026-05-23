@@ -28,6 +28,7 @@
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
 - 已知例外：`spreadsheetbench_verified_400` 的 `283-32` 是题目 `answer_position` 使用整列范围 `A:G` 而当前评测程序无法解析导致的评测程序问题；agent 输出值与 golden 一致。逐题错因分析时跳过该题，不归因给 agent 或 `univer-cli`。
+- 已知例外：`spreadsheetbench_verified_400` 的 `262-17` 题目已给univer-cli仓库报了bug。
 
 ## 修复与实验原则
 
