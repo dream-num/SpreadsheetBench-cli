@@ -192,7 +192,7 @@ EVAL_RUN_ID_ARGS=(--run-id "$RUN_ID_NAME")
         --dataset "$DATASET_NAME" \
         --setting "$SETTING_NAME" \
         "${EVAL_RUN_ID_ARGS[@]}" \
-        "${EVAL_SELECTION_ARGS[@]}"
+        ${EVAL_SELECTION_ARGS[@]+"${EVAL_SELECTION_ARGS[@]}"}
 )
 echo "[pipeline] evaluation done"
 

@@ -45,6 +45,8 @@ def discover_task_cases(dataset_path: Path, task: Dict) -> List[int]:
             prefix = input_file.name.split("_", 1)[0]
             if prefix.isdigit():
                 cases.append(int(prefix))
+    if (spreadsheet_dir / "initial.xlsx").is_file():
+        cases.append(1)
     return sorted(set(cases))
 
 

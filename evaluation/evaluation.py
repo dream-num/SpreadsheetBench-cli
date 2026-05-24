@@ -219,6 +219,9 @@ def get_proc_path(dataset_path, setting, model, data_id, case_index, source='out
         init_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_init.xlsx'
         if init_path.is_file():
             return init_path
+        legacy_initial_path = dataset_path / 'spreadsheet' / data_id / 'initial.xlsx'
+        if case_index == 1 and legacy_initial_path.is_file():
+            return legacy_initial_path
         return input_path
     return dataset_path / 'outputs' / f'{setting}_{model}' / f'{case_index}_{data_id}_output.xlsx'
 
@@ -232,6 +235,9 @@ def get_ground_truth_path(dataset_path, data_id, case_index):
     golden_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_golden.xlsx'
     if golden_path.is_file():
         return golden_path
+    legacy_golden_path = dataset_path / 'spreadsheet' / data_id / 'golden.xlsx'
+    if case_index == 1 and legacy_golden_path.is_file():
+        return legacy_golden_path
     return answer_path
 
 
@@ -245,6 +251,8 @@ def discover_case_indices(dataset_path, data_id):
             prefix = answer_file.name.split('_', 1)[0]
             if prefix.isdigit():
                 cases.append(int(prefix))
+    if (spreadsheet_dir / 'golden.xlsx').is_file():
+        cases.append(1)
     return sorted(set(cases))
 
 

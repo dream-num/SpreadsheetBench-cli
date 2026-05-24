@@ -37,6 +37,18 @@ class EvaluationPathTest(unittest.TestCase):
 
             self.assertEqual(path, spreadsheet_dir / "1_task-1_init.xlsx")
 
+    def test_get_proc_path_can_read_legacy_initial_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_path = Path(tmp) / "data" / "verified"
+            spreadsheet_dir = dataset_path / "spreadsheet" / "task-1"
+            spreadsheet_dir.mkdir(parents=True)
+            initial_path = spreadsheet_dir / "initial.xlsx"
+            initial_path.write_bytes(b"init")
+
+            path = get_proc_path(dataset_path, "single", "univer-cli", "task-1", 1, "inputs")
+
+            self.assertEqual(path, initial_path)
+
     def test_discover_case_indices_uses_golden_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             dataset_path = Path(tmp) / "data" / "verified"
@@ -49,6 +61,17 @@ class EvaluationPathTest(unittest.TestCase):
                 get_ground_truth_path(dataset_path, "task-1", 1),
                 spreadsheet_dir / "1_task-1_golden.xlsx",
             )
+
+    def test_discover_case_indices_uses_legacy_golden_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dataset_path = Path(tmp) / "data" / "verified"
+            spreadsheet_dir = dataset_path / "spreadsheet" / "task-1"
+            spreadsheet_dir.mkdir(parents=True)
+            golden_path = spreadsheet_dir / "golden.xlsx"
+            golden_path.write_bytes(b"answer")
+
+            self.assertEqual(discover_case_indices(dataset_path, "task-1"), [1])
+            self.assertEqual(get_ground_truth_path(dataset_path, "task-1", 1), golden_path)
 
 
 if __name__ == "__main__":

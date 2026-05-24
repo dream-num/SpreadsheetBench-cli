@@ -21,6 +21,9 @@ def test_case_input_path(dataset_path: Path, task: Dict, case_index: int) -> Pat
     init_path = spreadsheet_dir / f"{case_index}_{task_id}_init.xlsx"
     if init_path.is_file():
         return init_path
+    legacy_initial_path = spreadsheet_dir / "initial.xlsx"
+    if case_index == 1 and legacy_initial_path.is_file():
+        return legacy_initial_path
     return input_path
 
 

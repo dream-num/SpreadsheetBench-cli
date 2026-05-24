@@ -161,6 +161,30 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
             self.assertEqual(cli.discover_common_cases(dataset_path, tasks), [1])
 
+    def test_discover_common_cases_accepts_legacy_initial_workbooks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path = tmp_path / "data" / "verified"
+            for task_id in ("task-1", "task-2"):
+                spreadsheet_dir = dataset_path / "spreadsheet" / task_id
+                spreadsheet_dir.mkdir(parents=True)
+                (spreadsheet_dir / "initial.xlsx").write_bytes(b"input")
+
+            tasks = [{"id": "task-1"}, {"id": "task-2"}]
+
+            self.assertEqual(cli.discover_common_cases(dataset_path, tasks), [1])
+
+    def test_test_case_input_path_accepts_legacy_initial_workbook(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path = tmp_path / "data" / "verified"
+            spreadsheet_dir = dataset_path / "spreadsheet" / "task-1"
+            spreadsheet_dir.mkdir(parents=True)
+            initial_path = spreadsheet_dir / "initial.xlsx"
+            initial_path.write_bytes(b"input")
+
+            self.assertEqual(test_case_input_path(dataset_path, {"id": "task-1"}, 1), initial_path)
+
     def test_run_tasks_starts_multiple_tasks_concurrently(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
