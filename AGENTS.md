@@ -27,8 +27,25 @@
 - 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：优先用 `openpyxl` 直接读取 output 和 golden 的 `.xlsx`，检查 `answer_position` 内的值、公式、数字格式、样式、空白区、工作表结构、排序、截断、导出结果或范围外污染；只有需要 Univer 可见状态或 CLI 行为对照时，再把 `.xlsx` 临时导入为 `.univer` 辅助检查。
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
-- 已知例外：`spreadsheetbench_verified_400` 的 `283-32` 是题目 `answer_position` 使用整列范围 `A:G` 而当前评测程序无法解析导致的评测程序问题；agent 输出值与 golden 一致。逐题错因分析时跳过该题，不归因给 agent 或 `univer-cli`。
-- 已知例外：`spreadsheetbench_verified_400` 的 `262-17` 题目已给univer-cli仓库报了bug。
+
+## 已知错题与 issue 状态
+
+逐题错因分析时先查本节。已知问题不要重复归因给 agent；如果新 run 中同一 task 出现不同失败形态，需要明确说明“不同于已知问题”的新证据。
+
+### 已知题目
+
+| 数据集 | task-id | 当前状态 | issue 状态 | 分析处理 |
+| --- | --- | --- | --- | --- |
+| `spreadsheetbench_verified_400` | `283-32` | 题目 `answer_position` 使用整列范围 `A:G`，当前评测程序无法解析；agent 输出值与 golden 一致。 | 本地记录：`issue/283-32-answer-position-column-range-eval-gap.md`；不是 `univer-cli` 上游问题，未报上游 issue。 | 逐题错因分析时跳过，不归因给 agent 或 `univer-cli`。 |
+| `spreadsheetbench_verified_400` | `262-17` | 已知 `univer-cli` / 导出相关问题。早期 drawing export crash 在新版已修；后续仍有 data validation `type=""` 导出兼容问题。 | 本地记录：`issue/262-17-export-drawing-crash-date-fallback.md`、`issue/262-17-export-invalid-data-validation-empty-type.md`；已给 `univer-cli` 仓库报过 bug。 | 作为已知工具链问题处理；除非出现新失败形态，否则不要重复归因给 agent。 |
+| `spreadsheetbench_verified_400` | `42930` | 数据文件名不匹配：golden 文件为 `1_43930_golden.xlsx`，task id 为 `42930`，导致评测发现不到有效 case。 | 暂无上游 issue；属于数据/题目文件问题。 | 汇总统计时单独列出，不归因给 agent 或 `univer-cli`。 |
+
+### 已报上游通用问题
+
+| GitHub issue | 问题 | 关联 SpreadsheetBench 题目 | 本地记录 |
+| --- | --- | --- | --- |
+| https://github.com/dream-num/univer-cli/issues/296 | `FILTER` 动态数组公式导出后，Excel 修复并删除公式，spill 缓存值丢失。 | `220-7665`, `323-54085`, `340-56378`, `387-58499`；相关现象：`130-33722`, `328-54667`, `399-59884`。 | `issue/296-filter-dynamic-array-export-excel-repair.md` |
+| https://github.com/dream-num/univer-cli/issues/297 | `import/export` roundtrip 后 `styles.xml` 出现空 `<fill/>`，导致 `openpyxl` 无法读取导出 xlsx。 | `193-51090`, `215-3911`, `258-35742`, `315-52541`, `332-55060`, `384-57989` 等。 | `issue/297-empty-fill-openpyxl-roundtrip.md`；复现包在 `debug/univer-empty-fill-openpyxl-repro.zip`。 |
 
 ## 修复与实验原则
 
