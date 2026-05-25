@@ -28,8 +28,6 @@ fi
 
 mkdir -p /task/logs /task/work
 
-prompt="$(cat /task/prompt.md)"
-
 if [ -n "$agent_command" ]; then
     export SPREADSHEETBENCH_PROMPT_FILE=/task/prompt.md
     export SPREADSHEETBENCH_TASK_DIR=/task
@@ -60,10 +58,11 @@ case "$agent" in
         if [ -n "${CODEX_MODEL_REASONING_EFFORT:-}" ]; then
             codex_args+=(-c "model_reasoning_effort=\"${CODEX_MODEL_REASONING_EFFORT}\"")
         fi
-        exec codex "${codex_args[@]}" "$prompt"
+        exec codex "${codex_args[@]}" - < /task/prompt.md
         ;;
     claude)
         cd /task
+        prompt="$(cat /task/prompt.md)"
         exec claude -p "$prompt" \
             --permission-mode bypassPermissions \
             --no-session-persistence \
