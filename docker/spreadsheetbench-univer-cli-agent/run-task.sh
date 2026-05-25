@@ -62,12 +62,12 @@ case "$agent" in
         ;;
     claude)
         cd /task
-        prompt="$(cat /task/prompt.md)"
-        exec claude -p "$prompt" \
+        exec claude -p \
             --permission-mode bypassPermissions \
             --no-session-persistence \
             --output-format stream-json \
-            --verbose
+            --verbose \
+            < /task/prompt.md
         ;;
     "")
         echo "--agent is required when --agent-command is not set" >&2

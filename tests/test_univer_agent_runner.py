@@ -263,6 +263,18 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn('exec codex "${codex_args[@]}" - < /task/prompt.md', run_task_script)
         self.assertNotIn('exec codex "${codex_args[@]}" "$prompt"', run_task_script)
 
+    def test_claude_agent_reads_prompt_from_stdin_to_avoid_argument_limit(self):
+        run_task_script = (
+            Path(__file__).resolve().parents[1]
+            / "docker"
+            / "spreadsheetbench-univer-cli-agent"
+            / "run-task.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("exec claude -p \\", run_task_script)
+        self.assertIn("< /task/prompt.md", run_task_script)
+        self.assertNotIn('claude -p "$prompt"', run_task_script)
+
     def test_shell_wrappers_default_to_agent_specific_env_files(self):
         repo_root = Path(__file__).resolve().parents[1]
         script_texts = [
