@@ -8,6 +8,24 @@ Build:
 bash scripts/build_agent_docker.sh
 ```
 
+Build with a local `/Users/otime/project/univer-cli` checkout instead of `univer-cli@latest`:
+
+```bash
+bash scripts/build_agent_docker_from_local_univer_cli.sh
+```
+
+Use a different local checkout or image tag:
+
+```bash
+bash scripts/build_agent_docker_from_local_univer_cli.sh \
+  --repo /path/to/univer-cli \
+  --tag spreadsheetbench-univer-cli-agent
+```
+
+This local build script runs `pnpm build` in the checkout, packs `apps/cli/dist`,
+installs that tarball into the solver image, then runs the same CLI warmup and
+stops both `univer view` and `univer daemon` before the image layer is finalized.
+
 The host runner mounts exactly one task directory at `/task`:
 
 ```text

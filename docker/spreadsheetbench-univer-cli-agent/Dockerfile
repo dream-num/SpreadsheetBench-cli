@@ -21,6 +21,8 @@ RUN mkdir -p /home/node/.codex/skills /home/node/.claude/skills \
 RUN tmp="$(mktemp -d)" \
     && univer new "$tmp/warmup.univer" >/dev/null \
     && univer inspect workbook "$tmp/warmup.univer" >/dev/null \
+    && univer view stop >/dev/null \
+    && univer daemon stop >/dev/null \
     && rm -rf "$tmp"
 
 COPY entrypoint.sh /usr/local/bin/spreadsheetbench-agent-entrypoint
