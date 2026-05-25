@@ -104,8 +104,25 @@ G2 = None
 
 另外还有部分相关现象：
 
-- `130-33722`: 涉及 `FILTER` / 数组公式，最终卡在 `univer export` 超时。
 - `328-54667`: Univer 内可见公式计算结果，但导出后多行公式缓存缺失。
 - `399-59884`: 依赖已有 dynamic array / spill 区域时，Univer 可见结果和导出 / golden 缓存行对齐不一致。
 
 这些 SpreadsheetBench case 不是该 issue 的最小复现依赖；上面的 `repro/` 命令已可独立复现导出文件被 Excel 修复并删除 `FILTER` 公式的问题。
+
+## 复验更新：`130-33722` 不再按本 issue 归类
+
+2026-05-25 使用当前镜像单题重跑：
+
+```bash
+bash scripts/run_univer_agent_eval.sh --agent codex --dataset spreadsheetbench_verified_400 --task-id 33722 --run-id tmp-codex-verified400-task33722-export-timeout-20260525-verify --agent-timeout 300
+```
+
+结果：
+
+- runner status: `ok`
+- accuracy: `1.0`
+- total/correct/error/timeout: `1/1/0/0`
+- evaluation: `Cell values in the specified range are identical.`
+- 新 run 中 `univer export` 在约 0.5 秒内完成。
+
+旧基线 `codex-gpt-5-5-verified400-all-20260523-230050` 中 `33722` 的 300 秒超时没有在当前镜像/当前 agent 输出下复现，因此后续不再把 `33722` 作为本动态数组导出 issue 的关联失败处理。
