@@ -17,6 +17,7 @@
 
 - 先看 `.runs/univer-agent/<run-id>/summary.json`：确认任务数、`ok/error/timeout`、耗时最高的任务。
 - 再看 `report/<run-id>.json` 和 `outputs/eval_*<run-id>.json`：统计准确率、失败 case、超时 case。
+- 根目录 `wrong-report-matrix.univer` 用来累计记录不同报告中的错题稳定性；以后只更新这个 `.univer` 文件，不保留配套 `.xlsx`。每个 sheet 按 `<agent>-<model>-<题集>` 命名，例如 `codex-gpt-5.5-verified400`；行只保留至少在该 sheet 任一报告中失败过一次的 task；基础列固定为 `task_id`、`备注`，后面每个报告一列。报告列名使用简短 run-id：在不丢失辨识度的前提下去掉已由 sheet 名表达的 agent/model/题集公共前缀，例如 `codex-gpt-5-5-verified400-all-20260525-153934` 在 `codex-gpt-5.5-verified400` sheet 中记为 `20260525-153934`。报告列按时间从左到右追加。通过的单元格留空，失败、超时、缺评测项或空 `test_case_results` 写 `FAIL`。新增全量报告后，应根据 `outputs/eval_*<run-id>.json` 在对应 agent/model/题集 sheet 末尾追加一列；如果出现新的错题，需要在该 sheet 追加新行。不要添加题目序号列、`classification` 列或 summary sheet；稳定过、稳定错、偶发错通过横向查看空白/`FAIL` 判断。
 - 对失败或超时 case，按以下顺序定位原因：
   1. 读该 case 的 `task/prompt.md`，确认 `answer_position` 和任务要求。
   2. 查 `task/logs/docker.output.txt`、`docker.stderr.txt`、`docker.timing.json`。
