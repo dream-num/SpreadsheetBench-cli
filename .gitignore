@@ -14,7 +14,7 @@ debug
 debug-tmp
 outputs
 report/
-analaysix/
+analyze/
 .venv
 .claude
 .codex
