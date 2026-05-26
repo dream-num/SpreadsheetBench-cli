@@ -1,0 +1,1935 @@
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e5f40-2614-7e90-b91b-a2241477b799
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 56915
+[stderr] 
+[stderr] ### instruction
+[stderr] Populate cells in the range B18:E23 corresponding to the column header in Column A and row header in Row 13 on the COVER sheet with the correct data from the DATA sheet, where the entity is selected in cell B12 of the COVER sheet. The formulas I found only work for column B and don't seem to work for columns C, D, and E, which may be due to the presence of merged cells on the DATA sheet. All the data needs to be rounded off to two decimal places. Columns C and E to be updated in decimal format with negative numbers in parentheses even when they round off to zero.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: COVER
+[stderr] 				
+[stderr] 				
+[stderr] 				
+[stderr] 				
+[stderr] 				
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: DATA
+[stderr] 																												
+[stderr] 																												
+[stderr] 																												
+[stderr] 																												
+[stderr] 																												
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: LIST
+[stderr] D - 1111
+[stderr] D - 2222
+[stderr] D - 3333
+[stderr] D - 4444
+[stderr] V - 5555
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Cell-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] 'COVER'!B18:E23
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export with `getCellDatas()`: compare `v`, `t`, `f`, `p`, `si`, `s` or resolved style, and visible display where relevant. Do not use `getValues()` to verify value type. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - `inspect` and `pipe out` are useful only for quickly understanding visible content, rough ranges, and formulas. They cannot prove value type or complete cell model. `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer true `v`, `t`, `f`, `s`, date serials, forced text, or number formats from `inspect`, `pipe out`, TSV/CSV/JSON previews, or display values. For value type and model verification, always use `univer run` with `range.getCellDatas()`.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json` only for quick visible inspection; if exact coordinates, formulas, or cell models matter, use `univer run` to return explicit `{ row1, col1, value, formula, cellData }` objects from `getCellDatas()`.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type enum), `f` (formula), `si` (formula id), `p` (rich text), `s` (style id or style object, including number format), and `custom` (custom data). The `t` enum values are: `1=STRING`, `2=NUMBER`, `3=BOOLEAN`, `4=FORCE_STRING`. If `t` is omitted, Univer may auto-detect the type, which can turn text like `2-2` into a date serial.
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not use `getValues()` to verify value type, formula, number format, forced text, or cell model.
+[stderr]   3. Choose reads by intent: display-only planning may use `getValues()` or `getDisplayValues()`; raw values without model preservation may use `getRawValues()` for calculations; complete cell models and all value-type verification must use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`, and use `getCellDatas()` when formula cells also need model/type/format verification.
+[stderr]   4. Hard requirement for writes: whenever you write values into cells or ranges, use explicit `ICellData` objects instead of bare JavaScript values. Do not write `setValues([["2-2", 123, true]])`; write `setValues([[{ v: "2-2", t: 4 }, { v: 123, t: 2 }, { v: 1, t: 3 }]])`. Every written cell must make its semantic type explicit with `t`, `f`, and any needed `s` number format. Do not use `pipe in` for workbook edits because it writes tabular values without an explicit per-cell `ICellData` model.
+[stderr]   5. Choose write models by semantics: ordinary text uses `{ v: "text", t: 1 }`; text that must not be auto-converted uses `{ v: "2-2", t: 4 }`; numbers use `{ v: 123, t: 2 }`; booleans use `{ v: 1, t: 3 }` for TRUE and `{ v: 0, t: 3 }` for FALSE; formulas use `{ f: '=A1+B1' }` or `setFormula('=A1+B1')`; literal formula text uses `{ v: '=A1+B1', t: 4 }`.
+[stderr]   6. Values that look like dates, numbers, fractions, scores, ranges, codes, phone numbers, postal codes, or identifiers must use `t: 4` when the task semantics require text. Examples include scores like `2-2` or `3-1`, hyphenated codes, leading-zero IDs, SKU/account IDs, phone-like values, and ZIP/postal codes. Do not let Excel/OOXML auto-detect these as dates or numbers.
+[stderr]   7. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`. After writing, `getCellDatas()` may show `s` as a style id string instead of an inline object; use `getCellStyleData()` / `getCellStyles()` or the workbook snapshot styles to resolve and verify the number format.
+[stderr]   8. When reading existing cells and writing them elsewhere: display-only reads may use `getValues()`/`getDisplayValues()` only for internal planning, but writes must still use explicit `ICellData`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   9. If `p` rich text exists, it controls the displayed content even when `v` is also set. Use the rich text builder APIs for rich text tasks and verify `p` with `getCellDatas()`.
+[stderr]   10. Do not hand-author `si` formula ids. Preserve `si` only when deep-cloning existing formula cells with `getCellDatas()`; for new formulas use `f` or `setFormula()`.
+[stderr]   11. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] 
+[stderr] codex
+[stderr] I’ll use the `univer-cli` skill first, then inspect the workbook structure and cell models with `univer` before writing only `COVER!B18:E23`.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,240p' /home/node/.agents/skills/univer-cli/SKILL.md" in /task
+[stderr]  succeeded in 0ms:
+[stderr] ---
+[stderr] name: univer-cli
+[stderr] description: "Use when solving spreadsheet workbook problems with the `univer` or `unv` CLI as a terminal-native spreadsheet engine: Excel-compatible `.xlsx` handoff, `.univer` or `.unv` packages, workbook inspection, range search, formulas, formatting, charts, shapes, floating images, rich spreadsheet edits, live preview and viewer review comments, versioning, shell-native `pipe out`/`pipe in` roundtrips, or bounded `run` scripts."
+[stderr] ---
+[stderr] 
+[stderr] # univer-cli
+[stderr] 
+[stderr] `univer` is a spreadsheet engine in the terminal. Use it when an agent needs real workbook semantics: sheets, ranges, formulas, formatting, layout, previews, imports, exports, or versioned workbook state.
+[stderr] 
+[stderr] Install the CLI with `npm i -g univer-cli`. Update the CLI with `univer update`. The executable is `univer`; `unv` may be available as a short alias.
+[stderr] 
+[stderr] ## Core Mental Model
+[stderr] 
+[stderr] Treat workbook-visible state as the source of truth. A successful command summary, package metadata, or an internal manifest does not prove that sheet names, cell values, formulas, formatting, or exported handoff files are correct.
+[stderr] 
+[stderr] The workbook path is the local identity. Pick one explicit path such as `./budget.univer` and use that path as the CLI target. Do not target workbooks by `unitId`, `sessionId`, manifest ids, or runtime ids.
+[stderr] 
+[stderr] `.univer` and `.unv` files are CLI operation targets, not agent-editable data stores. Read and write workbook data through public CLI surfaces such as `inspect`, `search`, `pipe`, `run`, `export`, `status`, and `commit`.
+[stderr] 
+[stderr] Use `univer help` and `univer help <command...>` for exact syntax. For `run` scripts, use `univer help run` and `univer help run <topic>` before relying on unfamiliar APIs.
+[stderr] 
+[stderr] ## Use When
+[stderr] 
+[stderr] Use this skill when the task involves spreadsheet or workbook work, especially:
+[stderr] 
+[stderr] - creating, importing, exporting, or handing off `.xlsx`, `.csv`, `.univer`, or `.unv` files
+[stderr] - inspecting workbook shape, sheets, ranges, formulas, formatting, or visible cell state
+[stderr] - locating content-defined rows, columns, headers, or cells before editing
+[stderr] - making bounded edits to cells, formulas, formatting, charts, shapes, floating images, layout, or sheet structure
+[stderr] - streaming rectangular workbook data through shell tools before reading it into context
+[stderr] - writing generated matrix data back into a sheet-qualified range
+[stderr] - previewing workbook state locally with `univer view`
+[stderr] - reading submitted local viewer review comments with `univer view comments`
+[stderr] - creating, restoring, resetting, pulling, or syncing local workbook changesets
+[stderr] - proving that a workbook-visible mutation or export is correct enough to hand back
+[stderr] 
+[stderr] ## Default Operating Loop
+[stderr] 
+[stderr] 1. Pick one explicit workbook path, for example `./budget.univer`.
+[stderr] 2. Create or import a workbook first if no `.univer` or `.unv` target exists.
+[stderr] 3. Inspect workbook-visible state before deciding where to write.
+[stderr] 4. Locate targets from visible headers, values, formulas, or inspected ranges.
+[stderr] 5. Choose the smallest public CLI surface that fits the task.
+[stderr] 6. Mutate through the CLI, not by editing package internals.
+[stderr] 7. Verify changed workbook-visible state with `inspect`, `pipe out`, or another public read.
+[stderr] 8. Export only after verification when the user needs a handoff file.
+[stderr] 9. After changes have been verified, if the user may need to inspect, audit, or review the final workbook, run `univer view "$WB" --no-open --json` to get a local preview link and include that link in your response.
+[stderr] 10. Commit or sync only after verified changes when versioning is part of the workflow.
+[stderr] 
+[stderr] ## Hard Rules
+[stderr] 
+[stderr] - Do not read `.univer` or `.unv` internals to infer workbook contents.
+[stderr] - Do not write, patch, unzip, rezip, rename internal files, or manipulate workbook package contents.
+[stderr] - Do not inspect `manifest.json`, snapshots, mutation logs, or package fragments as a substitute for workbook-visible reads.
+[stderr] - Do not guess sheet names, row numbers, formulas, ranges, or changed cells from memory or file metadata.
+[stderr] - Do not treat stdout summaries as proof of workbook state. Verify with a workbook-visible read.
+[stderr] - Do not invent commands or `run` APIs. Check `univer help` and documented run topics.
+[stderr] 
+[stderr] Direct package access can corrupt workbooks or teach the agent false state. If the CLI cannot read what you need, diagnose the CLI/runtime path instead of bypassing it.
+[stderr] 
+[stderr] ## Command Selection
+[stderr] 
+[stderr] | Need | Prefer |
+[stderr] | --- | --- |
+[stderr] | Discover exact command syntax | `univer help`, `univer help <command...>` |
+[stderr] | Start a workbook package | `univer new` or `univer import` |
+[stderr] | Hand back Excel-compatible output | `univer export` |
+[stderr] | Understand workbook shape before editing | `univer inspect workbook`, then `univer inspect range` |
+[stderr] | Locate content-defined cells | `univer search`, scoped with `--sheet` and/or `--range` when possible |
+[stderr] | Stream rectangular data through shell tools | `univer pipe out` |
+[stderr] | Write a known rectangular matrix back | `univer pipe in` |
+[stderr] | Apply bounded workbook-local logic | `univer run --file` |
+[stderr] | Create or maintain workbook charts | `univer run --file` with `univer help run charts` |
+[stderr] | Create or maintain workbook shapes and connectors | `univer run --file` with `univer help run shapes` |
+[stderr] | Create or maintain workbook floating images | `univer run --file` with `univer help run images` |
+[stderr] | Preview readonly workbook state | `univer view --no-open --json` or `univer view` |
+[stderr] | Read local viewer review feedback | `univer view comments "$WB" --json` |
+[stderr] | Check local versioning state | `univer status` |
+[stderr] | Create a local changeset from local mutations | `univer commit --message <message>` |
+[stderr] | Discard uncommitted local mutations | `univer restore` |
+[stderr] | Reset local unsynced commits | `univer reset --soft HEAD~N` or `univer reset --hard HEAD~N` |
+[stderr] | Initialize a local package from an existing remote unit | `univer clone --unit-id <unitID>` |
+[stderr] | Pull remote-only changes for a bound package | `univer pull` |
+[stderr] | Sync local and remote versioning state | `univer sync` |
+[stderr] | Diagnose runtime problems | `univer doctor`, `univer daemon status` |
+[stderr] | Prepare a bug report or Univer team support artifact after user authorization | `univer doctor collect` |
+[stderr] 
+[stderr] Use canonical command help such as `univer help inspect range` and `univer help pipe out`. Top-level help group headings are visual sections only; do not run group-prefixed topics such as `univer help read inspect range`.
+[stderr] 
+[stderr] ## Execution Results
+[stderr] 
+[stderr] Treat non-zero exit as failure even when stdout is partially present. Read stderr before changing approach; it usually contains the stable diagnostic code, usage, and retry examples.
+[stderr] 
+[stderr] Keep data stdout clean in shell pipelines. If diagnostics are needed, capture stderr separately so downstream tools receive only workbook data.
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20' > ./range.md 2> ./range.err
+[stderr] status=$?
+[stderr] if [ "$status" -ne 0 ]; then
+[stderr]   sed -n '1,80p' ./range.err
+[stderr]   exit "$status"
+[stderr] fi
+[stderr] sed -n '1,40p' ./range.md
+[stderr] ```
+[stderr] 
+[stderr] ## Workflow Recipes
+[stderr] 
+[stderr] These are verified command shapes. Replace paths, sheet names, and ranges with inspected workbook facts.
+[stderr] 
+[stderr] ### Create Or Import, Then Inspect
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./orders.univer
+[stderr] univer import ./orders.csv "$WB" --json
+[stderr] univer inspect workbook "$WB"
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D4'
+[stderr] ```
+[stderr] 
+[stderr] Use `new` when the task starts from a blank workbook:
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./workbook.univer
+[stderr] univer new "$WB" --name "Workbook"
+[stderr] univer inspect workbook "$WB"
+[stderr] ```
+[stderr] 
+[stderr] ### Locate Before Editing
+[stderr] 
+[stderr] Use `search` before editing when the target is defined by visible workbook content:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West
+[stderr] ```
+[stderr] 
+[stderr] Plain text output is one A1 reference per matched cell, which keeps shell pipelines clean. With no
+[stderr] matches, stdout is empty and the command still succeeds. Use `--json` when you need match metadata,
+[stderr] the matched cell data preview, truncation flags, counts, or the searched scope:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West --sheet Orders --range 'A1:Z200' --json
+[stderr] ```
+[stderr] 
+[stderr] By default, search checks `displayValue`, so formatted values such as dates are searchable by the
+[stderr] same strings a user sees in the sheet. Use `--type rawValue` for underlying numeric/string values
+[stderr] such as spreadsheet date serials, and `--type formula` for formulas:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" 2024-01-01
+[stderr] univer search "$WB" 45292 --type rawValue
+[stderr] univer search "$WB" SUM --type formula --json
+[stderr] ```
+[stderr] 
+[stderr] Useful narrowing options:
+[stderr] 
+[stderr] - `--sheet <name>` may be repeated.
+[stderr] - `--range <A1>` may be repeated; unqualified ranges require a `--sheet`.
+[stderr] - `--case-sensitive` and `--whole-cell` tighten matching.
+[stderr] - `--max-results` limits returned matches; truncation is reported on stderr for text output and in JSON fields for `--json`.
+[stderr] - `--max-cell-value-length` bounds previewed cell data in JSON.
+[stderr] 
+[stderr] If `search` fails, read stderr for the diagnostic message before changing approach. If the target is
+[stderr] not content-defined, inspect a bounded range and derive the edit boundary from visible headers and
+[stderr] sample rows:
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20'
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe Out Through Shell Tools
+[stderr] 
+[stderr] Use `pipe out` when the shell can reduce or reshape rectangular data before the agent reads it. Prefer TSV for `awk`, JSON for `jq`, and `--type rawValue` when formatted display text is not safe enough for comparisons.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe out "$WB" --range 'Sheet1!A1:D4' --format tsv > ./orders.tsv
+[stderr] awk -F '\t' 'BEGIN{OFS="\t"} NR==1 || $2=="West" {print $1,$3}' ./orders.tsv > ./west.tsv
+[stderr] sed -n '1,5p' ./west.tsv
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe In Generated Table Data
+[stderr] 
+[stderr] Write only a known matrix into an explicit, sheet-qualified range. Make `pipe in` the terminal stage of a pipeline unless you intentionally want its success summary downstream.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe in "$WB" --range 'Sheet1!F1:G3' --input-format tsv --data-file ./west.tsv
+[stderr] univer inspect range "$WB" --range 'Sheet1!F1:G3'
+[stderr] univer pipe out "$WB" --range 'Sheet1!F1:G3' --format tsv
+[stderr] ```
+[stderr] 
+[stderr] Verify headers, sample rows, and key columns. Row count alone is weak evidence because shifted columns can still preserve row count.
+[stderr] 
+[stderr] ### Run A Bounded Workbook Script
+[stderr] 
+[stderr] Use `run --file` for workbook-native logic that does not fit `inspect`, `search`, `pipe`, or `export`. Check `univer help run` and the relevant `univer help run <topic>` manual before using unfamiliar APIs.
+[stderr] 
+[stderr] ```bash
+[stderr] cat > ./review.js <<'JS'
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] 
+[stderr]   sheet.getRange("I1:J3").setValues([
+[stderr]     ["metric", "value"],
+[stderr]     ["west_orders", 2],
+[stderr]     ["reviewed", "yes"],
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true, changedRanges: ["Sheet1!I1:J3"] };
+[stderr] }
+[stderr] JS
+[stderr] 
+[stderr] univer run "$WB" --file ./review.js
+[stderr] univer inspect range "$WB" --range 'Sheet1!I1:J3'
+[stderr] ```
+[stderr] 
+[stderr] `run` scripts should:
+[stderr] 
+[stderr] - wrap code in `() => { ... }` or `async () => { ... }`
+[stderr] - return a plain object with explicit success or error fields
+[stderr] - use explicit workbook, sheet, and A1 range boundaries
+[stderr] - prefer A1 notation for fixed workbook-facing locations
+[stderr] - remember numeric coordinate overloads are 0-based
+[stderr] - use documented facade builders for conditional formatting instead of editing internal rule model shapes
+[stderr] - use official enum references for conditional formatting color scales, data bars, and icon sets: `ConditionFormatIconSetTypeEnum` supplies `setIconSet().iconConfigs[].iconType`, and `ConditionFormatValueTypeEnum` supplies value config `type` values
+[stderr] - use documented chart builders and worksheet chart APIs from `univer help run charts` instead of editing chart resource internals
+[stderr] - use documented shape builders and worksheet shape APIs from `univer help run shapes` instead of editing drawing or shape resource internals
+[stderr] - use documented floating image builders and worksheet image APIs from `univer help run images` instead of editing drawing or resource internals
+[stderr] - wait for formula calculation with the documented formula wait API before reading same-run computed results
+[stderr] - prefer `--file` for scripts beyond a short one-liner
+[stderr] 
+[stderr] ### Create Or Maintain Charts
+[stderr] 
+[stderr] Use `univer run` for workbook-local charts and `univer view` for visual inspection. Command-line verification should read facade state such as `sheet.getCharts()`, `chart.getChartId()`, `chart.getRange()`, `chart.getSeriesData()`, and `chart.getCategoryData()`.
+[stderr] 
+[stderr] ```bash
+[stderr] univer help run charts
+[stderr] univer run "$WB" --file ./create-chart.js
+[stderr] univer view "$WB" --no-open --json
+[stderr] ```
+[stderr] 
+[stderr] 
+[stderr] codex
+[stderr] The skill is loaded. I’m going to inspect workbook sheets, the relevant COVER headers, formulas/styles in the target range, and the DATA layout enough to map the selected entity despite merged cells.
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'COVER"'!A12:E23'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'DATA"'!A1:AZ80'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr]  exited 1 in 3054ms:
+[stderr] ERROR CLI_ERROR
+[stderr] 
+[stderr] Range is out of bounds. Max rows: 150, Max columns: 30, Given range: {"startRow":0,"startColumn":0,"endRow":79,"endColumn":51,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0,"unitId":"CGAXA2JtqE0kojULfRy","sheetId":"uni1"}
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer help <command...>
+[stderr] 
+[stderr] Try:
+[stderr]   univer help
+[stderr] 
+[stderr] Trace ID: 5737724d6234171f8b7186244b2500fc
+[stderr] 
+[stderr]  succeeded in 3243ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: COVER
+[stderr] Sheet Count: 3
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | COVER | A1:E23 | 1 | 1 |
+[stderr] | 2 | DATA | A1:AC24 | 1 | 0 |
+[stderr] | 3 | LIST | A1:A6 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'COVER'
+[stderr] 
+[stderr] - Used Range: A1:E23
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 1 covering 1 cells
+[stderr] 
+[stderr] ### Table 1: A1:E23
+[stderr] |A1,|B1,|C1,|D1,|E1,|
+[stderr] |A2,|B2,|C2,|D2,|E2,|
+[stderr] |A3,|B3,|C3,|D3,|E3,|
+[stderr] |A4,|B4,|C4,|D4,|E4,|
+[stderr] |A5,|B5,|C5,|D5,|E5,|
+[stderr] 
+[stderr] ### Formulas (1 groups, 1 cells)
+[stderr] - B18:E18,B21:E23 <- B18 =INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))
+[stderr] 
+[stderr] ## Sheet: 'DATA'
+[stderr] 
+[stderr] - Used Range: A1:AC24
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:AC24
+[stderr] |A1,|B1,|C1,|D1,|E1,|F1,|
+[stderr] |A2,|B2,|C2,|D2,|E2,|F2,|
+[stderr] |A3,|B3,|C3,|D3,|E3,|F3,|
+[stderr] |A4,|B4,|C4,|D4,|E4,|F4,|
+[stderr] |A5,|B5,|C5,|D5,|E5,|F5,|
+[stderr] 
+[stderr] ## Sheet: 'LIST'
+[stderr] 
+[stderr] - Used Range: A1:A6
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:A6
+[stderr] |A1,D - 1111|
+[stderr] |A2,D - 2222|
+[stderr] |A3,D - 3333|
+[stderr] |A4,D - 4444|
+[stderr] |A5,V - 5555|
+[stderr] 
+[stderr]  succeeded in 3275ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: COVER!A12:E23
+[stderr] Rows: 12 (11 data rows; first row is header)
+[stderr] Columns: 5
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | Entity >> | text | 8/11 | 8 non-empty | - |
+[stderr] | B | V - 6666 | text | 5/11 | 5 non-empty | =INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0)) |
+[stderr] | C |  | text | 5/11 | 5 non-empty | =INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0)) |
+[stderr] | D |  | text | 5/11 | 5 non-empty | =INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=D$13,1)),0)) |
+[stderr] | E |  | text | 5/11 | 5 non-empty | =INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=E$13,1)),0)) |
+[stderr] 
+[stderr] ## Preview
+[stderr] |A12,Entity >>|B12,V - 6666|C12,|D12,|E12,|
+[stderr] |A13, |B13,January|C13,% age|D13,YTD|E13,% age|
+[stderr] |A14,|B14,|C14,|D14,|E14,|
+[stderr] |A15,|B15,|C15,|D15,|E15,|
+[stderr] ...
+[stderr] |A23,        STUFF 3|B23,3,658.20|C23,#N/A|D23,#N/A|E23,#N/A|
+[stderr] 
+[stderr] *Note: 7 rows omitted from data preview*
+[stderr] 
+[stderr] Formula Groups (1 groups):
+[stderr] - B18:E18,B21:E23 <- B18 =INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'DATA"'!A1:AC24'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'DATA"'!A12:AC24'"' --format json" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'COVER"'!A12:E23'"' --format json" in /task
+[stderr]  succeeded in 438ms:
+[stderr] [["Entity >>","V - 6666","","",""],[" ","January","% age","YTD","% age"],["","","","",""],["","","","",""],["    REVENUES","","","",""],["","","","",""],["    TOTAL: REVENUE","56,113.91","#N/A","#N/A","#N/A"],["    COST OF GOODS SOLD","","","",""],["      STUFF","","","",""],["        STUFF 1","1,705.66","#N/A","#N/A","#N/A"],["        STUFF 2","(95.68)","#N/A","#N/A","#N/A"],["        STUFF 3","3,658.20","#N/A","#N/A","#N/A"]]
+[stderr] 
+[stderr]  succeeded in 454ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: DATA!A1:AC24
+[stderr] Rows: 24 (23 data rows; first row is header)
+[stderr] Columns: 29
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A |  | text | 10/23 | 10 non-empty | - |
+[stderr] | B |  | text | 6/23 | 6 non-empty | - |
+[stderr] | C |  | text | 5/23 | 5 non-empty | - |
+[stderr] | D |  | text | 5/23 | 5 non-empty | - |
+[stderr] | E |  | text | 5/23 | 5 non-empty | - |
+[stderr] | AC |  | text | 5/23 | 5 non-empty | - |
+[stderr] 
+[stderr] *Note: 23 columns omitted from profile preview*
+[stderr] 
+[stderr] ## Preview
+[stderr] |A1,|B1,|C1,|D1,|E1,|...|AC1,|
+[stderr] |A2,|B2,|C2,|D2,|E2,|...|AC2,|
+[stderr] |A3,|B3,|C3,|D3,|E3,|...|AC3,|
+[stderr] |A4,|B4,|C4,|D4,|E4,|...|AC4,|
+[stderr] ...
+[stderr] |A24,        STUFF 3|B24,128,564.29|C24,6.80%|D24,128,564.29|E24,6.80%|...|AC24,6.99%|
+[stderr] 
+[stderr] *Note: 19 rows and 23 columns omitted from data preview*
+[stderr] 
+[stderr]  succeeded in 442ms:
+[stderr] [[" ","Total","","","","V - 6666","","","","D - 1111","","","","D - 2222","","","","D - 3333","","","","D - 4444","","","","D - 5555","","",""],[" ","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age"],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["    REVENUES","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["    TOTAL: REVENUE","1,890,146.68","100.00%","1,890,146.68","100.00%","56,113.91","100.00%","56,113.91","100.00%","36,241.62","100.00%","36,241.62","100.00%","70,337.43","100.00%","70,337.43","100.00%","43,713.70","100.00%","43,713.70","100.00%","31,238.91","100.00%","31,238.91","100.00%","31,976.68","100.00%","31,976.68","100.00%"],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["    COST OF GOODS SOLD","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["      STUFF","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["        STUFF 1","49,887.70","2.64%","49,887.70","2.64%","1,705.66","3.04%","1,705.66","3.04%","1,227.87","3.39%","1,227.87","3.39%","2,199.84","3.13%","2,199.84","3.13%","1,232.71","2.82%","1,232.71","2.82%","872.77","2.79%","872.77","2.79%","1,231.88","3.85%","1,231.88","3.85%"],["        STUFF 2","(3,390.81)","-0.18%","(3,390.81)","-0.18%","(95.68)","-0.17%","(95.68)","-0.17%","(66.59)","-0.18%","(66.59)","-0.18%","(118.19)","-0.17%","(118.19)","-0.17%","(75.90)","-0.17%","(75.90)","-0.17%","(57.52)","-0.18%","(57.52)","-0.18%","(62.16)","-0.19%","(62.16)","-0.19%"],["        STUFF 3","128,564.29","6.80%","128,564.29","6.80%","3,658.20","6.52%","3,658.20","6.52%","2,482.03","6.85%","2,482.03","6.85%","4,671.57","6.64%","4,671.57","6.64%","2,900.10","6.63%","2,900.10","6.63%","1,929.18","6.18%","1,929.18","6.18%","2,236.16","6.99%","2,236.16","6.99%"]]
+[stderr] 
+[stderr] codex
+[stderr] The target rows line up with DATA rows 18, 21, 22, and 23; row 13 provides the four metrics. The issue is DATA row 12 only stores the selected entity in the first cell of a merged 4-column block, so I’m going to fill forward that entity label during lookup and write explicit numeric cell models plus number formats in the target range.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/work' in /task
+[stderr]  succeeded in 0ms:
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/inspect_case1.js
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/inspect_case1.js' in /task
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 811ms:
+[stderr] {"success":true,"cover":{"range":"A12:E23","display":[["Entity >>","V - 6666","","",""],[" ","January","% age","YTD","% age"],["","","","",""],["","","","",""],["    REVENUES","","","",""],["","","","",""],["    TOTAL: REVENUE","56,113.91","#N/A","#N/A","#N/A"],["    COST OF GOODS SOLD","","","",""],["      STUFF","","","",""],["        STUFF 1","1,705.66","#N/A","#N/A","#N/A"],["        STUFF 2","(95.68)","#N/A","#N/A","#N/A"],["        STUFF 3","3,658.20","#N/A","#N/A","#N/A"]],"values":[["Entity >>","V - 6666",null,null,null],[" ","January","% age","YTD","% age"],[null,null,null,null,null],[null,null,null,null,null],["    REVENUES",null,null,null,null],[null,null,null,null,null],["    TOTAL: REVENUE","56,113.91","#N/A","#N/A","#N/A"],["    COST OF GOODS SOLD",null,null,null,null],["      STUFF",null,null,null,null],["        STUFF 1","1,705.66","#N/A","#N/A","#N/A"],["        STUFF 2","(95.68)","#N/A","#N/A","#N/A"],["        STUFF 3","3,658.20","#N/A","#N/A","#N/A"]],"cellDatas":[[{"v":"Entity >>","t":1,"s":"R41"},{"v":"V - 6666","t":1,"s":"R42"},{"s":"R43"},{"s":"R43"},{"s":"R44"}],[{"v":" ","t":1,"s":"R9"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"}],[{"s":"R12"},null,null,null,null],[{"s":"R15"},null,null,null,null],[{"v":"    REVENUES","t":1,"s":"R19"},null,null,null,null],[{"s":"R20"},null,null,null,null],[{"v":"    TOTAL: REVENUE","t":1,"s":"R24"},{"s":"R27","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))","ref":"B18","v":56113.91,"t":2},{"s":"R28","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0))","ref":"C18","v":"#N/A","t":1},{"s":"R27","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=D$13,1)),0))","ref":"D18","v":"#N/A","t":1},{"s":"R28","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=E$13,1)),0))","ref":"E18","v":"#N/A","t":1}],[{"v":"    COST OF GOODS SOLD","t":1,"s":"R12"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"}],[{"v":"      STUFF","t":1,"s":"R12"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"}],[{"v":"        STUFF 1","t":1,"s":"R12"},{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))","ref":"B21","v":1705.6561549394,"t":2},{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0))","ref":"C21","v":"#N/A","t":1},{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=D$13,1)),0))","ref":"D21","v":"#N/A","t":1},{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=E$13,1)),0))","ref":"E21","v":"#N/A","t":1}],[{"v":"        STUFF 2","t":1,"s":"R12"},{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A22,IF(DATA!$A$18:$A$24=$A22,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))","ref":"B22","v":-95.6776850726545,"t":2},{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A22,IF(DATA!$A$18:$A$24=$A22,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0))","ref":"C22","v":"#N/A","t":1},{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A22,IF(DATA!$A$18:$A$24=$A22,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=D$13,1)),0))","ref":"D22","v":"#N/A","t":1},{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A22,IF(DATA!$A$18:$A$24=$A22,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=E$13,1)),0))","ref":"E22","v":"#N/A","t":1}],[{"v":"        STUFF 3","t":1,"s":"R12"},{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A23,IF(DATA!$A$18:$A$24=$A23,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))","ref":"B23","v":3658.20212926082,"t":2},{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A23,IF(DATA!$A$18:$A$24=$A23,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0))","ref":"C23","v":"#N/A","t":1},{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A23,IF(DATA!$A$18:$A$24=$A23,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=D$13,1)),0))","ref":"D23","v":"#N/A","t":1},{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A23,IF(DATA!$A$18:$A$24=$A23,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=E$13,1)),0))","ref":"E23","v":"#N/A","t":1}]]},"data":{"range":"A12:AC24","display":[[" ","Total","","","","V - 6666","","","","D - 1111","","","","D - 2222","","","","D - 3333","","","","D - 4444","","","","D - 5555","","",""],[" ","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age"],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["    REVENUES","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["    TOTAL: REVENUE","1,890,146.68","100.00%","1,890,146.68","100.00%","56,113.91","100.00%","56,113.91","100.00%","36,241.62","100.00%","36,241.62","100.00%","70,337.43","100.00%","70,337.43","100.00%","43,713.70","100.00%","43,713.70","100.00%","31,238.91","100.00%","31,238.91","100.00%","31,976.68","100.00%","31,976.68","100.00%"],["","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["    COST OF GOODS SOLD","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["      STUFF","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["        STUFF 1","49,887.70","2.64%","49,887.70","2.64%","1,705.66","3.04%","1,705.66","3.04%","1,227.87","3.39%","1,227.87","3.39%","2,199.84","3.13%","2,199.84","3.13%","1,232.71","2.82%","1,232.71","2.82%","872.77","2.79%","872.77","2.79%","1,231.88","3.85%","1,231.88","3.85%"],["        STUFF 2","(3,390.81)","-0.18%","(3,390.81)","-0.18%","(95.68)","-0.17%","(95.68)","-0.17%","(66.59)","-0.18%","(66.59)","-0.18%","(118.19)","-0.17%","(118.19)","-0.17%","(75.90)","-0.17%","(75.90)","-0.17%","(57.52)","-0.18%","(57.52)","-0.18%","(62.16)","-0.19%","(62.16)","-0.19%"],["        STUFF 3","128,564.29","6.80%","128,564.29","6.80%","3,658.20","6.52%","3,658.20","6.52%","2,482.03","6.85%","2,482.03","6.85%","4,671.57","6.64%","4,671.57","6.64%","2,900.10","6.63%","2,900.10","6.63%","1,929.18","6.18%","1,929.18","6.18%","2,236.16","6.99%","2,236.16","6.99%"]],"values":[[" ","Total",null,null,null,"V - 6666",null,null,null,"D - 1111",null,null,null,"D - 2222",null,null,null,"D - 3333",null,null,null,"D - 4444",null,null,null,"D - 5555",null,null,null],[" ","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age","January","% age","YTD","% age"],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["    REVENUES",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["    TOTAL: REVENUE","1,890,146.68","100.00%","1,890,146.68","100.00%","56,113.91","100.00%","56,113.91","100.00%","36,241.62","100.00%","36,241.62","100.00%","70,337.43","100.00%","70,337.43","100.00%","43,713.70","100.00%","43,713.70","100.00%","31,238.91","100.00%","31,238.91","100.00%","31,976.68","100.00%","31,976.68","100.00%"],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["    COST OF GOODS SOLD",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["      STUFF",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],["        STUFF 1","49,887.70","2.64%","49,887.70","2.64%","1,705.66","3.04%","1,705.66","3.04%","1,227.87","3.39%","1,227.87","3.39%","2,199.84","3.13%","2,199.84","3.13%","1,232.71","2.82%","1,232.71","2.82%","872.77","2.79%","872.77","2.79%","1,231.88","3.85%","1,231.88","3.85%"],["        STUFF 2","(3,390.81)","-0.18%","(3,390.81)","-0.18%","(95.68)","-0.17%","(95.68)","-0.17%","(66.59)","-0.18%","(66.59)","-0.18%","(118.19)","-0.17%","(118.19)","-0.17%","(75.90)","-0.17%","(75.90)","-0.17%","(57.52)","-0.18%","(57.52)","-0.18%","(62.16)","-0.19%","(62.16)","-0.19%"],["        STUFF 3","128,564.29","6.80%","128,564.29","6.80%","3,658.20","6.52%","3,658.20","6.52%","2,482.03","6.85%","2,482.03","6.85%","4,671.57","6.64%","4,671.57","6.64%","2,900.10","6.63%","2,900.10","6.63%","1,929.18","6.18%","1,929.18","6.18%","2,236.16","6.99%","2,236.16","6.99%"]],"cellDatas":[[{"v":" ","t":1,"s":"R8"},{"v":"Total","t":1,"s":"R45"},{"s":"R45"},{"s":"R45"},{"s":"R46"},{"v":"V - 6666","t":1,"s":"R47"},{"s":"R45"},{"s":"R45"},{"s":"R46"},{"v":"D - 1111","t":1,"s":"R48"},{"s":"R48"},{"s":"R48"},{"s":"R48"},{"v":"D - 2222","t":1,"s":"R48"},{"s":"R48"},{"s":"R48"},{"s":"R48"},{"v":"D - 3333","t":1,"s":"R48"},{"s":"R48"},{"s":"R48"},{"s":"R48"},{"v":"D - 4444","t":1,"s":"R45"},{"s":"R45"},{"s":"R45"},{"s":"R46"},{"v":"D - 5555","t":1,"s":"R45"},{"s":"R45"},{"s":"R45"},{"s":"R46"}],[{"v":" ","t":1,"s":"R9"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"January","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"},{"v":"YTD","t":1,"s":"R10"},{"v":"% age","t":1,"s":"R11"}],[{"s":"R12"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"},{"s":"R13"},{"s":"R14"}],[{"s":"R15"},{"s":"R16"},{"s":"R17"},{"s":"R16"},{"s":"R17"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"}],[{"v":"    REVENUES","t":1,"s":"R19"},{"s":"R16"},{"s":"R17"},{"s":"R16"},{"s":"R17"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"},{"s":"R16"},{"s":"R18"},{"s":"R18"},{"s":"R18"}],[{"s":"R20"},{"s":"R21"},{"s":"R22"},{"s":"R21"},{"s":"R22"},{"s":"R21"},{"s":"R23"},{"s":"R23"},{"s":"R23"},{"s":"R21"},{"s":"R23"},{"s":"R23"},{"s":"R23"},{"s":"R21"},{"s":"R23"},{"s":"R23"},{"s":"R23"},{"s":"R21"},{"s":"R23"},{"s":"R23"},{"s":"R23"},{"s":"R21"},{"s":"R23"},{"s":"R23"},{"s":"R23"},{"s":"R21"},{"s":"R36"},{"s":"R23"},{"s":"R23"}],[{"v":"    TOTAL: REVENUE","t":1,"s":"R24"},{"v":"1890146.68","t":2,"s":"R25"},{"v":"1","t":2,"s":"R26"},{"v":"1890146.68","t":2,"s":"R25"},{"v":"1","t":2,"s":"R26"},{"v":"56113.91","t":2,"s":"R27"},{"v":"1","t":2,"s":"R28"},{"v":"56113.91","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"},{"v":"36241.620000000003","t":2,"s":"R27"},{"v":"1","t":2,"s":"R28"},{"v":"36241.620000000003","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"},{"v":"70337.429999999993","t":2,"s":"R27"},{"v":"1","t":2,"s":"R28"},{"v":"70337.429999999993","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"},{"v":"43713.7","t":2,"s":"R27"},{"v":"1","t":2,"s":"R28"},{"v":"43713.7","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"},{"v":"31238.91","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"},{"v":"31238.91","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"},{"v":"31976.68","t":2,"s":"R25"},{"v":"1","t":2,"s":"R37"},{"v":"31976.68","t":2,"s":"R25"},{"v":"1","t":2,"s":"R28"}],[{"s":"R12"},{"s":"R29"},{"s":"R30"},{"s":"R29"},{"s":"R30"},{"s":"R25"},{"s":"R31"},{"s":"R29"},{"s":"R31"},{"s":"R25"},{"s":"R31"},{"s":"R29"},{"s":"R31"},{"s":"R25"},{"s":"R31"},{"s":"R29"},{"s":"R31"},{"s":"R25"},{"s":"R31"},{"s":"R29"},{"s":"R31"},{"s":"R29"},{"s":"R31"},{"s":"R29"},{"s":"R31"},{"s":"R29"},{"s":"R38"},{"s":"R29"},{"s":"R31"}],[{"v":"    COST OF GOODS SOLD","t":1,"s":"R12"},{"s":"R32"},{"s":"R6"},{"s":"R5"},{"s":"R6"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R39"},{"s":"R5"},{"s":"R33"}],[{"v":"      STUFF","t":1,"s":"R12"},{"s":"R5"},{"s":"R6"},{"s":"R5"},{"s":"R6"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R39"},{"s":"R5"},{"s":"R33"}],[{"v":"        STUFF 1","t":1,"s":"R12"},{"v":"49887.704868295099","t":2,"s":"R25"},{"v":"0.0263935626775246","t":2,"s":"R34"},{"v":"49887.704868295099","t":2,"s":"R25"},{"v":"0.0263935626775246","t":2,"s":"R34"},{"v":"1705.6561549394","t":2,"s":"R25"},{"v":"0.0303963162598971","t":2,"s":"R34"},{"v":"1705.6561549394","t":2,"s":"R25"},{"v":"0.0303963162598971","t":2,"s":"R34"},{"v":"1227.87225264468","t":2,"s":"R25"},{"v":"0.0338801701647079","t":2,"s":"R34"},{"v":"1227.87225264468","t":2,"s":"R25"},{"v":"0.0338801701647079","t":2,"s":"R34"},{"v":"2199.8386299768799","t":2,"s":"R25"},{"v":"0.0312755048055763","t":2,"s":"R34"},{"v":"2199.8386299768799","t":2,"s":"R25"},{"v":"0.0312755048055763","t":2,"s":"R34"},{"v":"1232.71175827654","t":2,"s":"R25"},{"v":"0.0281996664266932","t":2,"s":"R34"},{"v":"1232.71175827654","t":2,"s":"R25"},{"v":"0.0281996664266932","t":2,"s":"R34"},{"v":"872.76572962553905","t":2,"s":"R25"},{"v":"0.0279384181338446","t":2,"s":"R34"},{"v":"872.76572962553905","t":2,"s":"R25"},{"v":"0.0279384181338446","t":2,"s":"R34"},{"v":"1231.8763665808499","t":2,"s":"R25"},{"v":"0.0385242109743992","t":2,"s":"R40"},{"v":"1231.8763665808499","t":2,"s":"R25"},{"v":"0.0385242109743992","t":2,"s":"R34"}],[{"v":"        STUFF 2","t":1,"s":"R12"},{"v":"-3390.8054482154698","t":2,"s":"R25"},{"v":"-0.00179393773197299","t":2,"s":"R26"},{"v":"-3390.8054482154698","t":2,"s":"R25"},{"v":"-0.00179393773197299","t":2,"s":"R34"},{"v":"-95.677685072654498","t":2,"s":"R25"},{"v":"-0.00170506181217196","t":2,"s":"R34"},{"v":"-95.677685072654498","t":2,"s":"R25"},{"v":"-0.00170506181217196","t":2,"s":"R34"},{"v":"-66.594560909697094","t":2,"s":"R25"},{"v":"-0.00183751611847641","t":2,"s":"R34"},{"v":"-66.594560909697094","t":2,"s":"R25"},{"v":"-0.00183751611847641","t":2,"s":"R34"},{"v":"-118.191797536987","t":2,"s":"R25"},{"v":"-0.00168035422302161","t":2,"s":"R34"},{"v":"-118.191797536987","t":2,"s":"R25"},{"v":"-0.00168035422302161","t":2,"s":"R34"},{"v":"-75.901471369541099","t":2,"s":"R25"},{"v":"-0.00173633143315576","t":2,"s":"R34"},{"v":"-75.901471369541099","t":2,"s":"R25"},{"v":"-0.00173633143315576","t":2,"s":"R34"},{"v":"-57.5186567808136","t":2,"s":"R25"},{"v":"-0.00184125043994216","t":2,"s":"R34"},{"v":"-57.5186567808136","t":2,"s":"R25"},{"v":"-0.00184125043994216","t":2,"s":"R34"},{"v":"-62.160700655674503","t":2,"s":"R25"},{"v":"-0.00194393854070136","t":2,"s":"R40"},{"v":"-62.160700655674503","t":2,"s":"R25"},{"v":"-0.00194393854070136","t":2,"s":"R34"}],[{"v":"        STUFF 3","t":1,"s":"R12"},{"v":"128564.289829883","t":2,"s":"R25"},{"v":"0.0680181549877828","t":2,"s":"R26"},{"v":"128564.289829883","t":2,"s":"R25"},{"v":"0.0680181549877828","t":2,"s":"R34"},{"v":"3658.2021292608201","t":2,"s":"R25"},{"v":"0.0651924296357323","t":2,"s":"R34"},{"v":"3658.2021292608201","t":2,"s":"R25"},{"v":"0.0651924296357323","t":2,"s":"R34"},{"v":"2482.0275025887399","t":2,"s":"R25"},{"v":"0.0684855561806767","t":2,"s":"R34"},{"v":"2482.0275025887399","t":2,"s":"R25"},{"v":"0.0684855561806767","t":2,"s":"R34"},{"v":"4671.5663481265201","t":2,"s":"R25"},{"v":"0.0664165060925104","t":2,"s":"R34"},{"v":"4671.5663481265201","t":2,"s":"R25"},{"v":"0.0664165060925104","t":2,"s":"R34"},{"v":"2900.1005613004199","t":2,"s":"R25"},{"v":"0.0663430586132134","t":2,"s":"R34"},{"v":"2900.1005613004199","t":2,"s":"R25"},{"v":"0.0663430586132134","t":2,"s":"R34"},{"v":"1929.1764038209201","t":2,"s":"R25"},{"v":"0.0617555607356632","t":2,"s":"R34"},{"v":"1929.1764038209201","t":2,"s":"R25"},{"v":"0.0617555607356632","t":2,"s":"R34"},{"v":"2236.1581643526602","t":2,"s":"R25"},{"v":"0.0699309047828811","t":2,"s":"R40"},{"v":"2236.1581643526602","t":2,"s":"R25"},{"v":"0.0699309047828811","t":2,"s":"R34"}]]}}
+[stderr] 
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/style_case1.js
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/style_case1.js' in /task
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 278ms:
+[stderr] {"success":true,"out":{"B18":{"cellData":[[{"s":"R27","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))","ref":"B18","v":56113.91,"t":2}]],"styleData":{"ff":"Helvetica","fs":8,"bg":{"rgb":"#FFFFFF","th":0},"bd":{"b":{"s":1,"cl":{"rgb":"#000000","th":0}}},"n":{"pattern":"#,##0.00;\\(#,##0.00\\)"},"ht":3,"tb":0},"numberFormat":"#,##0.00;\\(#,##0.00\\)"},"C18":{"cellData":[[{"s":"R28","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A18,IF(DATA!$A$18:$A$24=$A18,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0))","ref":"C18","v":"#N/A","t":1}]],"styleData":{"ff":"Helvetica","fs":8,"cl":{"rgb":"#8497b0","th":0},"bg":{"rgb":"#FFFFFF","th":0},"bd":{"b":{"s":1,"cl":{"rgb":"#000000","th":0}}},"n":{"pattern":"0.00%"},"ht":3,"tb":0},"numberFormat":"0.00%"},"B21":{"cellData":[[{"s":"R25","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=B$13,1)),0))","ref":"B21","v":1705.6561549394,"t":2}]],"styleData":{"ff":"Helvetica","fs":8,"bg":{"rgb":"#FFFFFF","th":0},"n":{"pattern":"#,##0.00;\\(#,##0.00\\)"},"ht":3,"tb":0},"numberFormat":"#,##0.00;\\(#,##0.00\\)"},"C21":{"cellData":[[{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=C$13,1)),0))","ref":"C21","v":"#N/A","t":1}]],"styleData":{"ff":"Helvetica","fs":8,"cl":{"rgb":"#8497b0","th":0},"bg":{"rgb":"#FFFFFF","th":0},"n":{"pattern":"0.00%"},"ht":3,"tb":0},"numberFormat":"0.00%"},"E21":{"cellData":[[{"s":"R34","f":"=INDEX(DATA!$B$18:$AC$24,MATCH(1,IF(DATA!$A$18:$A$24=$A21,IF(DATA!$A$18:$A$24=$A21,1)),0),MATCH(1,IF(DATA!$B$12:$AC$12=$B$12,IF(DATA!$B$13:$AC$13=E$13,1)),0))","ref":"E21","v":"#N/A","t":1}]],"styleData":{"ff":"Helvetica","fs":8,"cl":{"rgb":"#8497b0","th":0},"bg":{"rgb":"#FFFFFF","th":0},"n":{"pattern":"0.00%"},"ht":3,"tb":0},"numberFormat":"0.00%"}}}
+[stderr] 
+[stderr] codex
+[stderr] I found the percentage columns currently use a plain `0.00%` pattern, so negative percentages show with a minus sign. I’m replacing the broken formulas in the populated rows with formulas that match within the selected entity’s 4-column block, and I’ll apply a percentage format whose negative section uses parentheses.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/edit_case1.js
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..3de1a26b8d5c3d4c80c9b8d795578ce3bcc03118
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,42 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const style = sheet.getRange(r, c).getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(sheet.getRange(r, c).getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..3de1a26b8d5c3d4c80c9b8d795578ce3bcc03118
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,42 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const style = sheet.getRange(r, c).getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(sheet.getRange(r, c).getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/edit_case1.js
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/edit_case1.js' in /task
+[stderr]  succeeded in 378ms:
+[stderr] {"success":true,"changedRange":"COVER!B18:E23"}
+[stderr] 
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] 
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/verify_case1.js
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] diff --git a/work/verify_case1.js b/work/verify_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..d8a6f3077b1ab94c51c2182505d4e6a62c5effe4
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const range = sheet.getRange("B18:E23");
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    display: range.getDisplayValues(),
+[stderr] +    values: range.getValues(),
+[stderr] +    cellDatas: range.getCellDatas(),
+[stderr] +    styles: {
+[stderr] +      C18: sheet.getRange("C18").getCellStyleData(),
+[stderr] +      E22: sheet.getRange("E22").getCellStyleData(),
+[stderr] +    },
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] diff --git a/work/verify_case1.js b/work/verify_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..d8a6f3077b1ab94c51c2182505d4e6a62c5effe4
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const range = sheet.getRange("B18:E23");
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    display: range.getDisplayValues(),
+[stderr] +    values: range.getValues(),
+[stderr] +    cellDatas: range.getCellDatas(),
+[stderr] +    styles: {
+[stderr] +      C18: sheet.getRange("C18").getCellStyleData(),
+[stderr] +      E22: sheet.getRange("E22").getCellStyleData(),
+[stderr] +    },
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/verify_case1.js' in /task
+[stderr]  succeeded in 293ms:
+[stderr] {"success":true,"display":[["56,113.91","100.00%","56,113.91","100.00%"],["","","",""],["","","",""],["1,705.66","3.04%","1,705.66","3.04%"],["(95.68)","(0.17%)","(95.68)","(0.17%)"],["3,658.20","6.52%","3,658.20","6.52%"]],"values":[["56,113.91","100.00%","56,113.91","100.00%"],[null,null,null,null],[null,null,null,null],["1,705.66","3.04%","1,705.66","3.04%"],["(95.68)","(0.17%)","(95.68)","(0.17%)"],["3,658.20","6.52%","3,658.20","6.52%"]],"cellDatas":[[{"s":"R27","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A18,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(B$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"B18","v":56113.91,"t":2},{"s":"NAM-wW","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A18,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(C$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"C18","v":1,"t":2},{"s":"R27","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A18,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(D$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"D18","v":56113.91,"t":2},{"s":"NAM-wW","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A18,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(E$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"E18","v":1,"t":2}],[{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"}],[{"s":"R5"},{"s":"R33"},{"s":"R5"},{"s":"R33"}],[{"s":"R25","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A21,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(B$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"B21","v":1705.66,"t":2},{"s":"HAtAUw","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A21,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(C$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"C21","v":0.0304,"t":2},{"s":"R25","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A21,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(D$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"D21","v":1705.66,"t":2},{"s":"HAtAUw","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A21,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(E$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"E21","v":0.0304,"t":2}],[{"s":"R25","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A22,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(B$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"B22","v":-95.68,"t":2},{"s":"HAtAUw","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A22,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(C$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"C22","v":-0.0017,"t":2},{"s":"R25","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A22,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(D$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"D22","v":-95.68,"t":2},{"s":"HAtAUw","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A22,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(E$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"E22","v":-0.0017,"t":2}],[{"s":"R25","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A23,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(B$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"B23","v":3658.2,"t":2},{"s":"HAtAUw","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A23,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(C$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"C23","v":0.0652,"t":2},{"s":"R25","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A23,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(D$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),2)","ref":"D23","v":3658.2,"t":2},{"s":"HAtAUw","f":"=ROUND(INDEX(DATA!$B$18:$AC$24,MATCH($A23,DATA!$A$18:$A$24,0),MATCH($B$12,DATA!$B$12:$AC$12,0)+MATCH(E$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),4)","ref":"E23","v":0.0652,"t":2}]],"styles":{"C18":{"ff":"Helvetica","fs":8,"cl":{"rgb":"#8497b0","th":0},"bg":{"rgb":"#FFFFFF","th":0},"bd":{"b":{"s":1,"cl":{"rgb":"#000000","th":0}}},"n":{"pattern":"0.00%;\\(0.00%\\);0.00%"},"ht":3,"tb":0},"E22":{"ff":"Helvetica","fs":8,"cl":{"rgb":"#8497b0","th":0},"bg":{"rgb":"#FFFFFF","th":0},"n":{"pattern":"0.00%;\\(0.00%\\);0.00%"},"ht":3,"tb":0}}}
+[stderr] 
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] diff --git a/work/verify_case1.js b/work/verify_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..d8a6f3077b1ab94c51c2182505d4e6a62c5effe4
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const range = sheet.getRange("B18:E23");
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    display: range.getDisplayValues(),
+[stderr] +    values: range.getValues(),
+[stderr] +    cellDatas: range.getCellDatas(),
+[stderr] +    styles: {
+[stderr] +      C18: sheet.getRange("C18").getCellStyleData(),
+[stderr] +      E22: sheet.getRange("E22").getCellStyleData(),
+[stderr] +    },
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] Verification shows the target range now resolves the selected entity correctly: the `#N/A` cells are gone, amount cells are rounded to cents, and negative percentages display in parentheses such as `(0.17%)`. I’m exporting the edited workbook now.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/outputs/case_1 && univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx' in /task
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] diff --git a/work/verify_case1.js b/work/verify_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..d8a6f3077b1ab94c51c2182505d4e6a62c5effe4
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const range = sheet.getRange("B18:E23");
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    display: range.getDisplayValues(),
+[stderr] +    values: range.getValues(),
+[stderr] +    cellDatas: range.getCellDatas(),
+[stderr] +    styles: {
+[stderr] +      C18: sheet.getRange("C18").getCellStyleData(),
+[stderr] +      E22: sheet.getRange("E22").getCellStyleData(),
+[stderr] +    },
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 599ms:
+[stderr] exported /task/cases/case_1/input.univer -> /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'ls -l /task/outputs/case_1/output.xlsx' in /task
+[stderr]  succeeded in 0ms:
+[stderr] -rw-r--r--    1 node     node         14651 May 25 13:10 /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] diff --git a/work/verify_case1.js b/work/verify_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..d8a6f3077b1ab94c51c2182505d4e6a62c5effe4
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const range = sheet.getRange("B18:E23");
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    display: range.getDisplayValues(),
+[stderr] +    values: range.getValues(),
+[stderr] +    cellDatas: range.getCellDatas(),
+[stderr] +    styles: {
+[stderr] +      C18: sheet.getRange("C18").getCellStyleData(),
+[stderr] +      E22: sheet.getRange("E22").getCellStyleData(),
+[stderr] +    },
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] Done. I updated `COVER!B18:E23` in `/task/cases/case_1/input.univer` and exported the final workbook to:
+[stderr] 
+[stderr] `/task/outputs/case_1/output.xlsx`
+[stderr] 
+[stderr] Verified the target range displays the correct selected-entity values, with rounded amounts and negative percentage values in parentheses.
+[stderr] diff --git a/work/edit_case1.js b/work/edit_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ce3ba4fb35b8de155973dfb521e568983d16455d
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case1.js
+[stderr] @@ -0,0 +1,44 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  if (!sheet) return { success: false, error: "COVER not found" };
+[stderr] +
+[stderr] +  const populatedRows = new Set([18, 21, 22, 23]);
+[stderr] +  const target = sheet.getRange("B18:E23");
+[stderr] +  const existing = target.getCellDatas();
+[stderr] +
+[stderr] +  const moneyPattern = "#,##0.00;\\(#,##0.00\\)";
+[stderr] +  const percentPattern = "0.00%;\\(0.00%\\);0.00%";
+[stderr] +
+[stderr] +  const matrix = [];
+[stderr] +  for (let r = 18; r <= 23; r++) {
+[stderr] +    const row = [];
+[stderr] +    for (let c = 2; c <= 5; c++) {
+[stderr] +      const current = existing[r - 18]?.[c - 2] || {};
+[stderr] +      const cellRef = `${String.fromCharCode(64 + c)}${r}`;
+[stderr] +      const cellRange = sheet.getRange(cellRef);
+[stderr] +      const style = cellRange.getCellStyleData
+[stderr] +        ? JSON.parse(JSON.stringify(cellRange.getCellStyleData()))
+[stderr] +        : {};
+[stderr] +      const a1Col = String.fromCharCode(64 + c);
+[stderr] +      if (!populatedRows.has(r)) {
+[stderr] +        row.push({ s: current.s || style });
+[stderr] +        continue;
+[stderr] +      }
+[stderr] +
+[stderr] +      const isPercent = c === 3 || c === 5;
+[stderr] +      style.n = { pattern: isPercent ? percentPattern : moneyPattern };
+[stderr] +      const digits = isPercent ? 4 : 2;
+[stderr] +      const formula =
+[stderr] +        `=ROUND(INDEX(DATA!$B$18:$AC$24,` +
+[stderr] +        `MATCH($A${r},DATA!$A$18:$A$24,0),` +
+[stderr] +        `MATCH($B$12,DATA!$B$12:$AC$12,0)+` +
+[stderr] +        `MATCH(${a1Col}$13,OFFSET(DATA!$B$13,0,MATCH($B$12,DATA!$B$12:$AC$12,0)-1,1,4),0)-1),${digits})`;
+[stderr] +      row.push({ f: formula, t: 2, s: style });
+[stderr] +    }
+[stderr] +    matrix.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  target.setValues(matrix);
+[stderr] +  return { success: true, changedRange: "COVER!B18:E23" };
+[stderr] +}
+[stderr] diff --git a/work/inspect_case1.js b/work/inspect_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..531658b6c7ddc29584cd8b0c8aa6cf4289480b56
+[stderr] --- /dev/null
+[stderr] +++ b/work/inspect_case1.js
+[stderr] @@ -0,0 +1,16 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const cover = workbook.getSheetByName("COVER");
+[stderr] +  const data = workbook.getSheetByName("DATA");
+[stderr] +  const read = (sheet, range) => ({
+[stderr] +    range,
+[stderr] +    display: sheet.getRange(range).getDisplayValues(),
+[stderr] +    values: sheet.getRange(range).getValues(),
+[stderr] +    cellDatas: sheet.getRange(range).getCellDatas(),
+[stderr] +  });
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    cover: read(cover, "A12:E23"),
+[stderr] +    data: read(data, "A12:AC24"),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/style_case1.js b/work/style_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247bbbb80c586aaa24b9a5cd11ec0c776696bc33
+[stderr] --- /dev/null
+[stderr] +++ b/work/style_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const refs = ["B18", "C18", "B21", "C21", "E21"];
+[stderr] +  const out = {};
+[stderr] +  for (const ref of refs) {
+[stderr] +    const range = sheet.getRange(ref);
+[stderr] +    out[ref] = {
+[stderr] +      cellData: range.getCellDatas(),
+[stderr] +      styleData: typeof range.getCellStyleData === "function" ? range.getCellStyleData() : null,
+[stderr] +      numberFormat: typeof range.getNumberFormat === "function" ? range.getNumberFormat() : null,
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return { success: true, out };
+[stderr] +}
+[stderr] diff --git a/work/verify_case1.js b/work/verify_case1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..d8a6f3077b1ab94c51c2182505d4e6a62c5effe4
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case1.js
+[stderr] @@ -0,0 +1,15 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("COVER");
+[stderr] +  const range = sheet.getRange("B18:E23");
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    display: range.getDisplayValues(),
+[stderr] +    values: range.getValues(),
+[stderr] +    cellDatas: range.getCellDatas(),
+[stderr] +    styles: {
+[stderr] +      C18: sheet.getRange("C18").getCellStyleData(),
+[stderr] +      E22: sheet.getRange("E22").getCellStyleData(),
+[stderr] +    },
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] tokens used
+[stderr] 56,434
+[stdout] Done. I updated `COVER!B18:E23` in `/task/cases/case_1/input.univer` and exported the final workbook to:
+[stdout] 
+[stdout] `/task/outputs/case_1/output.xlsx`
+[stdout] 
+[stdout] Verified the target range displays the correct selected-entity values, with rounded amounts and negative percentage values in parentheses.

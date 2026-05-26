@@ -1,0 +1,2198 @@
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e5e45-2a4e-7af2-8aa8-93faa2b04ee0
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 58032
+[stderr] 
+[stderr] ### instruction
+[stderr] Recreate Sheet1 exactly as it is. Use Arial font. Make sure the titles on row 1 are bold, italicized, and properly bordered. Make sure cells on column D are filled with #CCCCCC beginning in D2. How do I create a formula in cell A2 to search through columns I:J for a person's name based on a combination of their Title and Department code?
+[stderr] 
+[stderr] Write formula in column A and set fill color for formulated cells to #FCD5B4. Hide gridlines as appropriate.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: Sheet1
+[stderr] Name	Title	Department Code	Bonus Amount	In role 6 Months?			Name	Title	Department Code
+[stderr] 	Manager	307490							
+[stderr] 	Manager	342441					Matthew Wusteney	Manager	306228
+[stderr] 	Manager	345321					Eliane Webb	Manager	331186
+[stderr] 	Manager	331383					Lora-lee Ciallella	Manager	354028
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Cell-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] A2:A35
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export with `getCellDatas()`: compare `v`, `t`, `f`, `p`, `si`, `s` or resolved style, and visible display where relevant. Do not use `getValues()` to verify value type. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - `inspect` and `pipe out` are useful only for quickly understanding visible content, rough ranges, and formulas. They cannot prove value type or complete cell model. `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer true `v`, `t`, `f`, `s`, date serials, forced text, or number formats from `inspect`, `pipe out`, TSV/CSV/JSON previews, or display values. For value type and model verification, always use `univer run` with `range.getCellDatas()`.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json` only for quick visible inspection; if exact coordinates, formulas, or cell models matter, use `univer run` to return explicit `{ row1, col1, value, formula, cellData }` objects from `getCellDatas()`.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type enum), `f` (formula), `si` (formula id), `p` (rich text), `s` (style id or style object, including number format), and `custom` (custom data). The `t` enum values are: `1=STRING`, `2=NUMBER`, `3=BOOLEAN`, `4=FORCE_STRING`. If `t` is omitted, Univer may auto-detect the type, which can turn text like `2-2` into a date serial.
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not use `getValues()` to verify value type, formula, number format, forced text, or cell model.
+[stderr]   3. Choose reads by intent: display-only planning may use `getValues()` or `getDisplayValues()`; raw values without model preservation may use `getRawValues()` for calculations; complete cell models and all value-type verification must use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`, and use `getCellDatas()` when formula cells also need model/type/format verification.
+[stderr]   4. Hard requirement for writes: whenever you write values into cells or ranges, use explicit `ICellData` objects instead of bare JavaScript values. Do not write `setValues([["2-2", 123, true]])`; write `setValues([[{ v: "2-2", t: 4 }, { v: 123, t: 2 }, { v: 1, t: 3 }]])`. Every written cell must make its semantic type explicit with `t`, `f`, and any needed `s` number format. Do not use `pipe in` for workbook edits because it writes tabular values without an explicit per-cell `ICellData` model.
+[stderr]   5. Choose write models by semantics: ordinary text uses `{ v: "text", t: 1 }`; text that must not be auto-converted uses `{ v: "2-2", t: 4 }`; numbers use `{ v: 123, t: 2 }`; booleans use `{ v: 1, t: 3 }` for TRUE and `{ v: 0, t: 3 }` for FALSE; formulas use `{ f: '=A1+B1' }` or `setFormula('=A1+B1')`; literal formula text uses `{ v: '=A1+B1', t: 4 }`.
+[stderr]   6. Values that look like dates, numbers, fractions, scores, ranges, codes, phone numbers, postal codes, or identifiers must use `t: 4` when the task semantics require text. Examples include scores like `2-2` or `3-1`, hyphenated codes, leading-zero IDs, SKU/account IDs, phone-like values, and ZIP/postal codes. Do not let Excel/OOXML auto-detect these as dates or numbers.
+[stderr]   7. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`. After writing, `getCellDatas()` may show `s` as a style id string instead of an inline object; use `getCellStyleData()` / `getCellStyles()` or the workbook snapshot styles to resolve and verify the number format.
+[stderr]   8. When reading existing cells and writing them elsewhere: display-only reads may use `getValues()`/`getDisplayValues()` only for internal planning, but writes must still use explicit `ICellData`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   9. If `p` rich text exists, it controls the displayed content even when `v` is also set. Use the rich text builder APIs for rich text tasks and verify `p` with `getCellDatas()`.
+[stderr]   10. Do not hand-author `si` formula ids. Preserve `si` only when deep-cloning existing formula cells with `getCellDatas()`; for new formulas use `f` or `setFormula()`.
+[stderr]   11. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] 
+[stderr] codex
+[stderr] I’ll load the `univer-cli` skill first, then inspect the workbook model and apply the requested formula and formatting only in `A2:A35` plus the explicitly requested existing formatting areas.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,220p' /home/node/.agents/skills/univer-cli/SKILL.md" in /task
+[stderr]  succeeded in 0ms:
+[stderr] ---
+[stderr] name: univer-cli
+[stderr] description: "Use when solving spreadsheet workbook problems with the `univer` or `unv` CLI as a terminal-native spreadsheet engine: Excel-compatible `.xlsx` handoff, `.univer` or `.unv` packages, workbook inspection, range search, formulas, formatting, charts, shapes, floating images, rich spreadsheet edits, live preview and viewer review comments, versioning, shell-native `pipe out`/`pipe in` roundtrips, or bounded `run` scripts."
+[stderr] ---
+[stderr] 
+[stderr] # univer-cli
+[stderr] 
+[stderr] `univer` is a spreadsheet engine in the terminal. Use it when an agent needs real workbook semantics: sheets, ranges, formulas, formatting, layout, previews, imports, exports, or versioned workbook state.
+[stderr] 
+[stderr] Install the CLI with `npm i -g univer-cli`. Update the CLI with `univer update`. The executable is `univer`; `unv` may be available as a short alias.
+[stderr] 
+[stderr] ## Core Mental Model
+[stderr] 
+[stderr] Treat workbook-visible state as the source of truth. A successful command summary, package metadata, or an internal manifest does not prove that sheet names, cell values, formulas, formatting, or exported handoff files are correct.
+[stderr] 
+[stderr] The workbook path is the local identity. Pick one explicit path such as `./budget.univer` and use that path as the CLI target. Do not target workbooks by `unitId`, `sessionId`, manifest ids, or runtime ids.
+[stderr] 
+[stderr] `.univer` and `.unv` files are CLI operation targets, not agent-editable data stores. Read and write workbook data through public CLI surfaces such as `inspect`, `search`, `pipe`, `run`, `export`, `status`, and `commit`.
+[stderr] 
+[stderr] Use `univer help` and `univer help <command...>` for exact syntax. For `run` scripts, use `univer help run` and `univer help run <topic>` before relying on unfamiliar APIs.
+[stderr] 
+[stderr] ## Use When
+[stderr] 
+[stderr] Use this skill when the task involves spreadsheet or workbook work, especially:
+[stderr] 
+[stderr] - creating, importing, exporting, or handing off `.xlsx`, `.csv`, `.univer`, or `.unv` files
+[stderr] - inspecting workbook shape, sheets, ranges, formulas, formatting, or visible cell state
+[stderr] - locating content-defined rows, columns, headers, or cells before editing
+[stderr] - making bounded edits to cells, formulas, formatting, charts, shapes, floating images, layout, or sheet structure
+[stderr] - streaming rectangular workbook data through shell tools before reading it into context
+[stderr] - writing generated matrix data back into a sheet-qualified range
+[stderr] - previewing workbook state locally with `univer view`
+[stderr] - reading submitted local viewer review comments with `univer view comments`
+[stderr] - creating, restoring, resetting, pulling, or syncing local workbook changesets
+[stderr] - proving that a workbook-visible mutation or export is correct enough to hand back
+[stderr] 
+[stderr] ## Default Operating Loop
+[stderr] 
+[stderr] 1. Pick one explicit workbook path, for example `./budget.univer`.
+[stderr] 2. Create or import a workbook first if no `.univer` or `.unv` target exists.
+[stderr] 3. Inspect workbook-visible state before deciding where to write.
+[stderr] 4. Locate targets from visible headers, values, formulas, or inspected ranges.
+[stderr] 5. Choose the smallest public CLI surface that fits the task.
+[stderr] 6. Mutate through the CLI, not by editing package internals.
+[stderr] 7. Verify changed workbook-visible state with `inspect`, `pipe out`, or another public read.
+[stderr] 8. Export only after verification when the user needs a handoff file.
+[stderr] 9. After changes have been verified, if the user may need to inspect, audit, or review the final workbook, run `univer view "$WB" --no-open --json` to get a local preview link and include that link in your response.
+[stderr] 10. Commit or sync only after verified changes when versioning is part of the workflow.
+[stderr] 
+[stderr] ## Hard Rules
+[stderr] 
+[stderr] - Do not read `.univer` or `.unv` internals to infer workbook contents.
+[stderr] - Do not write, patch, unzip, rezip, rename internal files, or manipulate workbook package contents.
+[stderr] - Do not inspect `manifest.json`, snapshots, mutation logs, or package fragments as a substitute for workbook-visible reads.
+[stderr] - Do not guess sheet names, row numbers, formulas, ranges, or changed cells from memory or file metadata.
+[stderr] - Do not treat stdout summaries as proof of workbook state. Verify with a workbook-visible read.
+[stderr] - Do not invent commands or `run` APIs. Check `univer help` and documented run topics.
+[stderr] 
+[stderr] Direct package access can corrupt workbooks or teach the agent false state. If the CLI cannot read what you need, diagnose the CLI/runtime path instead of bypassing it.
+[stderr] 
+[stderr] ## Command Selection
+[stderr] 
+[stderr] | Need | Prefer |
+[stderr] | --- | --- |
+[stderr] | Discover exact command syntax | `univer help`, `univer help <command...>` |
+[stderr] | Start a workbook package | `univer new` or `univer import` |
+[stderr] | Hand back Excel-compatible output | `univer export` |
+[stderr] | Understand workbook shape before editing | `univer inspect workbook`, then `univer inspect range` |
+[stderr] | Locate content-defined cells | `univer search`, scoped with `--sheet` and/or `--range` when possible |
+[stderr] | Stream rectangular data through shell tools | `univer pipe out` |
+[stderr] | Write a known rectangular matrix back | `univer pipe in` |
+[stderr] | Apply bounded workbook-local logic | `univer run --file` |
+[stderr] | Create or maintain workbook charts | `univer run --file` with `univer help run charts` |
+[stderr] | Create or maintain workbook shapes and connectors | `univer run --file` with `univer help run shapes` |
+[stderr] | Create or maintain workbook floating images | `univer run --file` with `univer help run images` |
+[stderr] | Preview readonly workbook state | `univer view --no-open --json` or `univer view` |
+[stderr] | Read local viewer review feedback | `univer view comments "$WB" --json` |
+[stderr] | Check local versioning state | `univer status` |
+[stderr] | Create a local changeset from local mutations | `univer commit --message <message>` |
+[stderr] | Discard uncommitted local mutations | `univer restore` |
+[stderr] | Reset local unsynced commits | `univer reset --soft HEAD~N` or `univer reset --hard HEAD~N` |
+[stderr] | Initialize a local package from an existing remote unit | `univer clone --unit-id <unitID>` |
+[stderr] | Pull remote-only changes for a bound package | `univer pull` |
+[stderr] | Sync local and remote versioning state | `univer sync` |
+[stderr] | Diagnose runtime problems | `univer doctor`, `univer daemon status` |
+[stderr] | Prepare a bug report or Univer team support artifact after user authorization | `univer doctor collect` |
+[stderr] 
+[stderr] Use canonical command help such as `univer help inspect range` and `univer help pipe out`. Top-level help group headings are visual sections only; do not run group-prefixed topics such as `univer help read inspect range`.
+[stderr] 
+[stderr] ## Execution Results
+[stderr] 
+[stderr] Treat non-zero exit as failure even when stdout is partially present. Read stderr before changing approach; it usually contains the stable diagnostic code, usage, and retry examples.
+[stderr] 
+[stderr] Keep data stdout clean in shell pipelines. If diagnostics are needed, capture stderr separately so downstream tools receive only workbook data.
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20' > ./range.md 2> ./range.err
+[stderr] status=$?
+[stderr] if [ "$status" -ne 0 ]; then
+[stderr]   sed -n '1,80p' ./range.err
+[stderr]   exit "$status"
+[stderr] fi
+[stderr] sed -n '1,40p' ./range.md
+[stderr] ```
+[stderr] 
+[stderr] ## Workflow Recipes
+[stderr] 
+[stderr] These are verified command shapes. Replace paths, sheet names, and ranges with inspected workbook facts.
+[stderr] 
+[stderr] ### Create Or Import, Then Inspect
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./orders.univer
+[stderr] univer import ./orders.csv "$WB" --json
+[stderr] univer inspect workbook "$WB"
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D4'
+[stderr] ```
+[stderr] 
+[stderr] Use `new` when the task starts from a blank workbook:
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./workbook.univer
+[stderr] univer new "$WB" --name "Workbook"
+[stderr] univer inspect workbook "$WB"
+[stderr] ```
+[stderr] 
+[stderr] ### Locate Before Editing
+[stderr] 
+[stderr] Use `search` before editing when the target is defined by visible workbook content:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West
+[stderr] ```
+[stderr] 
+[stderr] Plain text output is one A1 reference per matched cell, which keeps shell pipelines clean. With no
+[stderr] matches, stdout is empty and the command still succeeds. Use `--json` when you need match metadata,
+[stderr] the matched cell data preview, truncation flags, counts, or the searched scope:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West --sheet Orders --range 'A1:Z200' --json
+[stderr] ```
+[stderr] 
+[stderr] By default, search checks `displayValue`, so formatted values such as dates are searchable by the
+[stderr] same strings a user sees in the sheet. Use `--type rawValue` for underlying numeric/string values
+[stderr] such as spreadsheet date serials, and `--type formula` for formulas:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" 2024-01-01
+[stderr] univer search "$WB" 45292 --type rawValue
+[stderr] univer search "$WB" SUM --type formula --json
+[stderr] ```
+[stderr] 
+[stderr] Useful narrowing options:
+[stderr] 
+[stderr] - `--sheet <name>` may be repeated.
+[stderr] - `--range <A1>` may be repeated; unqualified ranges require a `--sheet`.
+[stderr] - `--case-sensitive` and `--whole-cell` tighten matching.
+[stderr] - `--max-results` limits returned matches; truncation is reported on stderr for text output and in JSON fields for `--json`.
+[stderr] - `--max-cell-value-length` bounds previewed cell data in JSON.
+[stderr] 
+[stderr] If `search` fails, read stderr for the diagnostic message before changing approach. If the target is
+[stderr] not content-defined, inspect a bounded range and derive the edit boundary from visible headers and
+[stderr] sample rows:
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20'
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe Out Through Shell Tools
+[stderr] 
+[stderr] Use `pipe out` when the shell can reduce or reshape rectangular data before the agent reads it. Prefer TSV for `awk`, JSON for `jq`, and `--type rawValue` when formatted display text is not safe enough for comparisons.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe out "$WB" --range 'Sheet1!A1:D4' --format tsv > ./orders.tsv
+[stderr] awk -F '\t' 'BEGIN{OFS="\t"} NR==1 || $2=="West" {print $1,$3}' ./orders.tsv > ./west.tsv
+[stderr] sed -n '1,5p' ./west.tsv
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe In Generated Table Data
+[stderr] 
+[stderr] Write only a known matrix into an explicit, sheet-qualified range. Make `pipe in` the terminal stage of a pipeline unless you intentionally want its success summary downstream.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe in "$WB" --range 'Sheet1!F1:G3' --input-format tsv --data-file ./west.tsv
+[stderr] univer inspect range "$WB" --range 'Sheet1!F1:G3'
+[stderr] univer pipe out "$WB" --range 'Sheet1!F1:G3' --format tsv
+[stderr] ```
+[stderr] 
+[stderr] Verify headers, sample rows, and key columns. Row count alone is weak evidence because shifted columns can still preserve row count.
+[stderr] 
+[stderr] ### Run A Bounded Workbook Script
+[stderr] 
+[stderr] Use `run --file` for workbook-native logic that does not fit `inspect`, `search`, `pipe`, or `export`. Check `univer help run` and the relevant `univer help run <topic>` manual before using unfamiliar APIs.
+[stderr] 
+[stderr] ```bash
+[stderr] cat > ./review.js <<'JS'
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] 
+[stderr]   sheet.getRange("I1:J3").setValues([
+[stderr]     ["metric", "value"],
+[stderr]     ["west_orders", 2],
+[stderr]     ["reviewed", "yes"],
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true, changedRanges: ["Sheet1!I1:J3"] };
+[stderr] }
+[stderr] JS
+[stderr] 
+[stderr] univer run "$WB" --file ./review.js
+[stderr] univer inspect range "$WB" --range 'Sheet1!I1:J3'
+[stderr] ```
+[stderr] 
+[stderr] `run` scripts should:
+[stderr] 
+[stderr] - wrap code in `() => { ... }` or `async () => { ... }`
+[stderr] - return a plain object with explicit success or error fields
+[stderr] - use explicit workbook, sheet, and A1 range boundaries
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '220,520p' /home/node/.agents/skills/univer-cli/SKILL.md" in /task
+[stderr]  succeeded in 0ms:
+[stderr] - use explicit workbook, sheet, and A1 range boundaries
+[stderr] - prefer A1 notation for fixed workbook-facing locations
+[stderr] - remember numeric coordinate overloads are 0-based
+[stderr] - use documented facade builders for conditional formatting instead of editing internal rule model shapes
+[stderr] - use official enum references for conditional formatting color scales, data bars, and icon sets: `ConditionFormatIconSetTypeEnum` supplies `setIconSet().iconConfigs[].iconType`, and `ConditionFormatValueTypeEnum` supplies value config `type` values
+[stderr] - use documented chart builders and worksheet chart APIs from `univer help run charts` instead of editing chart resource internals
+[stderr] - use documented shape builders and worksheet shape APIs from `univer help run shapes` instead of editing drawing or shape resource internals
+[stderr] - use documented floating image builders and worksheet image APIs from `univer help run images` instead of editing drawing or resource internals
+[stderr] - wait for formula calculation with the documented formula wait API before reading same-run computed results
+[stderr] - prefer `--file` for scripts beyond a short one-liner
+[stderr] 
+[stderr] ### Create Or Maintain Charts
+[stderr] 
+[stderr] Use `univer run` for workbook-local charts and `univer view` for visual inspection. Command-line verification should read facade state such as `sheet.getCharts()`, `chart.getChartId()`, `chart.getRange()`, `chart.getSeriesData()`, and `chart.getCategoryData()`.
+[stderr] 
+[stderr] ```bash
+[stderr] univer help run charts
+[stderr] univer run "$WB" --file ./create-chart.js
+[stderr] univer view "$WB" --no-open --json
+[stderr] ```
+[stderr] 
+[stderr] In scripts, seed or choose a source range, configure `sheet.newChart()`, call `build()`, then insert it with `sheet.insertChart(chartInfo)`. Use `chart.updateRange()` or `sheet.removeChart(chart)` for maintenance.
+[stderr] 
+[stderr] Special chart types have stricter source shapes:
+[stderr] 
+[stderr] - Most charts use a category-plus-series table, for example `month, sales, cost`.
+[stderr] - Relation charts require a node/type matrix: first column is node, second column is type/category, remaining columns are the numeric relation matrix. For `N` nodes, use `N` data rows and `N + 2` columns.
+[stderr] - Sankey charts require a `source, target, value` edge list. The third column must be numeric; avoid reverse edges that create circular Sankey data.
+[stderr] - Bubble charts need numeric `x`, `y`, and `size` columns.
+[stderr] - Heatmap charts use the first column as y-axis labels, remaining headers as x-axis labels, and remaining cells as numeric heat values.
+[stderr] 
+[stderr] ### Create Or Maintain Shapes
+[stderr] 
+[stderr] Use `univer run` for workbook-local shapes and connectors and `univer view` for visual inspection. Command-line verification should read facade state such as `sheet.getShapes()`, `shape.isLineShape()`, `shape.getShapeId()`, `shape.getShapeType()`, `shape.getPosition()`, `shape.getSize()`, `shape.getStartConnectInfo()`, and `shape.getEndConnectInfo()`.
+[stderr] 
+[stderr] ```bash
+[stderr] univer help run shapes
+[stderr] univer run "$WB" --file ./create-shapes.js
+[stderr] univer view "$WB" --no-open --json
+[stderr] ```
+[stderr] 
+[stderr] In scripts, configure `sheet.newShape()`, call `build()`, then insert it with `sheet.insertShape(shapeInfo)`. Use `sheet.newConnector()` for connector lines, `sheet.connectShapes()` to attach connector endpoints to facade shape objects from the same worksheet, `sheet.newShape(existingShape)` with `sheet.updateShape(updatedShapeInfo)` for updates, and `sheet.removeShape(shape)` for deletion.
+[stderr] 
+[stderr] Use `univerAPI.Enum.ShapeTypeEnum` with `setShapeType()`. Common starts are `Rect`, `RoundRect`, `Ellipse`, `Diamond`, flowchart values such as `FlowchartProcess`, and connector values such as `StraightConnector1`, `BentConnector3`, or `CurvedConnector3`. Use shape facade enums for fill, stroke, dash, cap, join, and arrows: `ShapeFillEnum`, `ShapeGradientTypeEnum`, `ShapeLineTypeEnum`, `ShapeLineDashEnum`, `ShapeLineCapEnum`, `ShapeLineJoinEnum`, `ShapeArrowTypeEnum`, and `ShapeArrowSizeEnum`.
+[stderr] 
+[stderr] The shapes topic covers workbook-local floating shapes and connectors only. `univer run` does not export shape images, perform browser screenshots, or provide an interactive shape editor.
+[stderr] 
+[stderr] ### Create Or Maintain Floating Images
+[stderr] 
+[stderr] Use `univer run` for workbook-local floating images and `univer view` for visual inspection. Command-line verification should read facade state such as `sheet.getImages()`, `sheet.getImageById(id)`, `image.getId()`, `image.toBuilder().getSource()`, `image.toBuilder().getSourceType()`, and update or delete return values.
+[stderr] 
+[stderr] ```bash
+[stderr] univer help run images
+[stderr] univer run "$WB" --file ./create-image.js
+[stderr] univer view "$WB" --no-open --json
+[stderr] ```
+[stderr] 
+[stderr] In scripts, configure `sheet.newOverGridImage()`, call `buildAsync()`, then insert it with `sheet.insertImages([image])`. Use `image.toBuilder()` with `sheet.updateImages([newImage])`, direct `FOverGridImage` methods such as `setSizeAsync()` or `setPositionAsync()`, or `sheet.deleteImages([image])` for maintenance.
+[stderr] 
+[stderr] Use `univerAPI.Enum.ImageSourceType.URL` for HTTP(S) image URLs and full data URLs, `ImageSourceType.BASE64` for raw base64 payloads, and `ImageSourceType.UUID` only for existing Univer-managed image or file UUIDs. For predictable report placement, start with `univerAPI.Enum.SheetDrawingAnchorType.Position`.
+[stderr] 
+[stderr] The images topic covers floating images only. It does not cover cell images, floating DOM, screenshot export, local image upload helpers, or a top-level `univer image` command.
+[stderr] 
+[stderr] ### Preview Locally
+[stderr] 
+[stderr] Use preview when visual confirmation helps. `--no-open --json` is useful for agents and remote environments; the server process remains active until stopped.
+[stderr] 
+[stderr] ```bash
+[stderr] univer view "$WB" --no-open --json
+[stderr] ```
+[stderr] 
+[stderr] When a human submits review feedback in the local viewer, read it without reopening the browser:
+[stderr] 
+[stderr] ```bash
+[stderr] univer view comments "$WB" --json
+[stderr] univer view comments --session "<session-id>" --all --json
+[stderr] ```
+[stderr] 
+[stderr] By default, `view comments` returns actionable submitted comments that are not resolved. Use `--all` when you need pending, submitted, and resolved comments for audit context. These are local viewer review comments, not workbook-native cell notes or collaboration thread comments; the command is read-only and does not start a host, open a browser, create a session, or mutate the workbook.
+[stderr] 
+[stderr] Use `univer help view` for port and browser-opening options.
+[stderr] 
+[stderr] ### Version Verified Changes
+[stderr] 
+[stderr] Check status before committing. Commit only after workbook-visible verification.
+[stderr] 
+[stderr] ```bash
+[stderr] univer status "$WB"
+[stderr] univer commit "$WB" --message "Update review ranges"
+[stderr] univer status "$WB"
+[stderr] ```
+[stderr] 
+[stderr] `commit` creates a local changeset from current local mutations. It does not push to a remote.
+[stderr] 
+[stderr] Use `restore` when current uncommitted workbook mutations should be discarded while preserving local commits and synced history.
+[stderr] 
+[stderr] ```bash
+[stderr] univer status "$WB"
+[stderr] univer restore "$WB"
+[stderr] univer status "$WB"
+[stderr] ```
+[stderr] 
+[stderr] Use `reset --soft HEAD~N` to remove the last N local unsynced commits and restore their mutations as uncommitted local mutations. Use `reset --hard HEAD~N` to remove the last N local unsynced commits and discard current uncommitted local mutations.
+[stderr] 
+[stderr] ```bash
+[stderr] univer status "$WB"
+[stderr] univer reset "$WB" --soft HEAD~1
+[stderr] univer status "$WB"
+[stderr] 
+[stderr] univer reset "$WB" --hard HEAD~1
+[stderr] univer status "$WB"
+[stderr] ```
+[stderr] 
+[stderr] `reset` only accepts `HEAD~N` targets and only operates on local unsynced commits. It does not rewrite synced changesets or remote history.
+[stderr] 
+[stderr] ### Clone, Pull, And Sync
+[stderr] 
+[stderr] Use `clone` when a remote workbook unit already exists and you need a new local package path. The target `.univer` path must be nonexistent or empty.
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./budget.univer
+[stderr] univer clone "$WB" --unit-id unit-remote --json
+[stderr] univer status "$WB"
+[stderr] univer inspect workbook "$WB"
+[stderr] ```
+[stderr] 
+[stderr] Use `pull` when you only need missing remote changesets for a package already bound to a remote unit. Use `sync` to sync local and remote versioning state.
+[stderr] 
+[stderr] ```bash
+[stderr] univer status "$WB"
+[stderr] univer pull "$WB"
+[stderr] univer status "$WB"
+[stderr] 
+[stderr] univer commit "$WB" --message "Update review ranges"
+[stderr] univer sync "$WB"
+[stderr] univer status "$WB"
+[stderr] ```
+[stderr] 
+[stderr] `sync` creates the remote workbook first when the package is still local-only. It pulls remote changes and pushes local changesets, but it does not push uncommitted local mutations. Remote endpoints come from `collaboration.defaultRemote` and `collaboration.remotes.<name>.url`.
+[stderr] 
+[stderr] ### Export Handoff
+[stderr] 
+[stderr] Export after inspection proves the workbook state. Then prove the handoff file exists and, when useful, can be read back.
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect workbook "$WB"
+[stderr] univer export "$WB" ./handoff.xlsx --json
+[stderr] test -s ./handoff.xlsx
+[stderr] univer import ./handoff.xlsx ./handoff.univer --json
+[stderr] univer inspect workbook ./handoff.univer
+[stderr] ```
+[stderr] 
+[stderr] Use `.xlsx` for Excel handoff when workbook interoperability matters. Use CSV only when plain rectangular data is enough for the handoff.
+[stderr] 
+[stderr] ## Shell-Native Rules
+[stderr] 
+[stderr] Use shell tools to reduce large ranges before bringing data back to the agent. `pipe out` should produce clean data; diagnostics and help belong outside the data stream.
+[stderr] 
+[stderr] - Keep ranges explicit and sheet-qualified.
+[stderr] - Quote the full A1 range string, especially for non-English or shell-sensitive sheet names.
+[stderr] - Prefer TSV for `awk` and JSON for `jq`.
+[stderr] - Stage intermediate files when you need a stable preview or assertion.
+[stderr] - Make `pipe in` the usual final pipeline stage.
+[stderr] - Verify with `inspect range` or `pipe out` after every writeback.
+[stderr] 
+[stderr] Avoid `pnpm dev -- ...` in clean pipeline examples. The pnpm/tsx wrapper can print logs to stdout and corrupt streamed data. Use the installed `univer`/`unv` executable or another entrypoint you have proven emits clean stdout.
+[stderr] 
+[stderr] ## Gotchas
+[stderr] 
+[stderr] - `manifest.json` is metadata only. It does not prove sheet names, formulas, changed cells, or handoff correctness.
+[stderr] - Package contents are not a meaningful way to infer spreadsheet data. Use public CLI reads instead.
+[stderr] - Local file identity is the workbook path, such as `./budget.univer`, not `unitId`, `sessionId`, or manifest ids.
+[stderr] - Command success is not enough after import, mutation, export, or handoff. Verify workbook-visible state.
+[stderr] - A non-zero exit means the operation failed. Read stderr for the diagnostic, usage, and retry guidance.
+[stderr] - `search` may be unavailable or limited in some installed versions. Fall back to bounded `inspect range`.
+[stderr] - Quote the full range: `--range 'Sheet1!A1:J20'`, not just the sheet name fragment.
+[stderr] - Shell row counts can pass while headers, columns, or keys shift. Check headers, samples, and key columns together.
+[stderr] - `pipe in` writes parsed matrix data and reports a summary; it does not echo input.
+[stderr] - `view` is readonly preview. Do not treat it as mutation verification unless the task is visual review.
+[stderr] - Charts are maintained through `univer run` and the Pro Charts facade. Do not edit chart resource internals or expect `run` to export chart images.
+[stderr] - Shapes are maintained through `univer run` and the Pro Shapes facade. Do not inspect private drawing resource storage or expect `run` to export shape images.
+[stderr] - Floating images are maintained through `univer run` and the Sheets Drawing facade. Do not invent a top-level `univer image` command or inspect private drawing resource storage.
+[stderr] - `commit` is local only; use `sync` to push local changesets.
+[stderr] - `restore` discards only uncommitted local mutations; it does not remove local commits.
+[stderr] - `reset` is local-only and limited to `HEAD~N` over unsynced local commits. Do not use it as a remote revert or force-push workflow.
+[stderr] - `sync` does not push uncommitted local mutations. Commit verified workbook changes first.
+[stderr] - If `sync` reports an invalid remote binding, stop and diagnose the package or remote setup.
+[stderr] - `pull` requires a package already bound to a remote unit. Use `sync` for first remote creation or `clone --unit-id` for an existing remote unit.
+[stderr] - `clone` replaced older remote binding wording. Do not use or invent a `bind` command.
+[stderr] - If runtime-backed commands fail to start, inspect `univer daemon status` before retrying blindly.
+[stderr] - If workbook-visible reads disagree with package metadata, trust workbook-visible reads first.
+[stderr] 
+[stderr] ## Support
+[stderr] 
+[stderr] Only enter support flow when the user asks to report a suspected CLI bug. Public issues: https://github.com/dream-num/skills/issues. Community support and builder discussions: https://discord.gg/nThHPupraR. Private artifacts: email developer@univer.ai; get authorization before guiding `univer doctor collect`.
+[stderr] 
+[stderr] Skill document revision: 2026-05-22.
+[stderr] 
+[stderr] codex
+[stderr] Plan: inspect `Sheet1` around `A1:J35`, confirm source lookup columns and formatting boundaries, write `A2:A35` formulas as explicit formula cells, apply the requested fill to those formula cells, then verify formulas/styles with `getCellDatas()` and export.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A1:J35'"'" in /task
+[stderr]  succeeded in 328ms:
+[stderr] univer run - Run workbook-local programmable surface logic.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer run <file.univer|file.unv> --file <script.js>
+[stderr]   univer run <file.univer|file.unv> --code <script>
+[stderr]   univer run <file.univer|file.unv> <script.js>
+[stderr]   printf '<script>' | univer run <file.univer|file.unv> -
+[stderr] 
+[stderr] Options:
+[stderr]   --code <script> - Inline JavaScript arrow function to execute.
+[stderr]   --file <script.js> - Script file containing bounded edit logic.
+[stderr]   <script.js> - Positional script file accepted when --code and --file are absent.
+[stderr]   - - Read JavaScript source from stdin.
+[stderr] 
+[stderr] Output:
+[stderr]   The run command is the workbook-local programmable surface for scripts.
+[stderr]   Scripts can read workbook state, compute results, and write workbook state.
+[stderr]   Use only APIs documented by the run manual; do not guess method names.
+[stderr]   Runs the script through the runtime-backed command path.
+[stderr]   Returns the script result as JSON-compatible stdout.
+[stderr] 
+[stderr] Examples:
+[stderr]   univer run ./budget.univer --file ./task.js
+[stderr]   univer run ./budget.univer --code '() => ({ success: true })'
+[stderr] 
+[stderr] Manual Topics:
+[stderr]   overview - command selection, hard rules, and progressive discovery
+[stderr]   core - univerAPI, workbook access, worksheet access, A1 notation, and coordinates
+[stderr]   ranges - range reads, writes, shape rules, formulas, merges, clear, cell shifts, and AutoFill
+[stderr]   formulas - formula writes, async calculation waits, and stale-readback getchas
+[stderr]   sheets - worksheet creation, rename, row or column structure, freezing, gridlines, and visibility
+[stderr]   formatting - font, fill, alignment, border, number-format, and clear-format APIs
+[stderr]   conditional-formatting - conditional formatting builders, range binding, and worksheet rule-list APIs
+[stderr]   charts - chart builders, source ranges, readback, update or remove, and viewer rendering notes
+[stderr]   shapes - shape builders, connectors, connection sites, readback, update or remove, and viewer rendering notes
+[stderr]   images - floating image builders, source positioning, readback, update or delete, and viewer rendering notes
+[stderr] 
+[stderr] Manual Aliases:
+[stderr]   a1-reference -> core (A1 Notation)
+[stderr]   coordinates -> core (Coordinate Model)
+[stderr]   autofill -> ranges (AutoFill)
+[stderr]   fill-series -> ranges (AutoFill)
+[stderr]   get-values -> ranges (Reading From FRange)
+[stderr]   read-range -> ranges (Reading From FRange)
+[stderr]   formula-readback -> formulas (Formula Calculation)
+[stderr]   calculation -> formulas (Formula Calculation)
+[stderr]   freeze-panes -> sheets (Freeze Rows And Columns)
+[stderr]   number-format -> formatting (Number Formats)
+[stderr]   conditional-format -> conditional-formatting (Core Workflow)
+[stderr]   condition-format -> conditional-formatting (Core Workflow)
+[stderr]   color-scale -> conditional-formatting (Color Scales)
+[stderr]   data-bar -> conditional-formatting (Data Bars)
+[stderr]   icon-set -> conditional-formatting (Icon Sets)
+[stderr]   chart -> charts (Core Workflow)
+[stderr]   insert-chart -> charts (Core Workflow)
+[stderr]   chart-builder -> charts (Chart Builder)
+[stderr]   shape -> shapes (Core Workflow)
+[stderr]   insert-shape -> shapes (Core Workflow)
+[stderr]   connector-shape -> shapes (Connector Shapes)
+[stderr]   connect-shapes -> shapes (Connect Shapes)
+[stderr]   image -> images (Core Workflow)
+[stderr]   floating-image -> images (Core Workflow)
+[stderr]   insert-image -> images (Core Workflow)
+[stderr] 
+[stderr] Read Manual:
+[stderr]   univer help run ranges
+[stderr]   univer help run autofill
+[stderr]   univer help run charts
+[stderr]   univer help run shapes
+[stderr]   univer help run images
+[stderr] 
+[stderr] Related:
+[stderr]   univer pipe in
+[stderr]   univer daemon status
+[stderr] 
+[stderr]  succeeded in 1158ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A1:J35
+[stderr] Rows: 35 (34 data rows; first row is header)
+[stderr] Columns: 10
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | Name | text | 0/34 | all empty | - |
+[stderr] | B | Title | text | 34/34 | 34 non-empty | - |
+[stderr] | C | Department Code | text | 34/34 | 34 non-empty | - |
+[stderr] | D | Bonus Amount | text | 0/34 | all empty | - |
+[stderr] | E | In role 6 Months? | text | 0/34 | all empty | - |
+[stderr] | J | Department Code | text | 27/34 | 27 non-empty | - |
+[stderr] 
+[stderr] *Note: 4 columns omitted from profile preview*
+[stderr] 
+[stderr] ## Preview
+[stderr] |A1,Name|B1,Title|C1,Department Code|D1,Bonus Amount|E1,In role 6 Months?|...|J1,Department Code|
+[stderr] |A2,|B2,Manager|C2,307490|D2,|E2,|...|J2,|
+[stderr] |A3,|B3,Manager|C3,342441|D3,|E3,|...|J3,306228|
+[stderr] |A4,|B4,Manager|C4,345321|D4,|E4,|...|J4,331186|
+[stderr] ...
+[stderr] |A35,|B35,Manager|C35,340437|D35,|E35,|...|J35,|
+[stderr] 
+[stderr] *Note: 30 rows and 4 columns omitted from data preview*
+[stderr] 
+[stderr]  succeeded in 1176ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Sheet1
+[stderr] Sheet Count: 1
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Sheet1 | A1:J35 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'Sheet1'
+[stderr] 
+[stderr] - Used Range: A1:J35
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:J35
+[stderr] |A1,Name|B1,Title|C1,Department Code|D1,Bonus Amount|E1,In role 6 Months?|F1,|
+[stderr] |A2,|B2,Manager|C2,307490|D2,|E2,|F2,|
+[stderr] |A3,|B3,Manager|C3,342441|D3,|E3,|F3,|
+[stderr] |A4,|B4,Manager|C4,345321|D4,|E4,|F4,|
+[stderr] |A5,|B5,Manager|C5,331383|D5,|E5,|F5,|
+[stderr] 
+[stderr] codex
+[stderr] The workbook has one sheet, `Sheet1`, with used range `A1:J35`. The lookup table is in `H:J` rather than just `I:J` visually including names, so I’m checking the exact row data before choosing the lookup formula.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run sheets' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'Sheet1"'!A1:J35'"' --format json" in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run formatting' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run formulas' in /task
+[stderr]  succeeded in 387ms:
+[stderr] # Sheets
+[stderr] 
+[stderr] This topic focuses on worksheet creation, worksheet structure, row or column presentation, freezing, gridlines, and visibility changes.
+[stderr] 
+[stderr] ## What This Topic Is For
+[stderr] 
+[stderr] Use this topic when the task is about sheet-level or row/column-level structure instead of direct cell value changes.
+[stderr] 
+[stderr] ## Worksheet Lifecycle
+[stderr] 
+[stderr] Use the workbook object to locate, list, create, and delete sheets.
+[stderr] 
+[stderr] - `getSheetByName(name) -> FWorksheet | null` - recommended explicit lookup by sheet name
+[stderr] - `getSheets() -> FWorksheet[]` - list all worksheets; useful when the task first needs sheet names
+[stderr] - `create(name, rows, cols) -> FWorksheet` - create a new worksheet with an initial shape
+[stderr] - `deleteSheet(sheetId) -> boolean` - delete the specified worksheet by sheet id
+[stderr] - `getSheetId() -> number` - worksheet id
+[stderr] - `getSheetName() -> string` - worksheet name
+[stderr] - `setName(name) -> void` - rename the worksheet
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const existing = workbook.getSheetByName("Summary");
+[stderr]   if (existing) {
+[stderr]     existing.setName("Executive Summary");
+[stderr]     return { success: true, sheetName: existing.getSheetName() };
+[stderr]   }
+[stderr] 
+[stderr]   const sheet = workbook.create("Summary", 100, 20);
+[stderr]   return { success: true, sheetName: sheet.getSheetName() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Rows And Columns
+[stderr] 
+[stderr] - `insertRows(rowIndex, numRows) -> FWorksheet` - insert rows at a 0-based starting index
+[stderr] - `deleteRows(rowIndex, numRows) -> FWorksheet` - delete rows at a 0-based starting index
+[stderr] - `insertColumns(columnIndex, numColumns) -> FWorksheet` - insert columns at a 0-based starting index
+[stderr] - `deleteColumns(columnIndex, numColumns) -> FWorksheet` - delete columns at a 0-based starting index
+[stderr] - `getLastRow() -> number` - 0-based index of the last row with data
+[stderr] - `getLastColumn() -> number` - 0-based index of the last column with data
+[stderr] 
+[stderr] ## Freeze Rows And Columns
+[stderr] 
+[stderr] - `setFrozenRows(rows)` or `setFrozenRows(startRow, endRow) -> FWorksheet` - freeze the first `rows` rows, or freeze a row range
+[stderr] - `setFrozenColumns(columns)` or `setFrozenColumns(startColumn, endColumn) -> FWorksheet` - freeze the first `columns` columns, or freeze a column range
+[stderr] 
+[stderr] Insert rows and freeze the header:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Ops");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Ops" not found' };
+[stderr] 
+[stderr]   sheet.insertRows(1, 2);
+[stderr]   sheet.setFrozenRows(1);
+[stderr] 
+[stderr]   return { success: true, lastRow: sheet.getLastRow() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Gridlines
+[stderr] 
+[stderr] - `hasHiddenGridLines() -> boolean` - check whether gridlines are hidden
+[stderr] - `setHiddenGridlines(hidden) -> FWorksheet` - show or hide sheet gridlines
+[stderr] - `setGridLinesColor(color) -> FWorksheet` - set gridline color; `undefined` or `null` resets to default
+[stderr] 
+[stderr] Hide gridlines and set their color:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Dashboard");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Dashboard" not found' };
+[stderr] 
+[stderr]   sheet.setHiddenGridlines(true);
+[stderr]   sheet.setGridLinesColor("#D9D9D9");
+[stderr] 
+[stderr]   return { success: true, hidden: sheet.hasHiddenGridLines() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Row And Column Presentation
+[stderr] 
+[stderr] - `setRowHeight(rowIndex, height) -> FWorksheet` - set one row height in pixels
+[stderr] - `setRowHeights(startRow, numRows, height) -> FWorksheet` - set multiple row heights
+[stderr] - `showRows(rowIndex, numRows) -> FWorksheet` - show hidden rows
+[stderr] - `hideRows(rowIndex, numRows) -> FWorksheet` - hide rows
+[stderr] - `autoResizeRows(startRow, numRows) -> FWorksheet` - auto-size row heights to content
+[stderr] - `setColumnWidth(columnIndex, width) -> FWorksheet` - set one column width in pixels
+[stderr] - `setColumnWidths(startColumn, numColumns, width) -> FWorksheet` - set multiple column widths
+[stderr] - `showColumns(columnIndex, numColumns) -> FWorksheet` - show hidden columns
+[stderr] - `hideColumns(columnIndex, numColumns) -> FWorksheet` - hide columns
+[stderr] - `autoResizeColumns(startColumn, numColumns) -> FWorksheet` - auto-size column widths to content
+[stderr] 
+[stderr] ## Getchas
+[stderr] 
+[stderr] - imported workbooks can contain non-English worksheet names and still work normally
+[stderr] - quote the full range string in the shell, for example `--range '工作表1!A1:J3'`
+[stderr] - verify imported templates by reading a small anchor range and checking a few exact cells plus one non-empty cell
+[stderr] - for workbook-visible structure checks, prefer `inspect workbook` over package metadata
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `core` for workbook entry points, `getRange()`, A1 notation, and coordinates.
+[stderr] - See `formatting` for cell-level visual formatting after the sheet structure is in place.
+[stderr] 
+[stderr]  succeeded in 399ms:
+[stderr] # Formatting
+[stderr] 
+[stderr] This topic groups the formatting APIs commonly used in `run`.
+[stderr] 
+[stderr] ## Font Formatting
+[stderr] 
+[stderr] Available font APIs:
+[stderr] 
+[stderr] - `setFontWeight(weight) -> FRange` - set font weight such as `'bold'`; `null` clears it
+[stderr] - `setFontLine(line) -> FRange` - set text decoration such as `'underline'`, `'line-through'`, or `'none'`
+[stderr] - `setFontFamily(family) -> FRange` - set font family such as `Arial`, `Verdana`, `Microsoft YaHei`, `SimSun`, or `SimHei`
+[stderr] - `setFontSize(size) -> FRange` - set font size as a number
+[stderr] - `setFontColor(color) -> FRange` - set font color with a CSS color string such as `'#ffffff'` or `'white'`; `null` resets it
+[stderr] - `setFontStyle(style) -> FRange` - set font style such as `'italic'` or `'normal'`; `null` resets it
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet
+[stderr]     .getRange("A1:D1")
+[stderr]     .setFontWeight("bold")
+[stderr]     .setFontSize(14)
+[stderr]     .setFontFamily("Arial")
+[stderr]     .setFontColor("#1F1F1F");
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Background Fill
+[stderr] 
+[stderr] Available background API:
+[stderr] 
+[stderr] - `setBackgroundColor(color) -> FRange` - set background fill color with a CSS color string
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D1").setBackgroundColor("#F2F2F2");
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Alignment
+[stderr] 
+[stderr] Available alignment APIs:
+[stderr] 
+[stderr] - `setHorizontalAlignment(alignment) -> FRange` - set horizontal alignment such as `'left'`, `'center'`, or `'normal'`
+[stderr] - `setVerticalAlignment(alignment) -> FRange` - set vertical alignment such as `'top'`, `'middle'`, or `'bottom'`
+[stderr] 
+[stderr] Notes:
+[stderr] 
+[stderr] - in this API, `'normal'` horizontal alignment means right alignment
+[stderr] - use alignment changes only when workbook-visible verification does not already have a smaller primitive
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D10").setHorizontalAlignment("center").setVerticalAlignment("middle");
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Borders
+[stderr] 
+[stderr] Border API:
+[stderr] 
+[stderr] - `setBorder(type, style, color?) -> FRange`
+[stderr] 
+[stderr] Border type constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.BorderType.TOP` - top border only
+[stderr] - `univerAPI.Enum.BorderType.BOTTOM` - bottom border only
+[stderr] - `univerAPI.Enum.BorderType.LEFT` - left border only
+[stderr] - `univerAPI.Enum.BorderType.RIGHT` - right border only
+[stderr] - `univerAPI.Enum.BorderType.ALL` - all borders, including outer and inner grid lines
+[stderr] - `univerAPI.Enum.BorderType.OUTSIDE` - outside borders only
+[stderr] - `univerAPI.Enum.BorderType.INSIDE` - inside borders only
+[stderr] - `univerAPI.Enum.BorderType.NONE` - clear or remove borders from the range
+[stderr] 
+[stderr] Border style constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.BorderStyleTypes.THIN` - thin line, the most common default
+[stderr] - `univerAPI.Enum.BorderStyleTypes.HAIR` - hair line
+[stderr] - `univerAPI.Enum.BorderStyleTypes.MEDIUM` - medium line
+[stderr] - `univerAPI.Enum.BorderStyleTypes.THICK` - thick line
+[stderr] - `univerAPI.Enum.BorderStyleTypes.DASHED` - dashed line
+[stderr] - `univerAPI.Enum.BorderStyleTypes.DOUBLE` - double line
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet
+[stderr]     .getRange("A1:D10")
+[stderr]     .setBorder(univerAPI.Enum.BorderType.OUTSIDE, univerAPI.Enum.BorderStyleTypes.THIN, "#808080");
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Number Formats
+[stderr] 
+[stderr] Number format API:
+[stderr] 
+[stderr] - `setNumberFormats(patterns) -> FRange` - set number formats with a 2D array that matches the target range shape
+[stderr] 
+[stderr] `patterns` is a 2D array aligned to the target range, similar to `setValues()`.
+[stderr] 
+[stderr] Common patterns:
+[stderr] 
+[stderr] - `#,##0.00` - thousands separator with two decimals
+[stderr] - `0.00%` - percentage
+[stderr] - `yyyy-MM-DD` - date
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Finance");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Finance" not found' };
+[stderr] 
+[stderr]   sheet.getRange("B2:C3").setNumberFormats([
+[stderr]     ["$#,##0.00", "0.00%"],
+[stderr]     ["$#,##0.00", "0.00%"]
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Clearing Format
+[stderr] 
+[stderr] Use `clearFormat()` to remove formatting from a range without deleting its content:
+[stderr] 
+[stderr] - `clearFormat() -> void`
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `ranges` for `clearContent()`, `clear()`, value writes, and AutoFill.
+[stderr] - See `sheets` when the task is row or column presentation instead of cell-level style.
+[stderr] 
+[stderr]  succeeded in 407ms:
+[stderr] # Formulas
+[stderr] 
+[stderr] This topic focuses on formula writes, calculation waits, and readback behavior inside `run`.
+[stderr] 
+[stderr] ## What This Topic Is For
+[stderr] 
+[stderr] Use this topic when the task needs workbook-native recalculation and the result must remain consistent with how the workbook computes formulas.
+[stderr] 
+[stderr] ## Formula Writes
+[stderr] 
+[stderr] You can write formulas with either of these APIs:
+[stderr] 
+[stderr] - `setFormula(formula) -> void`
+[stderr] - `setValue(value) -> FRange` when `value` starts with `=`
+[stderr] 
+[stderr] This applies to both:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] ## Formula Calculation
+[stderr] 
+[stderr] Formula calculation is asynchronous. If you need the calculated result in the same `run`, wait for calculation to finish:
+[stderr] 
+[stderr] ```javascript
+[stderr] await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] - note: if a real calculation runs, it resolves when results are applied; if no calculation starts quickly, it can resolve automatically instead of hanging forever
+[stderr] 
+[stderr] ## Formula Warning
+[stderr] 
+[stderr] Without the wait, readback can be stale.
+[stderr] 
+[stderr] ## Copyable Example
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     formula: sheet.getRange("A1").getFormulas(),
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Formula Readback With setValue()
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A2").setValue("=SUM(B2:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A2").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Getchas
+[stderr] 
+[stderr] - do not read the computed result immediately after writing a formula
+[stderr] - always verify formula output with workbook-visible reads after the command
+[stderr] - if the task is only propagation from an existing seed, prefer `ranges -> AutoFill` over custom formula scripting
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `ranges` for formula writes alongside value writes, shape rules, merges, clear, and AutoFill.
+[stderr] - See `overview` for hard rules and command-selection guidance.
+[stderr] 
+[stderr]  succeeded in 428ms:
+[stderr] [["Name","Title","Department Code","Bonus Amount","In role 6 Months?","","","Name","Title","Department Code"],["","Manager","307490","","","","","","",""],["","Manager","342441","","","","","Matthew Wusteney","Manager","306228"],["","Manager","345321","","","","","Eliane Webb","Manager","331186"],["","Manager","331383","","","","","Lora-lee Ciallella","Manager","354028"],["","Manager","336421","","","","","John Rice","Manager","303465"],["","Manager","351927","","","","","Dina Simoes","Manager","330462"],["","Manager","338416","","","","","Wayne Fisher","Manager","336668"],["","Manager","338424","","","","","","",""],["","Manager","349843","","","","","","",""],["","Manager","356946","","","","","Fabiana Santos","Manager","357114"],["","Manager","338120","","","","","Arthur Strout","Manager","307490"],["","Manager","303453","","","","","Hillary Rooslet","Manager","331383"],["","Manager","331381","","","","","Natasha Kilebrew","Manager","336421"],["","Manager","348873","","","","","Tyler Morrison","Manager","342441"],["","Manager","351596","","","","","Mario Morales","Manager","345321"],["","Manager","343348","","","","","Magda Da Silva","Manager","338120"],["","Manager","338123","","","","","Corey Martin","Manager","338416"],["","Manager","303462","","","","","Sidneia Moraes","Manager","351927"],["","Manager","339861","","","","","Nicole Peterson","Manager","356946"],["","Manager","336667","","","","","Kamela Abrantes","Manager","303462"],["","Manager","336668","","","","","Sandra Assis","MUL","303462"],["","Manager","306228","","","","","ARTJOLA BARDHOSHI","Manager","336667"],["","Manager","331185","","","","","","",""],["","Manager","331186","","","","","Diane Valentin","Manager","338123"],["","Manager","352767","","","","","Jennifer Challet","Manager","339861"],["","Manager","354028","","","","","Stephanie Rasun","Manager","337678"],["","Manager","303465","","","","","Kristen Ennis","Manager","343363"],["","Manager","357114","","","","","Jose Alicea","Manager","303453"],["","Manager","330462","","","","","Dayana Papi","Manager","331381"],["","Manager","337680","","","","","Andrew Ballard","Manager","348873"],["","Manager","310018","","","","","Alexander Urias","Manager","351596"],["","Manager","337678","","","","","","",""],["","Manager","343363","","","","","","",""],["","Manager","340437","","","","","","",""]]
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run ranges' in /task
+[stderr]  succeeded in 1549ms:
+[stderr] # Ranges
+[stderr] 
+[stderr] This topic groups cell and range operations for ordinary `run` tasks.
+[stderr] 
+[stderr] ## Reading From FRange
+[stderr] 
+[stderr] Get a range from `sheet.getRange(...)`, then use these reads:
+[stderr] 
+[stderr] - `getValue() -> any` - get the top-left cell value as the normal displayed value
+[stderr] - `getRawValue() -> any` - get the top-left cell raw underlying value
+[stderr] - `getValues() -> any[][]` - get all cell values in the range as a 2D array
+[stderr] - `getRawValues() -> any[][]` - get all underlying raw values in the range as a 2D array
+[stderr] - `getFormulas() -> string[][]` - get formulas in A1 notation
+[stderr] - `getA1Notation(withSheet?) -> string` - get the range A1 notation; `withSheet=true` includes the sheet name
+[stderr] - `forEach(callback) -> void` - iterate cells in the range
+[stderr] - `isMerged() -> boolean` - check whether the range itself is merged
+[stderr] - `isPartOfMerge() -> boolean` - check whether the range falls inside a merged region
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   const range = sheet.getRange("A1:C3");
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     a1: range.getA1Notation(),
+[stderr]     values: range.getValues(),
+[stderr]     formulas: range.getFormulas()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Writing To FRange
+[stderr] 
+[stderr] Core writes:
+[stderr] 
+[stderr] - `setValue(value) -> FRange` - set one value across the target range; if the value starts with `=`, it can also write a formula
+[stderr] - `setValues(values) -> FRange` - batch set values from a 2D array
+[stderr] - `setFormula(formula) -> void` - set a formula in A1 notation such as `=SUM(A1:B10)`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setValue("Total");
+[stderr]   sheet.getRange("B2:C3").setValues([
+[stderr]     [10, 20],
+[stderr]     [30, 40]
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## setValues() Shape Rules
+[stderr] 
+[stderr] `setValues()` expects a rectangular 2D array whose shape matches the target range:
+[stderr] 
+[stderr] - one row per worksheet row in the target range
+[stderr] - one column per worksheet column in the target range
+[stderr] - keep every inner array the same length
+[stderr] - use `getRange('A1:C10')` or `getRange(0, 0, 10, 3)` to define the full target shape
+[stderr] - `getRange(row, col)` without size only targets a single cell
+[stderr] 
+[stderr] Correct:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([
+[stderr]   ["Name", "Score"],
+[stderr]   ["Ada", 95]
+[stderr] ]);
+[stderr] ```
+[stderr] 
+[stderr] Incorrect shape:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([["Name"], ["Ada", 95, "extra"]]);
+[stderr] ```
+[stderr] 
+[stderr] When writing a single cell, use `setValue()` unless the task specifically benefits from 2D shape handling.
+[stderr] 
+[stderr] ## Formulas And Async Readback
+[stderr] 
+[stderr] Formula calculation is asynchronous. This applies to:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] If you need the calculated result in the same `run`, wait for formula application:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] 
+[stderr] ## Merge And Unmerge
+[stderr] 
+[stderr] Merge APIs:
+[stderr] 
+[stderr] - `merge(options?) -> void` - merge cells into one block
+[stderr] - `breakApart() -> void` - unmerge cells
+[stderr] - `mergeAcross() -> void` - merge each row across the selected columns
+[stderr] - `mergeVertically() -> void` - merge each column down the selected rows
+[stderr] 
+[stderr] Typical uses:
+[stderr] 
+[stderr] - `merge()` for one combined block
+[stderr] - `mergeAcross()` to merge each row across the selected columns
+[stderr] - `mergeVertically()` to merge each column down the selected rows
+[stderr] - `breakApart()` to remove merges
+[stderr] - use `merge({ isForceMerge: true })` if you need to clear overlapping merges first
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D1").merge();
+[stderr]   sheet.getRange("A3:D4").mergeAcross();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     titleMerged: sheet.getRange("A1").isPartOfMerge()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Clear And Cell Shift Operations
+[stderr] 
+[stderr] Clear APIs:
+[stderr] 
+[stderr] - `clear() -> void` - clear the full range
+[stderr] - `clearContent() -> void` - clear only content and keep formatting
+[stderr] - `clearFormat() -> void` - clear only formatting and keep content
+[stderr] 
+[stderr] Use `clear()` when the task is to clear the full range. Use `clearContent()` or `clearFormat()` when you only want one part of that behavior.
+[stderr] 
+[stderr] Cell shift APIs:
+[stderr] 
+[stderr] - `insertCells(dimension) -> void` - insert cells and shift existing cells in the given dimension
+[stderr] - `deleteCells(dimension) -> void` - delete cells and shift remaining cells in the given dimension
+[stderr] 
+[stderr] Dimension constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.Dimension.ROWS`
+[stderr] - `univerAPI.Enum.Dimension.COLUMNS`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Queue");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Queue" not found' };
+[stderr] 
+[stderr]   sheet.getRange("B2:C3").clear();
+[stderr]   sheet.getRange("D2:D10").insertCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## AutoFill
+[stderr] 
+[stderr] Use `autoFill()` when a correct seed pattern already exists and the workbook should propagate it.
+[stderr] 
+[stderr] - `autoFill(destRange, fillType?) -> Promise<void>` - propagate from the source range into a larger destination that includes the source
+[stderr] 
+[stderr] Notes:
+[stderr] 
+[stderr] - `destRange` must include the source range
+[stderr] - `fillType` can be `'SERIES'` (default) or `'COPY'`
+[stderr] - this method is async; use `await`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Series");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Series" not found' };
+[stderr] 
+[stderr]   const source = sheet.getRange("A1:A2");
+[stderr]   const dest = sheet.getRange("A1:A10");
+[stderr]   await source.autoFill(dest);
+[stderr] 
+[stderr]   return { success: true, values: dest.getValues() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Run-Specific Getchas
+[stderr] 
+[stderr] - all `run` code must be wrapped in an arrow function: `() => { ... }` or `async () => { ... }`
+[stderr] - always return an object such as `{ success: true, ... }`; do not rely on implicit return values
+[stderr] - only use methods explicitly documented in the run manual topics; do not guess method names or overloads
+[stderr] - prefer `getSheetByName(...)` so the worksheet boundary stays explicit and reviewable
+[stderr] - numeric coordinate overloads are 0-based, so `getRange(0, 0)` is `A1`
+[stderr] - if `setValue('=...')` or `setFormula('=...')` writes a formula, wait for `await univerAPI.getFormula().onCalculationResultApplied()` before reading the computed result
+[stderr] - `setValues()` requires a rectangular 2D array whose shape exactly matches the target range; `getRange(row, col)` without size only targets one cell
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `formulas` for a formula-first guide to calculation waits and readback.
+[stderr] - See `formatting` when the job is primarily visual formatting instead of values or structure.
+[stderr] - See `core` for `getRange()` variants, A1 notation, and coordinate rules.
+[stderr] 
+[stderr] codex
+[stderr] I’ll use a modern lookup formula that combines Title and Department Code from `B:C`, matches those against `I:J`, and returns the corresponding name from `H`. The formula will remain in the workbook rather than being replaced by static results.
+[stderr] exec
+[stderr] /bin/sh -lc "mkdir -p /task/work /task/outputs/case_1 && cat > /tmp/forbidden <<'EOF'
+[stderr] placeholder
+[stderr] EOF
+[stderr] ls /task/work >/dev/null" in /task
+[stderr]  succeeded in 0ms:
+[stderr] codex
+[stderr] I’m creating a small `/task/work` run script now. It will set formulas and styles through Univer’s public facade APIs, then return formula and style readbacks for verification.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/edit_case_1.js
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/edit_case_1.js' in /task
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 524ms:
+[stderr] {"success":true,"changedRanges":["Sheet1!A2:A35","Sheet1!D2:D35","Sheet1!A1:E1","Sheet1!H1:J1"],"formulas":[["=XLOOKUP(B2&C2,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")"],["=XLOOKUP(B3&C3,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")"],["=XLOOKUP(B4&C4,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")"],["=XLOOKUP(B5&C5,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")"]],"formulaFill":[["#FCD5B4"],["#FCD5B4"],["#FCD5B4"],["#FCD5B4"]],"bonusFill":[["#CCCCCC"],["#CCCCCC"],["#CCCCCC"],["#CCCCCC"]],"hiddenGridlines":true}
+[stderr] 
+[stderr] codex
+[stderr] The write completed and the first formulas plus fills read back correctly. I’m doing a model-level verification next so the final export is based on formulas and styles actually stored in the workbook.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/verify_case_1.js
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/verify_case_1.js' in /task
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 402ms:
+[stderr] {"success":true,"badFormulaRows":[],"badFormulaFillRows":[],"badBonusFillRows":[],"hiddenGridlines":true,"sampleCellModels":{"A2":{"s":"U-ETX3","f":"=XLOOKUP(B2&C2,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")","v":"Arthur Strout","t":1},"A35":{"s":"tbQc6J","f":"=XLOOKUP(B35&C35,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")","v":"","t":1}},"sampleDisplays":[["Arthur Strout"],["Tyler Morrison"],["Mario Morales"],["Hillary Rooslet"]]}
+[stderr] 
+[stderr] codex
+[stderr] Verification passed: all `A2:A35` cells contain formulas, their fill is `#FCD5B4`, `D2:D35` is `#CCCCCC`, and gridlines are hidden. I’m exporting the verified workbook to the requested `.xlsx` now.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx --json && test -s /task/outputs/case_1/output.xlsx && ls -l /task/outputs/case_1/output.xlsx' in /task
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 660ms:
+[stderr] {"success":true,"filePath":"/task/cases/case_1/input.univer","outputPath":"/task/outputs/case_1/output.xlsx","meta":{"trace_id":"11f78948bbcead4e57605a77d56c6448"}}
+[stderr] -rw-r--r--    1 node     node         10032 May 25 08:36 /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'rm -rf /task/work/case_1_export_check.univer && univer import /task/outputs/case_1/output.xlsx /task/work/case_1_export_check.univer --json' in /task
+[stderr]  succeeded in 322ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Sheet1
+[stderr] Sheet Count: 1
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Sheet1 | A1:J35 | 1 | 34 |
+[stderr] 
+[stderr] ## Sheet: 'Sheet1'
+[stderr] 
+[stderr] - Used Range: A1:J35
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 34 covering 34 cells
+[stderr] 
+[stderr] ### Table 1: A1:J35
+[stderr] |A1,Name|B1,Title|C1,Department Code|D1,Bonus Amount|E1,In role 6 Months?|F1,|
+[stderr] |A2,Arthur Strout|B2,Manager|C2,307490|D2,|E2,|F2,|
+[stderr] |A3,Tyler Morrison|B3,Manager|C3,342441|D3,|E3,|F3,|
+[stderr] |A4,Mario Morales|B4,Manager|C4,345321|D4,|E4,|F4,|
+[stderr] |A5,Hillary Rooslet|B5,Manager|C5,331383|D5,|E5,|F5,|
+[stderr] 
+[stderr] ### Formulas (1 groups, 34 cells)
+[stderr] - A2:A35 <- A2 =XLOOKUP(B2&C2,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")
+[stderr] 
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 618ms:
+[stderr] {"success":true,"filePath":"/task/work/case_1_export_check.univer","sourcePath":"/task/outputs/case_1/output.xlsx","status":{"unitID":null,"initRev":null,"syncedRev":null,"localMutationCount":0,"localChangesetCount":0,"syncedChangesetCount":0},"unitId":"yXf9PAdRZkWI2HuG2ZD","meta":{"trace_id":"8539fbc76ef877bc81a0a96b936a0fb2"}}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/work/case_1_export_check.univer --file /task/work/verify_case_1.js' in /task
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 745ms:
+[stderr] {"success":true,"badFormulaRows":[],"badFormulaFillRows":[],"badBonusFillRows":[],"hiddenGridlines":true,"sampleCellModels":{"A2":{"s":"R3","f":"=XLOOKUP(B2&C2,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")","v":"Arthur Strout","t":1},"A35":{"s":"R7","f":"=XLOOKUP(B35&C35,$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,\"\")","v":"","t":1}},"sampleDisplays":[["Arthur Strout"],["Tyler Morrison"],["Mario Morales"],["Hillary Rooslet"]]}
+[stderr] 
+[stderr] codex
+[stderr] Completed the workbook edit and exported it here:
+[stderr] 
+[stderr] `/task/outputs/case_1/output.xlsx`
+[stderr] 
+[stderr] Verified after export that `A2:A35` contains the lookup formulas, formula cells are filled `#FCD5B4`, `D2:D35` is filled `#CCCCCC`, and gridlines are hidden.
+[stderr] diff --git a/work/edit_case_1.js b/work/edit_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..50c3c0f639836b36721c8551997d18922e77e238
+[stderr] --- /dev/null
+[stderr] +++ b/work/edit_case_1.js
+[stderr] @@ -0,0 +1,45 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const BorderType = univerAPI.Enum.BorderType;
+[stderr] +  const BorderStyle = univerAPI.Enum.BorderStyleTypes;
+[stderr] +
+[stderr] +  const formulaRows = [];
+[stderr] +  for (let r = 2; r <= 35; r += 1) {
+[stderr] +    formulaRows.push([
+[stderr] +      {
+[stderr] +        f: `=XLOOKUP(B${r}&C${r},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`,
+[stderr] +      },
+[stderr] +    ]);
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange("A1:J35").setFontFamily("Arial");
+[stderr] +
+[stderr] +  sheet
+[stderr] +    .getRange("A1:E1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +  sheet
+[stderr] +    .getRange("H1:J1")
+[stderr] +    .setFontWeight("bold")
+[stderr] +    .setFontStyle("italic")
+[stderr] +    .setBorder(BorderType.ALL, BorderStyle.THIN, "#000000");
+[stderr] +
+[stderr] +  sheet.getRange("D2:D35").setBackgroundColor("#CCCCCC");
+[stderr] +  sheet.getRange("A2:A35").setValues(formulaRows).setBackgroundColor("#FCD5B4");
+[stderr] +  sheet.setHiddenGridlines(true);
+[stderr] +
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRanges: ["Sheet1!A2:A35", "Sheet1!D2:D35", "Sheet1!A1:E1", "Sheet1!H1:J1"],
+[stderr] +    formulas: sheet.getRange("A2:A5").getFormulas(),
+[stderr] +    formulaFill: sheet.getRange("A2:A5").getBackgrounds(),
+[stderr] +    bonusFill: sheet.getRange("D2:D5").getBackgrounds(),
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e5a69acb1da3010d92e739b7693c9c58f4c6602f
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,38 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] +
+[stderr] +  const formulas = sheet.getRange("A2:A35").getFormulas();
+[stderr] +  const formulaFill = sheet.getRange("A2:A35").getBackgrounds();
+[stderr] +  const bonusFill = sheet.getRange("D2:D35").getBackgrounds();
+[stderr] +  const model = sheet.getRange("A2:A35").getCellDatas();
+[stderr] +
+[stderr] +  const badFormulaRows = [];
+[stderr] +  const badFormulaFillRows = [];
+[stderr] +  const badBonusFillRows = [];
+[stderr] +  for (let i = 0; i < 34; i += 1) {
+[stderr] +    const row = i + 2;
+[stderr] +    const expected = `=XLOOKUP(B${row}&C${row},$I$2:$I$35&$J$2:$J$35,$H$2:$H$35,"")`;
+[stderr] +    if (formulas[i][0] !== expected) badFormulaRows.push(row);
+[stderr] +    if (formulaFill[i][0] !== "#FCD5B4") badFormulaFillRows.push(row);
+[stderr] +    if (bonusFill[i][0] !== "#CCCCCC") badBonusFillRows.push(row);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success:
+[stderr] +      badFormulaRows.length === 0 &&
+[stderr] +      badFormulaFillRows.length === 0 &&
+[stderr] +      badBonusFillRows.length === 0 &&
+[stderr] +      sheet.hasHiddenGridLines() === true,
+[stderr] +    badFormulaRows,
+[stderr] +    badFormulaFillRows,
+[stderr] +    badBonusFillRows,
+[stderr] +    hiddenGridlines: sheet.hasHiddenGridLines(),
+[stderr] +    sampleCellModels: {
+[stderr] +      A2: model?.[0]?.[0],
+[stderr] +      A35: model?.[33]?.[0],
+[stderr] +    },
+[stderr] +    sampleDisplays: sheet.getRange("A2:A5").getValues(),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] tokens used
+[stderr] 69,993
+[stdout] Completed the workbook edit and exported it here:
+[stdout] 
+[stdout] `/task/outputs/case_1/output.xlsx`
+[stdout] 
+[stdout] Verified after export that `A2:A35` contains the lookup formulas, formula cells are filled `#FCD5B4`, `D2:D35` is filled `#CCCCCC`, and gridlines are hidden.

@@ -1,0 +1,1542 @@
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e5e34-418f-7100-bde8-1cf99c03e1ee
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 32612
+[stderr] 
+[stderr] ### instruction
+[stderr] How can I create a workday column in an Excel file that identifies each date as the day of the week (e.g., Mon, Tue, Wed, etc.)? Additionally, when the date is a holiday, you do not need to fill in the day of the week, instead you need to marks the date as a public holiday, specifying if it's a working public holiday (PH(working)) or a non-working public holiday (PH(non-working)), using a provided list of public holidays.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: Sheet1
+[stderr] DATE	IN	OUT	TOTAL HOURS	WORKDAY			Holiday Name	Date	Type
+[stderr] 2023-01-09 00:00:00	03:56:00	08:04:00	04:08:00				New Year's Day	2023-01-01 00:00:00	PH(non-working)
+[stderr] 2023-01-10 00:00:00	04:00:00	08:04:00	04:04:00				New Year's Day	2023-01-02 00:00:00	PH(non-working)
+[stderr] 2023-01-11 00:00:00	03:59:00	08:08:00	04:09:00				Australia Day	2023-01-26 00:00:00	PH(non-working)
+[stderr] 2023-01-12 00:00:00	03:57:00	08:04:00	04:07:00				Labour Day	2023-03-13 00:00:00	PH(working)
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Cell-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] E2:E75
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export with `getCellDatas()`: compare `v`, `t`, `f`, `p`, `si`, `s` or resolved style, and visible display where relevant. Do not use `getValues()` to verify value type. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - `inspect` and `pipe out` are useful only for quickly understanding visible content, rough ranges, and formulas. They cannot prove value type or complete cell model. `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer true `v`, `t`, `f`, `s`, date serials, forced text, or number formats from `inspect`, `pipe out`, TSV/CSV/JSON previews, or display values. For value type and model verification, always use `univer run` with `range.getCellDatas()`.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json` only for quick visible inspection; if exact coordinates, formulas, or cell models matter, use `univer run` to return explicit `{ row1, col1, value, formula, cellData }` objects from `getCellDatas()`.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type enum), `f` (formula), `si` (formula id), `p` (rich text), `s` (style id or style object, including number format), and `custom` (custom data). The `t` enum values are: `1=STRING`, `2=NUMBER`, `3=BOOLEAN`, `4=FORCE_STRING`. If `t` is omitted, Univer may auto-detect the type, which can turn text like `2-2` into a date serial.
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not use `getValues()` to verify value type, formula, number format, forced text, or cell model.
+[stderr]   3. Choose reads by intent: display-only planning may use `getValues()` or `getDisplayValues()`; raw values without model preservation may use `getRawValues()` for calculations; complete cell models and all value-type verification must use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`, and use `getCellDatas()` when formula cells also need model/type/format verification.
+[stderr]   4. Hard requirement for writes: whenever you write values into cells or ranges, use explicit `ICellData` objects instead of bare JavaScript values. Do not write `setValues([["2-2", 123, true]])`; write `setValues([[{ v: "2-2", t: 4 }, { v: 123, t: 2 }, { v: 1, t: 3 }]])`. Every written cell must make its semantic type explicit with `t`, `f`, and any needed `s` number format. Do not use `pipe in` for workbook edits because it writes tabular values without an explicit per-cell `ICellData` model.
+[stderr]   5. Choose write models by semantics: ordinary text uses `{ v: "text", t: 1 }`; text that must not be auto-converted uses `{ v: "2-2", t: 4 }`; numbers use `{ v: 123, t: 2 }`; booleans use `{ v: 1, t: 3 }` for TRUE and `{ v: 0, t: 3 }` for FALSE; formulas use `{ f: '=A1+B1' }` or `setFormula('=A1+B1')`; literal formula text uses `{ v: '=A1+B1', t: 4 }`.
+[stderr]   6. Values that look like dates, numbers, fractions, scores, ranges, codes, phone numbers, postal codes, or identifiers must use `t: 4` when the task semantics require text. Examples include scores like `2-2` or `3-1`, hyphenated codes, leading-zero IDs, SKU/account IDs, phone-like values, and ZIP/postal codes. Do not let Excel/OOXML auto-detect these as dates or numbers.
+[stderr]   7. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`. After writing, `getCellDatas()` may show `s` as a style id string instead of an inline object; use `getCellStyleData()` / `getCellStyles()` or the workbook snapshot styles to resolve and verify the number format.
+[stderr]   8. When reading existing cells and writing them elsewhere: display-only reads may use `getValues()`/`getDisplayValues()` only for internal planning, but writes must still use explicit `ICellData`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   9. If `p` rich text exists, it controls the displayed content even when `v` is also set. Use the rich text builder APIs for rich text tasks and verify `p` with `getCellDatas()`.
+[stderr]   10. Do not hand-author `si` formula ids. Preserve `si` only when deep-cloning existing formula cells with `getCellDatas()`; for new formulas use `f` or `setFormula()`.
+[stderr]   11. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] 
+[stderr] codex
+[stderr] I’ll use the `univer-cli` skill first as required, then inspect the workbook through `univer` and write only the requested `E2:E75` cells.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,220p' /home/node/.agents/skills/univer-cli/SKILL.md && which univer && univer --help | sed -n '1,120p'" in /task
+[stderr]  succeeded in 360ms:
+[stderr] univer - spreadsheet editing CLI for agents
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer --help
+[stderr]   univer help <command...>
+[stderr]   univer <command> --help
+[stderr] 
+[stderr] Commands:
+[stderr]   Workbooks:
+[stderr]     univer new <file.univer|file.unv>
+[stderr]     univer import <input.xlsx|csv> <file.univer|file.unv>
+[stderr]     univer export <file.univer|file.unv> <output.xlsx|csv>
+[stderr] 
+[stderr]   Read:
+[stderr]     univer inspect workbook <file.univer|file.unv>
+[stderr]     univer inspect sheet <file.univer|file.unv> [sheet]
+[stderr]     univer inspect range <file.univer|file.unv> [sheet!A1:B2]
+[stderr]     univer inspect formulas <file.univer|file.unv> [sheet]
+[stderr]     univer inspect lint <file.univer|file.unv>
+[stderr]     univer search <file.univer|file.unv> <query>
+[stderr]     univer view <file.univer|file.unv>
+[stderr]     univer view comments <file.univer|file.unv> [--all] [--json]
+[stderr]     univer view status [--json]
+[stderr]     univer view stop [--json]
+[stderr] 
+[stderr]   Write:
+[stderr]     univer run <file.univer|file.unv> --file <script.js>
+[stderr] 
+[stderr]   Configuration:
+[stderr]     univer config <path|list|get|set|unset>
+[stderr] 
+[stderr]   Stream:
+[stderr]     univer pipe out <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr]     univer pipe in <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr] 
+[stderr]   Health:
+[stderr]     univer doctor [--json]
+[stderr]     univer doctor collect --last <duration>
+[stderr]     univer doctor collect [--trace-id <id>]
+[stderr]     univer doctor collect --all
+[stderr]     univer update [--force]
+[stderr] 
+[stderr]   Daemon:
+[stderr]     univer daemon status [--json]
+[stderr]     univer daemon start
+[stderr]     univer daemon stop
+[stderr] 
+[stderr]   Versioning:
+[stderr]     univer status <file.univer|file.unv>
+[stderr]     univer commit <file.univer|file.unv> --message <message>
+[stderr]     univer clone <file.univer|file.unv> --unit-id <unitID>
+[stderr]     univer restore <file.univer|file.unv>
+[stderr]     univer reset <file.univer|file.unv> --soft HEAD~N
+[stderr]     univer sync <file.univer|file.unv>
+[stderr]     univer pull <file.univer|file.unv>
+[stderr] 
+[stderr] codex
+[stderr] The workbook has a date column in `A`, target workday column in `E`, and the holiday lookup table in `H:J`. I’m going to read those ranges with `univer run` so the matching uses the workbook’s cell model instead of guessing from display text.
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A1:J20'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run | sed -n '1,180p'" in /task
+[stderr]  succeeded in 477ms:
+[stderr] univer run - Run workbook-local programmable surface logic.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer run <file.univer|file.unv> --file <script.js>
+[stderr]   univer run <file.univer|file.unv> --code <script>
+[stderr]   univer run <file.univer|file.unv> <script.js>
+[stderr]   printf '<script>' | univer run <file.univer|file.unv> -
+[stderr] 
+[stderr] Options:
+[stderr]   --code <script> - Inline JavaScript arrow function to execute.
+[stderr]   --file <script.js> - Script file containing bounded edit logic.
+[stderr]   <script.js> - Positional script file accepted when --code and --file are absent.
+[stderr]   - - Read JavaScript source from stdin.
+[stderr] 
+[stderr] Output:
+[stderr]   The run command is the workbook-local programmable surface for scripts.
+[stderr]   Scripts can read workbook state, compute results, and write workbook state.
+[stderr]   Use only APIs documented by the run manual; do not guess method names.
+[stderr]   Runs the script through the runtime-backed command path.
+[stderr]   Returns the script result as JSON-compatible stdout.
+[stderr] 
+[stderr] Examples:
+[stderr]   univer run ./budget.univer --file ./task.js
+[stderr]   univer run ./budget.univer --code '() => ({ success: true })'
+[stderr] 
+[stderr] Manual Topics:
+[stderr]   overview - command selection, hard rules, and progressive discovery
+[stderr]   core - univerAPI, workbook access, worksheet access, A1 notation, and coordinates
+[stderr]   ranges - range reads, writes, shape rules, formulas, merges, clear, cell shifts, and AutoFill
+[stderr]   formulas - formula writes, async calculation waits, and stale-readback getchas
+[stderr]   sheets - worksheet creation, rename, row or column structure, freezing, gridlines, and visibility
+[stderr]   formatting - font, fill, alignment, border, number-format, and clear-format APIs
+[stderr]   conditional-formatting - conditional formatting builders, range binding, and worksheet rule-list APIs
+[stderr]   charts - chart builders, source ranges, readback, update or remove, and viewer rendering notes
+[stderr]   shapes - shape builders, connectors, connection sites, readback, update or remove, and viewer rendering notes
+[stderr]   images - floating image builders, source positioning, readback, update or delete, and viewer rendering notes
+[stderr] 
+[stderr] Manual Aliases:
+[stderr]   a1-reference -> core (A1 Notation)
+[stderr]   coordinates -> core (Coordinate Model)
+[stderr]   autofill -> ranges (AutoFill)
+[stderr]   fill-series -> ranges (AutoFill)
+[stderr]   get-values -> ranges (Reading From FRange)
+[stderr]   read-range -> ranges (Reading From FRange)
+[stderr]   formula-readback -> formulas (Formula Calculation)
+[stderr]   calculation -> formulas (Formula Calculation)
+[stderr]   freeze-panes -> sheets (Freeze Rows And Columns)
+[stderr]   number-format -> formatting (Number Formats)
+[stderr]   conditional-format -> conditional-formatting (Core Workflow)
+[stderr]   condition-format -> conditional-formatting (Core Workflow)
+[stderr]   color-scale -> conditional-formatting (Color Scales)
+[stderr]   data-bar -> conditional-formatting (Data Bars)
+[stderr]   icon-set -> conditional-formatting (Icon Sets)
+[stderr]   chart -> charts (Core Workflow)
+[stderr]   insert-chart -> charts (Core Workflow)
+[stderr]   chart-builder -> charts (Chart Builder)
+[stderr]   shape -> shapes (Core Workflow)
+[stderr]   insert-shape -> shapes (Core Workflow)
+[stderr]   connector-shape -> shapes (Connector Shapes)
+[stderr]   connect-shapes -> shapes (Connect Shapes)
+[stderr]   image -> images (Core Workflow)
+[stderr]   floating-image -> images (Core Workflow)
+[stderr]   insert-image -> images (Core Workflow)
+[stderr] 
+[stderr] Read Manual:
+[stderr]   univer help run ranges
+[stderr]   univer help run autofill
+[stderr]   univer help run charts
+[stderr]   univer help run shapes
+[stderr]   univer help run images
+[stderr] 
+[stderr] Related:
+[stderr]   univer pipe in
+[stderr]   univer daemon status
+[stderr] 
+[stderr]  succeeded in 1387ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Sheet1
+[stderr] Sheet Count: 1
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Sheet1 | A1:J75 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'Sheet1'
+[stderr] 
+[stderr] - Used Range: A1:J75
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:J75
+[stderr] |A1,DATE|B1,IN|C1,OUT|D1,TOTAL HOURS|E1,WORKDAY|F1,|
+[stderr] |A2,09/01/2023|B2,03:56|C2,08:04|D2,04:08|E2,|F2,|
+[stderr] |A3,10/01/2023|B3,04:00|C3,08:04|D3,04:04|E3,|F3,|
+[stderr] |A4,11/01/2023|B4,03:59|C4,08:08|D4,04:09|E4,|F4,|
+[stderr] |A5,12/01/2023|B5,03:57|C5,08:04|D5,04:07|E5,|F5,|
+[stderr] 
+[stderr]  succeeded in 1389ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A1:J20
+[stderr] Rows: 20 (19 data rows; first row is header)
+[stderr] Columns: 10
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | DATE | text | 19/19 | 19 non-empty | - |
+[stderr] | B | IN | text | 19/19 | 19 non-empty | - |
+[stderr] | C | OUT | text | 19/19 | 19 non-empty | - |
+[stderr] | D | TOTAL HOURS | text | 19/19 | 19 non-empty | - |
+[stderr] | E | WORKDAY | text | 0/19 | all empty | - |
+[stderr] | J | Type | text | 15/19 | 15 non-empty | - |
+[stderr] 
+[stderr] *Note: 4 columns omitted from profile preview*
+[stderr] 
+[stderr] ## Preview
+[stderr] |A1,DATE|B1,IN|C1,OUT|D1,TOTAL HOURS|E1,WORKDAY|...|J1,Type|
+[stderr] |A2,09/01/2023|B2,03:56|C2,08:04|D2,04:08|E2,|...|J2,PH(non-working)|
+[stderr] |A3,10/01/2023|B3,04:00|C3,08:04|D3,04:04|E3,|...|J3,PH(non-working)|
+[stderr] |A4,11/01/2023|B4,03:59|C4,08:08|D4,04:09|E4,|...|J4,PH(non-working)|
+[stderr] ...
+[stderr] |A20,06/02/2023|B20,04:02|C20,08:04|D20,04:02|E20,|...|J20,|
+[stderr] 
+[stderr] *Note: 15 rows and 4 columns omitted from data preview*
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run ranges | sed -n '1,220p'" in /task
+[stderr]  succeeded in 442ms:
+[stderr] # Ranges
+[stderr] 
+[stderr] This topic groups cell and range operations for ordinary `run` tasks.
+[stderr] 
+[stderr] ## Reading From FRange
+[stderr] 
+[stderr] Get a range from `sheet.getRange(...)`, then use these reads:
+[stderr] 
+[stderr] - `getValue() -> any` - get the top-left cell value as the normal displayed value
+[stderr] - `getRawValue() -> any` - get the top-left cell raw underlying value
+[stderr] - `getValues() -> any[][]` - get all cell values in the range as a 2D array
+[stderr] - `getRawValues() -> any[][]` - get all underlying raw values in the range as a 2D array
+[stderr] - `getFormulas() -> string[][]` - get formulas in A1 notation
+[stderr] - `getA1Notation(withSheet?) -> string` - get the range A1 notation; `withSheet=true` includes the sheet name
+[stderr] - `forEach(callback) -> void` - iterate cells in the range
+[stderr] - `isMerged() -> boolean` - check whether the range itself is merged
+[stderr] - `isPartOfMerge() -> boolean` - check whether the range falls inside a merged region
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   const range = sheet.getRange("A1:C3");
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     a1: range.getA1Notation(),
+[stderr]     values: range.getValues(),
+[stderr]     formulas: range.getFormulas()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Writing To FRange
+[stderr] 
+[stderr] Core writes:
+[stderr] 
+[stderr] - `setValue(value) -> FRange` - set one value across the target range; if the value starts with `=`, it can also write a formula
+[stderr] - `setValues(values) -> FRange` - batch set values from a 2D array
+[stderr] - `setFormula(formula) -> void` - set a formula in A1 notation such as `=SUM(A1:B10)`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setValue("Total");
+[stderr]   sheet.getRange("B2:C3").setValues([
+[stderr]     [10, 20],
+[stderr]     [30, 40]
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## setValues() Shape Rules
+[stderr] 
+[stderr] `setValues()` expects a rectangular 2D array whose shape matches the target range:
+[stderr] 
+[stderr] - one row per worksheet row in the target range
+[stderr] - one column per worksheet column in the target range
+[stderr] - keep every inner array the same length
+[stderr] - use `getRange('A1:C10')` or `getRange(0, 0, 10, 3)` to define the full target shape
+[stderr] - `getRange(row, col)` without size only targets a single cell
+[stderr] 
+[stderr] Correct:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([
+[stderr]   ["Name", "Score"],
+[stderr]   ["Ada", 95]
+[stderr] ]);
+[stderr] ```
+[stderr] 
+[stderr] Incorrect shape:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([["Name"], ["Ada", 95, "extra"]]);
+[stderr] ```
+[stderr] 
+[stderr] When writing a single cell, use `setValue()` unless the task specifically benefits from 2D shape handling.
+[stderr] 
+[stderr] ## Formulas And Async Readback
+[stderr] 
+[stderr] Formula calculation is asynchronous. This applies to:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] If you need the calculated result in the same `run`, wait for formula application:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] 
+[stderr] ## Merge And Unmerge
+[stderr] 
+[stderr] Merge APIs:
+[stderr] 
+[stderr] - `merge(options?) -> void` - merge cells into one block
+[stderr] - `breakApart() -> void` - unmerge cells
+[stderr] - `mergeAcross() -> void` - merge each row across the selected columns
+[stderr] - `mergeVertically() -> void` - merge each column down the selected rows
+[stderr] 
+[stderr] Typical uses:
+[stderr] 
+[stderr] - `merge()` for one combined block
+[stderr] - `mergeAcross()` to merge each row across the selected columns
+[stderr] - `mergeVertically()` to merge each column down the selected rows
+[stderr] - `breakApart()` to remove merges
+[stderr] - use `merge({ isForceMerge: true })` if you need to clear overlapping merges first
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D1").merge();
+[stderr]   sheet.getRange("A3:D4").mergeAcross();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     titleMerged: sheet.getRange("A1").isPartOfMerge()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Clear And Cell Shift Operations
+[stderr] 
+[stderr] Clear APIs:
+[stderr] 
+[stderr] - `clear() -> void` - clear the full range
+[stderr] - `clearContent() -> void` - clear only content and keep formatting
+[stderr] - `clearFormat() -> void` - clear only formatting and keep content
+[stderr] 
+[stderr] Use `clear()` when the task is to clear the full range. Use `clearContent()` or `clearFormat()` when you only want one part of that behavior.
+[stderr] 
+[stderr] Cell shift APIs:
+[stderr] 
+[stderr] - `insertCells(dimension) -> void` - insert cells and shift existing cells in the given dimension
+[stderr] - `deleteCells(dimension) -> void` - delete cells and shift remaining cells in the given dimension
+[stderr] 
+[stderr] Dimension constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.Dimension.ROWS`
+[stderr] - `univerAPI.Enum.Dimension.COLUMNS`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Queue");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Queue" not found' };
+[stderr] 
+[stderr]   sheet.getRange("B2:C3").clear();
+[stderr]   sheet.getRange("D2:D10").insertCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## AutoFill
+[stderr] 
+[stderr] Use `autoFill()` when a correct seed pattern already exists and the workbook should propagate it.
+[stderr] 
+[stderr] - `autoFill(destRange, fillType?) -> Promise<void>` - propagate from the source range into a larger destination that includes the source
+[stderr] 
+[stderr] Notes:
+[stderr] 
+[stderr] - `destRange` must include the source range
+[stderr] - `fillType` can be `'SERIES'` (default) or `'COPY'`
+[stderr] - this method is async; use `await`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Series");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Series" not found' };
+[stderr] 
+[stderr]   const source = sheet.getRange("A1:A2");
+[stderr]   const dest = sheet.getRange("A1:A10");
+[stderr]   await source.autoFill(dest);
+[stderr] 
+[stderr]   return { success: true, values: dest.getValues() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Run-Specific Getchas
+[stderr] 
+[stderr] - all `run` code must be wrapped in an arrow function: `() => { ... }` or `async () => { ... }`
+[stderr] 
+[stderr] codex
+[stderr] Implementation plan: read `A2:A75` as the source dates and `I2:J75` as the holiday date/type lookup; normalize dates to Excel serial day numbers for exact matching; write `E2:E75` as text cells, using the holiday type when matched and otherwise `Mon` through `Sun`; verify the final cell models in `E2:E75`, then export.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/work' in /task
+[stderr]  succeeded in 0ms:
+[stderr] codex
+[stderr] I’m creating a small workbook-local script under `/task/work` to read the date and holiday cells through Univer’s facade API and report the actual stored models before writing.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/read_case_1.js
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer run /task/cases/case_1/input.univer --file /task/work/read_case_1.js > /task/work/read_case_1.json && sed -n '1,220p' /task/work/read_case_1.json" in /task
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 616ms:
+[stderr] {"success":true,"dates":{"a1":"A2:A75","values":[["09/01/2023"],["10/01/2023"],["11/01/2023"],["12/01/2023"],["13/01/2023"],["16/01/2023"],["17/01/2023"],["18/01/2023"],["19/01/2023"],["20/01/2023"],["23/01/2023"],["25/01/2023"],["27/01/2023"],["30/01/2023"],["31/01/2023"],["01/02/2023"],["02/02/2023"],["03/02/2023"],["06/02/2023"],["07/02/2023"],["08/02/2023"],["09/02/2023"],["10/02/2023"],["13/02/2023"],["14/02/2023"],["15/02/2023"],["16/02/2023"],["17/02/2023"],["20/02/2023"],["21/02/2023"],["22/02/2023"],["23/02/2023"],["24/02/2023"],["27/02/2023"],["28/02/2023"],["01/03/2023"],["03/03/2023"],["06/03/2023"],["07/03/2023"],["08/03/2023"],["09/03/2023"],["10/03/2023"],["13/03/2023"],["14/03/2023"],["15/03/2023"],["16/03/2023"],["17/03/2023"],["20/03/2023"],["21/03/2023"],["22/03/2023"],["23/03/2023"],["24/03/2023"],["27/03/2023"],["28/03/2023"],["29/03/2023"],["30/03/2023"],["31/03/2023"],["04/04/2023"],["05/04/2023"],["06/04/2023"],["17/04/2023"],["18/04/2023"],["19/04/2023"],["20/04/2023"],["21/04/2023"],["24/04/2023"],["26/04/2023"],["27/04/2023"],["28/04/2023"],["01/05/2023"],["02/05/2023"],["03/05/2023"],["04/05/2023"],["05/05/2023"]],"rawValues":[["44935"],["44936"],["44937"],["44938"],["44939"],["44942"],["44943"],["44944"],["44945"],["44946"],["44949"],["44951"],["44953"],["44956"],["44957"],["44958"],["44959"],["44960"],["44963"],["44964"],["44965"],["44966"],["44967"],["44970"],["44971"],["44972"],["44973"],["44974"],["44977"],["44978"],["44979"],["44980"],["44981"],["44984"],["44985"],["44986"],["44988"],["44991"],["44992"],["44993"],["44994"],["44995"],["44998"],["44999"],["45000"],["45001"],["45002"],["45005"],["45006"],["45007"],["45008"],["45009"],["45012"],["45013"],["45014"],["45015"],["45016"],["45020"],["45021"],["45022"],["45033"],["45034"],["45035"],["45036"],["45037"],["45040"],["45042"],["45043"],["45044"],["45047"],["45048"],["45049"],["45050"],["45051"]],"cellDatas":[[{"v":"44935","t":2,"s":"R3"}],[{"v":"44936","t":2,"s":"R3"}],[{"v":"44937","t":2,"s":"R3"}],[{"v":"44938","t":2,"s":"R3"}],[{"v":"44939","t":2,"s":"R3"}],[{"v":"44942","t":2,"s":"R3"}],[{"v":"44943","t":2,"s":"R3"}],[{"v":"44944","t":2,"s":"R3"}],[{"v":"44945","t":2,"s":"R3"}],[{"v":"44946","t":2,"s":"R3"}],[{"v":"44949","t":2,"s":"R3"}],[{"v":"44951","t":2,"s":"R3"}],[{"v":"44953","t":2,"s":"R3"}],[{"v":"44956","t":2,"s":"R3"}],[{"v":"44957","t":2,"s":"R3"}],[{"v":"44958","t":2,"s":"R3"}],[{"v":"44959","t":2,"s":"R3"}],[{"v":"44960","t":2,"s":"R3"}],[{"v":"44963","t":2,"s":"R3"}],[{"v":"44964","t":2,"s":"R3"}],[{"v":"44965","t":2,"s":"R3"}],[{"v":"44966","t":2,"s":"R3"}],[{"v":"44967","t":2,"s":"R3"}],[{"v":"44970","t":2,"s":"R3"}],[{"v":"44971","t":2,"s":"R3"}],[{"v":"44972","t":2,"s":"R3"}],[{"v":"44973","t":2,"s":"R3"}],[{"v":"44974","t":2,"s":"R3"}],[{"v":"44977","t":2,"s":"R3"}],[{"v":"44978","t":2,"s":"R3"}],[{"v":"44979","t":2,"s":"R3"}],[{"v":"44980","t":2,"s":"R3"}],[{"v":"44981","t":2,"s":"R3"}],[{"v":"44984","t":2,"s":"R3"}],[{"v":"44985","t":2,"s":"R3"}],[{"v":"44986","t":2,"s":"R3"}],[{"v":"44988","t":2,"s":"R3"}],[{"v":"44991","t":2,"s":"R3"}],[{"v":"44992","t":2,"s":"R3"}],[{"v":"44993","t":2,"s":"R3"}],[{"v":"44994","t":2,"s":"R3"}],[{"v":"44995","t":2,"s":"R3"}],[{"v":"44998","t":2,"s":"R3"}],[{"v":"44999","t":2,"s":"R3"}],[{"v":"45000","t":2,"s":"R3"}],[{"v":"45001","t":2,"s":"R3"}],[{"v":"45002","t":2,"s":"R3"}],[{"v":"45005","t":2,"s":"R3"}],[{"v":"45006","t":2,"s":"R3"}],[{"v":"45007","t":2,"s":"R3"}],[{"v":"45008","t":2,"s":"R3"}],[{"v":"45009","t":2,"s":"R3"}],[{"v":"45012","t":2,"s":"R3"}],[{"v":"45013","t":2,"s":"R3"}],[{"v":"45014","t":2,"s":"R3"}],[{"v":"45015","t":2,"s":"R3"}],[{"v":"45016","t":2,"s":"R3"}],[{"v":"45020","t":2,"s":"R3"}],[{"v":"45021","t":2,"s":"R3"}],[{"v":"45022","t":2,"s":"R3"}],[{"v":"45033","t":2,"s":"R3"}],[{"v":"45034","t":2,"s":"R3"}],[{"v":"45035","t":2,"s":"R3"}],[{"v":"45036","t":2,"s":"R3"}],[{"v":"45037","t":2,"s":"R3"}],[{"v":"45040","t":2,"s":"R3"}],[{"v":"45042","t":2,"s":"R3"}],[{"v":"45043","t":2,"s":"R3"}],[{"v":"45044","t":2,"s":"R3"}],[{"v":"45047","t":2,"s":"R3"}],[{"v":"45048","t":2,"s":"R3"}],[{"v":"45049","t":2,"s":"R3"}],[{"v":"45050","t":2,"s":"R3"}],[{"v":"45051","t":2,"s":"R3"}]],"formulas":[[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""]]},"targets":{"a1":"E2:E75","values":[[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null]],"rawValues":[[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null]],"cellDatas":[[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}],[{"s":"R2"}]],"formulas":[[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""],[""]]},"holidays":{"a1":"H2:J75","values":[["New Year's Day","2023-1-1","PH(non-working)"],["New Year's Day","2023-1-2","PH(non-working)"],["Australia Day","2023-1-26","PH(non-working)"],["Labour Day","2023-3-13","PH(working)"],["Good Friday","2023-4-7","PH(non-working)"],["Easter Saturday","2023-4-8","PH(non-working)"],["Easter Sunday","2023-4-9","PH(non-working)"],["Easter Monday","2023-4-10","PH(non-working)"],["Easter Tuesday","2024-4-11","PH(non-working)"],["Anzac Day","2023-4-25","PH(non-working)"],["King's Birthday","2023-6-12","PH(working)"],["AFL Grand Final Friday","2023-9-29","PH(non-working)"],["Melbourne Cup Day","2023-11-7","PH(working)"],["Christmas Day","2023-12-25","PH(non-working)"],["Boxing Day","2023-12-26","PH(non-working)"],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null]],"rawValues":[["New Year's Day","44927","PH(non-working)"],["New Year's Day","44928","PH(non-working)"],["Australia Day","44952","PH(non-working)"],["Labour Day","44998","PH(working)"],["Good Friday","45023","PH(non-working)"],["Easter Saturday","45024","PH(non-working)"],["Easter Sunday","45025","PH(non-working)"],["Easter Monday","45026","PH(non-working)"],["Easter Tuesday","45393","PH(non-working)"],["Anzac Day","45041","PH(non-working)"],["King's Birthday","45089","PH(working)"],["AFL Grand Final Friday","45198","PH(non-working)"],["Melbourne Cup Day","45237","PH(working)"],["Christmas Day","45285","PH(non-working)"],["Boxing Day","45286","PH(non-working)"],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null],[null,null,null]],"cellDatas":[[{"v":"New Year's Day","t":1,"s":"R2"},{"v":"44927","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"New Year's Day","t":1,"s":"R2"},{"v":"44928","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Australia Day","t":1,"s":"R2"},{"v":"44952","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Labour Day","t":1,"s":"R2"},{"v":"44998","t":2,"s":"R5"},{"v":"PH(working)","t":1,"s":"R2"}],[{"v":"Good Friday","t":1,"s":"R2"},{"v":"45023","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Easter Saturday","t":1,"s":"R2"},{"v":"45024","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Easter Sunday","t":1,"s":"R2"},{"v":"45025","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Easter Monday","t":1,"s":"R2"},{"v":"45026","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Easter Tuesday","t":1,"s":"R2"},{"v":"45393","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Anzac Day","t":1,"s":"R2"},{"v":"45041","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"King's Birthday","t":1,"s":"R2"},{"v":"45089","t":2,"s":"R5"},{"v":"PH(working)","t":1,"s":"R2"}],[{"v":"AFL Grand Final Friday","t":1,"s":"R2"},{"v":"45198","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Melbourne Cup Day","t":1,"s":"R2"},{"v":"45237","t":2,"s":"R5"},{"v":"PH(working)","t":1,"s":"R2"}],[{"v":"Christmas Day","t":1,"s":"R2"},{"v":"45285","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"v":"Boxing Day","t":1,"s":"R2"},{"v":"45286","t":2,"s":"R5"},{"v":"PH(non-working)","t":1,"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}],[{"s":"R2"},{"s":"R2"},{"s":"R2"}]],"formulas":[["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""],["","",""]]}}
+[stderr] 
+[stderr] codex
+[stderr] I found the source dates are stored as numeric Excel serials, and the holiday table stores holiday dates the same way. That means the match can be done directly on serial day numbers; `13/03/2023` will become `PH(working)`, and `25/04/2023` would be `PH(non-working)` if it were in the target date list.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/update_case_1.js
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/update_case_1.js' in /task
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 267ms:
+[stderr] {"success":true,"changedRange":"Sheet1!E2:E75","holidayMatches":1,"firstTen":[{"row":2,"cell":{"s":"R2","v":"Mon","t":1}},{"row":3,"cell":{"s":"R2","v":"Tue","t":1}},{"row":4,"cell":{"s":"R2","v":"Wed","t":1}},{"row":5,"cell":{"s":"R2","v":"Thu","t":1}},{"row":6,"cell":{"s":"R2","v":"Fri","t":1}},{"row":7,"cell":{"s":"R2","v":"Mon","t":1}},{"row":8,"cell":{"s":"R2","v":"Tue","t":1}},{"row":9,"cell":{"s":"R2","v":"Wed","t":1}},{"row":10,"cell":{"s":"R2","v":"Thu","t":1}},{"row":11,"cell":{"s":"R2","v":"Fri","t":1}}],"matchedHolidays":[{"row":44,"value":"PH(working)"}]}
+[stderr] 
+[stderr] codex
+[stderr] The edit is applied. I’m now verifying the exact target cell models and a visible preview around the holiday row before exporting the workbook to the requested `.xlsx`.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/verify_case_1.js
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ccf5f41b772f92d7cb56e063a5439f3b7f119973
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,25 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const cells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  const values = cells.map((row, index) => ({
+[stderr] +    row: index + 2,
+[stderr] +    v: row[0] && row[0].v,
+[stderr] +    t: row[0] && row[0].t,
+[stderr] +    f: row[0] && row[0].f,
+[stderr] +  }));
+[stderr] +  const invalid = values.filter((item) => {
+[stderr] +    const allowed = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "PH(working)", "PH(non-working)"];
+[stderr] +    return item.t !== 1 || item.f || !allowed.includes(item.v);
+[stderr] +  });
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: invalid.length === 0,
+[stderr] +    count: values.length,
+[stderr] +    invalid,
+[stderr] +    holidayRows: values.filter((item) => String(item.v).startsWith("PH(")),
+[stderr] +    sample: values.slice(0, 8).concat(values.slice(40, 45), values.slice(-5)),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ccf5f41b772f92d7cb56e063a5439f3b7f119973
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,25 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const cells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  const values = cells.map((row, index) => ({
+[stderr] +    row: index + 2,
+[stderr] +    v: row[0] && row[0].v,
+[stderr] +    t: row[0] && row[0].t,
+[stderr] +    f: row[0] && row[0].f,
+[stderr] +  }));
+[stderr] +  const invalid = values.filter((item) => {
+[stderr] +    const allowed = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "PH(working)", "PH(non-working)"];
+[stderr] +    return item.t !== 1 || item.f || !allowed.includes(item.v);
+[stderr] +  });
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: invalid.length === 0,
+[stderr] +    count: values.length,
+[stderr] +    invalid,
+[stderr] +    holidayRows: values.filter((item) => String(item.v).startsWith("PH(")),
+[stderr] +    sample: values.slice(0, 8).concat(values.slice(40, 45), values.slice(-5)),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/verify_case_1.js' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A40:E46'"'" in /task
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ccf5f41b772f92d7cb56e063a5439f3b7f119973
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,25 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const cells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  const values = cells.map((row, index) => ({
+[stderr] +    row: index + 2,
+[stderr] +    v: row[0] && row[0].v,
+[stderr] +    t: row[0] && row[0].t,
+[stderr] +    f: row[0] && row[0].f,
+[stderr] +  }));
+[stderr] +  const invalid = values.filter((item) => {
+[stderr] +    const allowed = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "PH(working)", "PH(non-working)"];
+[stderr] +    return item.t !== 1 || item.f || !allowed.includes(item.v);
+[stderr] +  });
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: invalid.length === 0,
+[stderr] +    count: values.length,
+[stderr] +    invalid,
+[stderr] +    holidayRows: values.filter((item) => String(item.v).startsWith("PH(")),
+[stderr] +    sample: values.slice(0, 8).concat(values.slice(40, 45), values.slice(-5)),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 365ms:
+[stderr] {"success":true,"count":74,"invalid":[],"holidayRows":[{"row":44,"v":"PH(working)","t":1}],"sample":[{"row":2,"v":"Mon","t":1},{"row":3,"v":"Tue","t":1},{"row":4,"v":"Wed","t":1},{"row":5,"v":"Thu","t":1},{"row":6,"v":"Fri","t":1},{"row":7,"v":"Mon","t":1},{"row":8,"v":"Tue","t":1},{"row":9,"v":"Wed","t":1},{"row":42,"v":"Thu","t":1},{"row":43,"v":"Fri","t":1},{"row":44,"v":"PH(working)","t":1},{"row":45,"v":"Tue","t":1},{"row":46,"v":"Wed","t":1},{"row":71,"v":"Mon","t":1},{"row":72,"v":"Tue","t":1},{"row":73,"v":"Wed","t":1},{"row":74,"v":"Thu","t":1},{"row":75,"v":"Fri","t":1}]}
+[stderr] 
+[stderr]  succeeded in 369ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A40:E46
+[stderr] Rows: 7 (6 data rows; first row is header)
+[stderr] Columns: 5
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | 07/03/2023 | text | 6/6 | 6 non-empty | - |
+[stderr] | B | 03:56 | text | 6/6 | 6 non-empty | - |
+[stderr] | C | 08:03 | text | 6/6 | 6 non-empty | - |
+[stderr] | D | 04:07 | text | 6/6 | 6 non-empty | - |
+[stderr] | E | Tue | text | 6/6 | 6 non-empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |A40,07/03/2023|B40,03:56|C40,08:03|D40,04:07|E40,Tue|
+[stderr] |A41,08/03/2023|B41,04:04|C41,08:08|D41,04:04|E41,Wed|
+[stderr] |A42,09/03/2023|B42,04:12|C42,08:08|D42,03:56|E42,Thu|
+[stderr] |A43,10/03/2023|B43,04:02|C43,08:00|D43,03:58|E43,Fri|
+[stderr] ...
+[stderr] |A46,15/03/2023|B46,04:02|C46,08:07|D46,04:05|E46,Wed|
+[stderr] 
+[stderr] *Note: 2 rows omitted from data preview*
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/outputs/case_1 && univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx && ls -l /task/outputs/case_1/output.xlsx' in /task
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ccf5f41b772f92d7cb56e063a5439f3b7f119973
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,25 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const cells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  const values = cells.map((row, index) => ({
+[stderr] +    row: index + 2,
+[stderr] +    v: row[0] && row[0].v,
+[stderr] +    t: row[0] && row[0].t,
+[stderr] +    f: row[0] && row[0].f,
+[stderr] +  }));
+[stderr] +  const invalid = values.filter((item) => {
+[stderr] +    const allowed = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "PH(working)", "PH(non-working)"];
+[stderr] +    return item.t !== 1 || item.f || !allowed.includes(item.v);
+[stderr] +  });
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: invalid.length === 0,
+[stderr] +    count: values.length,
+[stderr] +    invalid,
+[stderr] +    holidayRows: values.filter((item) => String(item.v).startsWith("PH(")),
+[stderr] +    sample: values.slice(0, 8).concat(values.slice(40, 45), values.slice(-5)),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr]  succeeded in 693ms:
+[stderr] exported /task/cases/case_1/input.univer -> /task/outputs/case_1/output.xlsx
+[stderr] -rw-r--r--    1 node     node         10510 May 25 08:17 /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] codex
+[stderr] Completed the workbook edit and exported the result to:
+[stderr] 
+[stderr] `/task/outputs/case_1/output.xlsx`
+[stderr] 
+[stderr] Verified `Sheet1!E2:E75` contains text values for weekdays, with the matching public holiday row marked as `PH(working)`.
+[stderr] diff --git a/work/read_case_1.js b/work/read_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..333809189da146a053e6631a68d475fb6491ec8d
+[stderr] --- /dev/null
+[stderr] +++ b/work/read_case_1.js
+[stderr] @@ -0,0 +1,23 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const readRange = (a1) => {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    return {
+[stderr] +      a1,
+[stderr] +      values: range.getValues(),
+[stderr] +      rawValues: range.getRawValues(),
+[stderr] +      cellDatas: typeof range.getCellDatas === "function" ? range.getCellDatas() : null,
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +    };
+[stderr] +  };
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    dates: readRange("A2:A75"),
+[stderr] +    targets: readRange("E2:E75"),
+[stderr] +    holidays: readRange("H2:J75"),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/update_case_1.js b/work/update_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ea84b51c2af02f505205b26d3c7d6376df3ce14c
+[stderr] --- /dev/null
+[stderr] +++ b/work/update_case_1.js
+[stderr] @@ -0,0 +1,50 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const clean = (value) => String(value ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const serialKey = (value) => {
+[stderr] +    const n = Number(clean(value));
+[stderr] +    return Number.isFinite(n) ? String(Math.round(n)) : "";
+[stderr] +  };
+[stderr] +  const weekdayFromExcelSerial = (serial) => {
+[stderr] +    const epoch = Date.UTC(1899, 11, 30);
+[stderr] +    const date = new Date(epoch + Number(serial) * 86400000);
+[stderr] +    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getUTCDay()];
+[stderr] +  };
+[stderr] +
+[stderr] +  const dateCells = sheet.getRange("A2:A75").getCellDatas();
+[stderr] +  const holidayCells = sheet.getRange("I2:J75").getCellDatas();
+[stderr] +  const targetCells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +
+[stderr] +  const holidayBySerial = new Map();
+[stderr] +  for (const row of holidayCells) {
+[stderr] +    const dateCell = row[0] || {};
+[stderr] +    const typeCell = row[1] || {};
+[stderr] +    const key = serialKey(dateCell.v);
+[stderr] +    const type = clean(typeCell.v);
+[stderr] +    if (key && type) holidayBySerial.set(key, type);
+[stderr] +  }
+[stderr] +
+[stderr] +  const output = dateCells.map((row, index) => {
+[stderr] +    const sourceCell = row[0] || {};
+[stderr] +    const key = serialKey(sourceCell.v);
+[stderr] +    const value = holidayBySerial.get(key) || weekdayFromExcelSerial(key);
+[stderr] +    const existingTarget = (targetCells[index] && targetCells[index][0]) || {};
+[stderr] +    return [{ v: value, t: 1, s: existingTarget.s }];
+[stderr] +  });
+[stderr] +
+[stderr] +  sheet.getRange("E2:E75").setValues(output);
+[stderr] +
+[stderr] +  const written = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "Sheet1!E2:E75",
+[stderr] +    holidayMatches: output.filter((row) => String(row[0].v).startsWith("PH(")).length,
+[stderr] +    firstTen: written.slice(0, 10).map((row, idx) => ({ row: idx + 2, cell: row[0] })),
+[stderr] +    matchedHolidays: output
+[stderr] +      .map((row, idx) => ({ row: idx + 2, value: row[0].v }))
+[stderr] +      .filter((item) => String(item.value).startsWith("PH(")),
+[stderr] +  };
+[stderr] +};
+[stderr] diff --git a/work/verify_case_1.js b/work/verify_case_1.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..ccf5f41b772f92d7cb56e063a5439f3b7f119973
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_case_1.js
+[stderr] @@ -0,0 +1,25 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const cells = sheet.getRange("E2:E75").getCellDatas();
+[stderr] +  const values = cells.map((row, index) => ({
+[stderr] +    row: index + 2,
+[stderr] +    v: row[0] && row[0].v,
+[stderr] +    t: row[0] && row[0].t,
+[stderr] +    f: row[0] && row[0].f,
+[stderr] +  }));
+[stderr] +  const invalid = values.filter((item) => {
+[stderr] +    const allowed = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "PH(working)", "PH(non-working)"];
+[stderr] +    return item.t !== 1 || item.f || !allowed.includes(item.v);
+[stderr] +  });
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: invalid.length === 0,
+[stderr] +    count: values.length,
+[stderr] +    invalid,
+[stderr] +    holidayRows: values.filter((item) => String(item.v).startsWith("PH(")),
+[stderr] +    sample: values.slice(0, 8).concat(values.slice(40, 45), values.slice(-5)),
+[stderr] +  };
+[stderr] +};
+[stderr] 
+[stderr] tokens used
+[stderr] 46,664
+[stdout] Completed the workbook edit and exported the result to:
+[stdout] 
+[stdout] `/task/outputs/case_1/output.xlsx`
+[stdout] 
+[stdout] Verified `Sheet1!E2:E75` contains text values for weekdays, with the matching public holiday row marked as `PH(working)`.

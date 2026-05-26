@@ -1,0 +1,1927 @@
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e5f3f-41a7-7c91-8772-56d4cd3bd0a6
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 55427
+[stderr] 
+[stderr] ### instruction
+[stderr] I am attempting to consolidate data about schools from multiple spreadsheets using INDEX and MATCH functions. Specifically, I'm using the formula =INDEX('URN lookup'!$D$2:$D$1461,MATCH(L2,'URN lookup'!$K$2:$K$1461,0)) to look up a DFES number which is located in Column B of the attached 'School data.xlsx', by matching values from column L. However, this formula is not yielding the correct results, and I'm unsure why it is failing. Furthermore, I want to merge additional data that includes a Unique Reference Number (URN) for each school, along with another 15 columns of data. I need help figuring out the issue with my current formula to be able to proceed with merging the rest of the data.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: Compiled and located schools da
+[stderr] URN	DFES check	DfE Number	County	Name	Type	Address1	Address2	Address3	Address4	Address5	Postcode	Title	Initial	Surname	Email	Phone	Website	FSM	ABS	READPROG	WRITPROG	MATPROG	PTREAD_EXP	PTGPS_EXP	PTMAT_EXP	PTWRITTA_EXP	PTSCITA_EXP	ATT8SCR	P8PUP	P8MEA	P8CILOW	P8CIUPP	P8MEA_ORIG	PTL2BASICS_95	EBACCAPS
+[stderr] 	=INDEX('URN lookup'!$D$2:$D$1461,MATCH(L2,'URN lookup'!$K$2:$K$1461,0))		Cumbria	Abbotsmead CDC	Community Dev Centre	Cambridge Primary School	 Cambridge Street	 Barrow-In-Furness			 LA13 9RP	Mrs	S	Gadsden	cdcadmin@cambridge.cumbria.sch.uk																				
+[stderr] 	=INDEX('URN lookup'!$D$2:$D$1461,MATCH(L3,'URN lookup'!$K$2:$K$1461,0))		Cumbria	Accessing Hawthorn Education Services	Other Independent Es	Swimmers Farm	 Stoney Lane	 Witherslack	 Grange-Over-Sands		 LA11 6SN	C	Mason																						
+[stderr] 	=INDEX('URN lookup'!$D$2:$D$1461,MATCH(L4,'URN lookup'!$K$2:$K$1461,0))		Cumbria	Adult Education Carlisle	Adult Education Cent	Trinity School	 Strand Road	 Carlisle			 CA1 1JB	Mr	K	Brenan	kbr@trinity.cumbria.sch.uk		www.aecarlisle.com																		
+[stderr] 	=INDEX('URN lookup'!$D$2:$D$1461,MATCH(L5,'URN lookup'!$K$2:$K$1461,0))		Cumbria	All Saints CDC	Community Dev Centre	Slatefell Drive	 Cockermouth				 CA13 9BH	Mr	A	Walsh	allsaints@all-learn.org.uk		www.all-learn.org.uk																		
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: URN lookup
+[stderr] URN	LANAME	LA	ESTAB	LAESTAB	SCHNAME	STREET	LOCALITY	ADDRESS3	TOWN	POSTCODE	SCHSTATUS	OPENDATE	CLOSEDATE	MINORGROUP	SCHOOLTYPE	ISPRIMARY	ISSECONDARY	ISPOST16	AGELOW	AGEHIGH	GENDER	RELCHAR	ADMPOL
+[stderr] 112100	Cumbria	909	2001	9092001	Allonby Primary School	Moss Lane	Allonby		Maryport	CA15 6QG	Open			Maintained school	Community school	1	0	0	3	11	Mixed	Does not apply	Not applicable
+[stderr] 112101	Cumbria	909	2004	9092004	Alston Primary School	Church Road			Alston	CA9 3QU	Open			Maintained school	Community school	1	0	0	4	11	Mixed	Does not apply	Not applicable
+[stderr] 112102	Cumbria	909	2005	9092005	Armathwaite School	Armathwaite	Station Road		Carlisle	CA4 9PW	Open			Maintained school	Community school	1	0	0	3	11	Mixed	Does not apply	Not applicable
+[stderr] 112103	Cumbria	909	2008	9092008	Bewcastle School	Roadhead			Carlisle	CA6 6PF	Open			Maintained school	Community school	1	0	0	3	11	Mixed	Does not apply	Not applicable
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: KS4 data
+[stderr] LEA	ESTAB	URN	SCHNAME	ATT8SCR	P8PUP	P8MEA	P8CILOW	P8CIUPP	P8MEA_ORIG	PTL2BASICS_95	EBACCAPS
+[stderr] North Yorkshire	4518	136664	Skipton Girls' High School	71.2	106	0.61	0.37	0.86	0.61	0.896	6.86
+[stderr] North Yorkshire	4605	121715	St Francis Xavier School	58.8	87	0.55	0.28	0.82	0.55	0.626	5.42
+[stderr] North Yorkshire	4608	121716	Ermysted's Grammar School	71.5	106	0.65	0.41	0.89	0.65	0.955	6.63
+[stderr] North Yorkshire	4007	146769	Graham School								
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Cell-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] Compiled and located schools da'!B2:B1461
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export with `getCellDatas()`: compare `v`, `t`, `f`, `p`, `si`, `s` or resolved style, and visible display where relevant. Do not use `getValues()` to verify value type. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - `inspect` and `pipe out` are useful only for quickly understanding visible content, rough ranges, and formulas. They cannot prove value type or complete cell model. `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer true `v`, `t`, `f`, `s`, date serials, forced text, or number formats from `inspect`, `pipe out`, TSV/CSV/JSON previews, or display values. For value type and model verification, always use `univer run` with `range.getCellDatas()`.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json` only for quick visible inspection; if exact coordinates, formulas, or cell models matter, use `univer run` to return explicit `{ row1, col1, value, formula, cellData }` objects from `getCellDatas()`.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type enum), `f` (formula), `si` (formula id), `p` (rich text), `s` (style id or style object, including number format), and `custom` (custom data). The `t` enum values are: `1=STRING`, `2=NUMBER`, `3=BOOLEAN`, `4=FORCE_STRING`. If `t` is omitted, Univer may auto-detect the type, which can turn text like `2-2` into a date serial.
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not use `getValues()` to verify value type, formula, number format, forced text, or cell model.
+[stderr]   3. Choose reads by intent: display-only planning may use `getValues()` or `getDisplayValues()`; raw values without model preservation may use `getRawValues()` for calculations; complete cell models and all value-type verification must use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`, and use `getCellDatas()` when formula cells also need model/type/format verification.
+[stderr]   4. Hard requirement for writes: whenever you write values into cells or ranges, use explicit `ICellData` objects instead of bare JavaScript values. Do not write `setValues([["2-2", 123, true]])`; write `setValues([[{ v: "2-2", t: 4 }, { v: 123, t: 2 }, { v: 1, t: 3 }]])`. Every written cell must make its semantic type explicit with `t`, `f`, and any needed `s` number format. Do not use `pipe in` for workbook edits because it writes tabular values without an explicit per-cell `ICellData` model.
+[stderr]   5. Choose write models by semantics: ordinary text uses `{ v: "text", t: 1 }`; text that must not be auto-converted uses `{ v: "2-2", t: 4 }`; numbers use `{ v: 123, t: 2 }`; booleans use `{ v: 1, t: 3 }` for TRUE and `{ v: 0, t: 3 }` for FALSE; formulas use `{ f: '=A1+B1' }` or `setFormula('=A1+B1')`; literal formula text uses `{ v: '=A1+B1', t: 4 }`.
+[stderr]   6. Values that look like dates, numbers, fractions, scores, ranges, codes, phone numbers, postal codes, or identifiers must use `t: 4` when the task semantics require text. Examples include scores like `2-2` or `3-1`, hyphenated codes, leading-zero IDs, SKU/account IDs, phone-like values, and ZIP/postal codes. Do not let Excel/OOXML auto-detect these as dates or numbers.
+[stderr]   7. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`. After writing, `getCellDatas()` may show `s` as a style id string instead of an inline object; use `getCellStyleData()` / `getCellStyles()` or the workbook snapshot styles to resolve and verify the number format.
+[stderr]   8. When reading existing cells and writing them elsewhere: display-only reads may use `getValues()`/`getDisplayValues()` only for internal planning, but writes must still use explicit `ICellData`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   9. If `p` rich text exists, it controls the displayed content even when `v` is also set. Use the rich text builder APIs for rich text tasks and verify `p` with `getCellDatas()`.
+[stderr]   10. Do not hand-author `si` formula ids. Preserve `si` only when deep-cloning existing formula cells with `getCellDatas()`; for new formulas use `f` or `setFormula()`.
+[stderr]   11. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] 
+[stderr] codex
+[stderr] I’ll use the `univer-cli` skill as required, then inspect the workbook model enough to determine the correct lookup keys and write only `B2:B1461`.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,220p' /home/node/.agents/skills/univer-cli/SKILL.md" in /task
+[stderr]  succeeded in 0ms:
+[stderr] ---
+[stderr] name: univer-cli
+[stderr] description: "Use when solving spreadsheet workbook problems with the `univer` or `unv` CLI as a terminal-native spreadsheet engine: Excel-compatible `.xlsx` handoff, `.univer` or `.unv` packages, workbook inspection, range search, formulas, formatting, charts, shapes, floating images, rich spreadsheet edits, live preview and viewer review comments, versioning, shell-native `pipe out`/`pipe in` roundtrips, or bounded `run` scripts."
+[stderr] ---
+[stderr] 
+[stderr] # univer-cli
+[stderr] 
+[stderr] `univer` is a spreadsheet engine in the terminal. Use it when an agent needs real workbook semantics: sheets, ranges, formulas, formatting, layout, previews, imports, exports, or versioned workbook state.
+[stderr] 
+[stderr] Install the CLI with `npm i -g univer-cli`. Update the CLI with `univer update`. The executable is `univer`; `unv` may be available as a short alias.
+[stderr] 
+[stderr] ## Core Mental Model
+[stderr] 
+[stderr] Treat workbook-visible state as the source of truth. A successful command summary, package metadata, or an internal manifest does not prove that sheet names, cell values, formulas, formatting, or exported handoff files are correct.
+[stderr] 
+[stderr] The workbook path is the local identity. Pick one explicit path such as `./budget.univer` and use that path as the CLI target. Do not target workbooks by `unitId`, `sessionId`, manifest ids, or runtime ids.
+[stderr] 
+[stderr] `.univer` and `.unv` files are CLI operation targets, not agent-editable data stores. Read and write workbook data through public CLI surfaces such as `inspect`, `search`, `pipe`, `run`, `export`, `status`, and `commit`.
+[stderr] 
+[stderr] Use `univer help` and `univer help <command...>` for exact syntax. For `run` scripts, use `univer help run` and `univer help run <topic>` before relying on unfamiliar APIs.
+[stderr] 
+[stderr] ## Use When
+[stderr] 
+[stderr] Use this skill when the task involves spreadsheet or workbook work, especially:
+[stderr] 
+[stderr] - creating, importing, exporting, or handing off `.xlsx`, `.csv`, `.univer`, or `.unv` files
+[stderr] - inspecting workbook shape, sheets, ranges, formulas, formatting, or visible cell state
+[stderr] - locating content-defined rows, columns, headers, or cells before editing
+[stderr] - making bounded edits to cells, formulas, formatting, charts, shapes, floating images, layout, or sheet structure
+[stderr] - streaming rectangular workbook data through shell tools before reading it into context
+[stderr] - writing generated matrix data back into a sheet-qualified range
+[stderr] - previewing workbook state locally with `univer view`
+[stderr] - reading submitted local viewer review comments with `univer view comments`
+[stderr] - creating, restoring, resetting, pulling, or syncing local workbook changesets
+[stderr] - proving that a workbook-visible mutation or export is correct enough to hand back
+[stderr] 
+[stderr] ## Default Operating Loop
+[stderr] 
+[stderr] 1. Pick one explicit workbook path, for example `./budget.univer`.
+[stderr] 2. Create or import a workbook first if no `.univer` or `.unv` target exists.
+[stderr] 3. Inspect workbook-visible state before deciding where to write.
+[stderr] 4. Locate targets from visible headers, values, formulas, or inspected ranges.
+[stderr] 5. Choose the smallest public CLI surface that fits the task.
+[stderr] 6. Mutate through the CLI, not by editing package internals.
+[stderr] 7. Verify changed workbook-visible state with `inspect`, `pipe out`, or another public read.
+[stderr] 8. Export only after verification when the user needs a handoff file.
+[stderr] 9. After changes have been verified, if the user may need to inspect, audit, or review the final workbook, run `univer view "$WB" --no-open --json` to get a local preview link and include that link in your response.
+[stderr] 10. Commit or sync only after verified changes when versioning is part of the workflow.
+[stderr] 
+[stderr] ## Hard Rules
+[stderr] 
+[stderr] - Do not read `.univer` or `.unv` internals to infer workbook contents.
+[stderr] - Do not write, patch, unzip, rezip, rename internal files, or manipulate workbook package contents.
+[stderr] - Do not inspect `manifest.json`, snapshots, mutation logs, or package fragments as a substitute for workbook-visible reads.
+[stderr] - Do not guess sheet names, row numbers, formulas, ranges, or changed cells from memory or file metadata.
+[stderr] - Do not treat stdout summaries as proof of workbook state. Verify with a workbook-visible read.
+[stderr] - Do not invent commands or `run` APIs. Check `univer help` and documented run topics.
+[stderr] 
+[stderr] Direct package access can corrupt workbooks or teach the agent false state. If the CLI cannot read what you need, diagnose the CLI/runtime path instead of bypassing it.
+[stderr] 
+[stderr] ## Command Selection
+[stderr] 
+[stderr] | Need | Prefer |
+[stderr] | --- | --- |
+[stderr] | Discover exact command syntax | `univer help`, `univer help <command...>` |
+[stderr] | Start a workbook package | `univer new` or `univer import` |
+[stderr] | Hand back Excel-compatible output | `univer export` |
+[stderr] | Understand workbook shape before editing | `univer inspect workbook`, then `univer inspect range` |
+[stderr] | Locate content-defined cells | `univer search`, scoped with `--sheet` and/or `--range` when possible |
+[stderr] | Stream rectangular data through shell tools | `univer pipe out` |
+[stderr] | Write a known rectangular matrix back | `univer pipe in` |
+[stderr] | Apply bounded workbook-local logic | `univer run --file` |
+[stderr] | Create or maintain workbook charts | `univer run --file` with `univer help run charts` |
+[stderr] | Create or maintain workbook shapes and connectors | `univer run --file` with `univer help run shapes` |
+[stderr] | Create or maintain workbook floating images | `univer run --file` with `univer help run images` |
+[stderr] | Preview readonly workbook state | `univer view --no-open --json` or `univer view` |
+[stderr] | Read local viewer review feedback | `univer view comments "$WB" --json` |
+[stderr] | Check local versioning state | `univer status` |
+[stderr] | Create a local changeset from local mutations | `univer commit --message <message>` |
+[stderr] | Discard uncommitted local mutations | `univer restore` |
+[stderr] | Reset local unsynced commits | `univer reset --soft HEAD~N` or `univer reset --hard HEAD~N` |
+[stderr] | Initialize a local package from an existing remote unit | `univer clone --unit-id <unitID>` |
+[stderr] | Pull remote-only changes for a bound package | `univer pull` |
+[stderr] | Sync local and remote versioning state | `univer sync` |
+[stderr] | Diagnose runtime problems | `univer doctor`, `univer daemon status` |
+[stderr] | Prepare a bug report or Univer team support artifact after user authorization | `univer doctor collect` |
+[stderr] 
+[stderr] Use canonical command help such as `univer help inspect range` and `univer help pipe out`. Top-level help group headings are visual sections only; do not run group-prefixed topics such as `univer help read inspect range`.
+[stderr] 
+[stderr] ## Execution Results
+[stderr] 
+[stderr] Treat non-zero exit as failure even when stdout is partially present. Read stderr before changing approach; it usually contains the stable diagnostic code, usage, and retry examples.
+[stderr] 
+[stderr] Keep data stdout clean in shell pipelines. If diagnostics are needed, capture stderr separately so downstream tools receive only workbook data.
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20' > ./range.md 2> ./range.err
+[stderr] status=$?
+[stderr] if [ "$status" -ne 0 ]; then
+[stderr]   sed -n '1,80p' ./range.err
+[stderr]   exit "$status"
+[stderr] fi
+[stderr] sed -n '1,40p' ./range.md
+[stderr] ```
+[stderr] 
+[stderr] ## Workflow Recipes
+[stderr] 
+[stderr] These are verified command shapes. Replace paths, sheet names, and ranges with inspected workbook facts.
+[stderr] 
+[stderr] ### Create Or Import, Then Inspect
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./orders.univer
+[stderr] univer import ./orders.csv "$WB" --json
+[stderr] univer inspect workbook "$WB"
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D4'
+[stderr] ```
+[stderr] 
+[stderr] Use `new` when the task starts from a blank workbook:
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./workbook.univer
+[stderr] univer new "$WB" --name "Workbook"
+[stderr] univer inspect workbook "$WB"
+[stderr] ```
+[stderr] 
+[stderr] ### Locate Before Editing
+[stderr] 
+[stderr] Use `search` before editing when the target is defined by visible workbook content:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West
+[stderr] ```
+[stderr] 
+[stderr] Plain text output is one A1 reference per matched cell, which keeps shell pipelines clean. With no
+[stderr] matches, stdout is empty and the command still succeeds. Use `--json` when you need match metadata,
+[stderr] the matched cell data preview, truncation flags, counts, or the searched scope:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West --sheet Orders --range 'A1:Z200' --json
+[stderr] ```
+[stderr] 
+[stderr] By default, search checks `displayValue`, so formatted values such as dates are searchable by the
+[stderr] same strings a user sees in the sheet. Use `--type rawValue` for underlying numeric/string values
+[stderr] such as spreadsheet date serials, and `--type formula` for formulas:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" 2024-01-01
+[stderr] univer search "$WB" 45292 --type rawValue
+[stderr] univer search "$WB" SUM --type formula --json
+[stderr] ```
+[stderr] 
+[stderr] Useful narrowing options:
+[stderr] 
+[stderr] - `--sheet <name>` may be repeated.
+[stderr] - `--range <A1>` may be repeated; unqualified ranges require a `--sheet`.
+[stderr] - `--case-sensitive` and `--whole-cell` tighten matching.
+[stderr] - `--max-results` limits returned matches; truncation is reported on stderr for text output and in JSON fields for `--json`.
+[stderr] - `--max-cell-value-length` bounds previewed cell data in JSON.
+[stderr] 
+[stderr] If `search` fails, read stderr for the diagnostic message before changing approach. If the target is
+[stderr] not content-defined, inspect a bounded range and derive the edit boundary from visible headers and
+[stderr] sample rows:
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20'
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe Out Through Shell Tools
+[stderr] 
+[stderr] Use `pipe out` when the shell can reduce or reshape rectangular data before the agent reads it. Prefer TSV for `awk`, JSON for `jq`, and `--type rawValue` when formatted display text is not safe enough for comparisons.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe out "$WB" --range 'Sheet1!A1:D4' --format tsv > ./orders.tsv
+[stderr] awk -F '\t' 'BEGIN{OFS="\t"} NR==1 || $2=="West" {print $1,$3}' ./orders.tsv > ./west.tsv
+[stderr] sed -n '1,5p' ./west.tsv
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe In Generated Table Data
+[stderr] 
+[stderr] Write only a known matrix into an explicit, sheet-qualified range. Make `pipe in` the terminal stage of a pipeline unless you intentionally want its success summary downstream.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe in "$WB" --range 'Sheet1!F1:G3' --input-format tsv --data-file ./west.tsv
+[stderr] univer inspect range "$WB" --range 'Sheet1!F1:G3'
+[stderr] univer pipe out "$WB" --range 'Sheet1!F1:G3' --format tsv
+[stderr] ```
+[stderr] 
+[stderr] Verify headers, sample rows, and key columns. Row count alone is weak evidence because shifted columns can still preserve row count.
+[stderr] 
+[stderr] ### Run A Bounded Workbook Script
+[stderr] 
+[stderr] Use `run --file` for workbook-native logic that does not fit `inspect`, `search`, `pipe`, or `export`. Check `univer help run` and the relevant `univer help run <topic>` manual before using unfamiliar APIs.
+[stderr] 
+[stderr] ```bash
+[stderr] cat > ./review.js <<'JS'
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] 
+[stderr]   sheet.getRange("I1:J3").setValues([
+[stderr]     ["metric", "value"],
+[stderr]     ["west_orders", 2],
+[stderr]     ["reviewed", "yes"],
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true, changedRanges: ["Sheet1!I1:J3"] };
+[stderr] }
+[stderr] JS
+[stderr] 
+[stderr] univer run "$WB" --file ./review.js
+[stderr] univer inspect range "$WB" --range 'Sheet1!I1:J3'
+[stderr] ```
+[stderr] 
+[stderr] `run` scripts should:
+[stderr] 
+[stderr] - wrap code in `() => { ... }` or `async () => { ... }`
+[stderr] - return a plain object with explicit success or error fields
+[stderr] - use explicit workbook, sheet, and A1 range boundaries
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "which univer && univer --help | sed -n '1,160p'" in /task
+[stderr]  succeeded in 468ms:
+[stderr] univer - spreadsheet editing CLI for agents
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer --help
+[stderr]   univer help <command...>
+[stderr]   univer <command> --help
+[stderr] 
+[stderr] Commands:
+[stderr]   Workbooks:
+[stderr]     univer new <file.univer|file.unv>
+[stderr]     univer import <input.xlsx|csv> <file.univer|file.unv>
+[stderr]     univer export <file.univer|file.unv> <output.xlsx|csv>
+[stderr] 
+[stderr]   Read:
+[stderr]     univer inspect workbook <file.univer|file.unv>
+[stderr]     univer inspect sheet <file.univer|file.unv> [sheet]
+[stderr]     univer inspect range <file.univer|file.unv> [sheet!A1:B2]
+[stderr]     univer inspect formulas <file.univer|file.unv> [sheet]
+[stderr]     univer inspect lint <file.univer|file.unv>
+[stderr]     univer search <file.univer|file.unv> <query>
+[stderr]     univer view <file.univer|file.unv>
+[stderr]     univer view comments <file.univer|file.unv> [--all] [--json]
+[stderr]     univer view status [--json]
+[stderr]     univer view stop [--json]
+[stderr] 
+[stderr]   Write:
+[stderr]     univer run <file.univer|file.unv> --file <script.js>
+[stderr] 
+[stderr]   Configuration:
+[stderr]     univer config <path|list|get|set|unset>
+[stderr] 
+[stderr]   Stream:
+[stderr]     univer pipe out <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr]     univer pipe in <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr] 
+[stderr]   Health:
+[stderr]     univer doctor [--json]
+[stderr]     univer doctor collect --last <duration>
+[stderr]     univer doctor collect [--trace-id <id>]
+[stderr]     univer doctor collect --all
+[stderr]     univer update [--force]
+[stderr] 
+[stderr]   Daemon:
+[stderr]     univer daemon status [--json]
+[stderr]     univer daemon start
+[stderr]     univer daemon stop
+[stderr] 
+[stderr]   Versioning:
+[stderr]     univer status <file.univer|file.unv>
+[stderr]     univer commit <file.univer|file.unv> --message <message>
+[stderr]     univer clone <file.univer|file.unv> --unit-id <unitID>
+[stderr]     univer restore <file.univer|file.unv>
+[stderr]     univer reset <file.univer|file.unv> --soft HEAD~N
+[stderr]     univer sync <file.univer|file.unv>
+[stderr]     univer pull <file.univer|file.unv>
+[stderr] 
+[stderr] codex
+[stderr] The key issue appears likely to be a mix of lookup-key normalization and the indexed column. I’m going to verify the actual cell models and sheet dimensions before writing formulas, because this range contains formulas and the export needs to preserve them as formulas.
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range \"'URN lookup'"'!A1:K8"' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range \"'Compiled and located schools da'"'!A1:L8"' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect formulas /task/cases/case_1/input.univer 'Compiled and located schools da' | sed -n '1,120p'" in /task
+[stderr]  exited 1 in 2444ms:
+[stderr] ERROR CLI_ERROR
+[stderr] 
+[stderr] Sheet not found: 'URN lookup'
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer help <command...>
+[stderr] 
+[stderr] Try:
+[stderr]   univer help
+[stderr] 
+[stderr] Trace ID: 41c9a9764932bf37483fa020e0e588ac
+[stderr] 
+[stderr]  succeeded in 3004ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Compiled and located schools da
+[stderr] Sheet Count: 3
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Compiled and located schools da | A1:AJ1419 | 1 | 12 |
+[stderr] | 2 | URN lookup | A1:X1461 | 1 | 0 |
+[stderr] | 3 | KS4 data | A1:L278 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'Compiled and located schools da'
+[stderr] 
+[stderr] - Used Range: A1:AJ1419
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 12 covering 12 cells
+[stderr] 
+[stderr] ### Table 1: A1:AJ1419
+[stderr] |A1,URN|B1,DFES check|C1,DfE Number|D1,County|E1,Name|F1,Type|
+[stderr] |A2,|B2,#N/A|C2,|D2,Cumbria|E2,Abbotsmead CDC|F2,Community Dev Centre|
+[stderr] |A3,|B3,#N/A|C3,|D3,Cumbria|E3,Accessing Hawthorn Education Services|F3,Other Independent Es|
+[stderr] |A4,|B4,#N/A|C4,|D4,Cumbria|E4,Adult Education Carlisle|F4,Adult Education Cent|
+[stderr] |A5,|B5,#N/A|C5,|D5,Cumbria|E5,All Saints CDC|F5,Community Dev Centre|
+[stderr] 
+[stderr] ### Formulas (1 groups, 12 cells)
+[stderr] - B2:B13 <- B2 =INDEX('URN lookup'!$D$2:$D$1461,MATCH(L2,'URN lookup'!$K$2:$K$1461,0))
+[stderr] 
+[stderr] ## Sheet: 'URN lookup'
+[stderr] 
+[stderr] - Used Range: A1:X1461
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:X1461
+[stderr] |A1,URN|B1,LANAME|C1,LA|D1,ESTAB|E1,LAESTAB|F1,SCHNAME|
+[stderr] |A2,112100|B2,Cumbria|C2,909|D2,2001|E2,9092001|F2,Allonby Primary School|
+[stderr] |A3,112101|B3,Cumbria|C3,909|D3,2004|E3,9092004|F3,Alston Primary School|
+[stderr] |A4,112102|B4,Cumbria|C4,909|D4,2005|E4,9092005|F4,Armathwaite School|
+[stderr] |A5,112103|B5,Cumbria|C5,909|D5,2008|E5,9092008|F5,Bewcastle School|
+[stderr] 
+[stderr] ## Sheet: 'KS4 data'
+[stderr] 
+[stderr] - Used Range: A1:L278
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:L278
+[stderr] |A1,LEA|B1,ESTAB|C1,URN|D1,SCHNAME|E1,ATT8SCR|F1,P8PUP|
+[stderr] |A2,North Yorkshire|B2,4518|C2,136664|D2,Skipton Girls' High School|E2,71.2|F2,106|
+[stderr] |A3,North Yorkshire|B3,4605|C3,121715|D3,St Francis Xavier School|E3,58.8|F3,87|
+[stderr] |A4,North Yorkshire|B4,4608|C4,121716|D4,Ermysted's Grammar School|E4,71.5|F4,106|
+[stderr] |A5,North Yorkshire|B5,4007|C5,146769|D5,Graham School|E5,|F5,|
+[stderr] 
+[stderr]  exited 1 in 3058ms:
+[stderr] ERROR CLI_ERROR
+[stderr] 
+[stderr] Sheet not found: 'Compiled and located schools da'
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer help <command...>
+[stderr] 
+[stderr] Try:
+[stderr]   univer help
+[stderr] 
+[stderr] Trace ID: 8cb2f10d60cc34e988c6e51cf2439f77
+[stderr] 
+[stderr]  succeeded in 3061ms:
+[stderr] ## Formula Preview
+[stderr] 
+[stderr] ### Sheet 'Compiled and located schools da'
+[stderr] - B2:B13 <- B2 =INDEX('URN lookup'!$D$2:$D$1461,MATCH(L2,'URN lookup'!$K$2:$K$1461,0))
+[stderr] 
+[stderr] codex
+[stderr] Plan: use `Compiled and located schools da!L2:L1461` as the lookup key, normalize it with `TRIM`, match against `URN lookup!K2:K1461`, and return `URN lookup!E2:E1461` because that column is `LAESTAB`/DfE number. I’ll write formulas into only `Compiled and located schools da!B2:B1461`, then verify the formula model with `getCellDatas()` and export.
+[stderr] exec
+[stderr] /bin/sh -lc "mkdir -p /task/work /task/outputs/case_1 && univer help run | sed -n '1,180p'" in /task
+[stderr]  succeeded in 421ms:
+[stderr] univer run - Run workbook-local programmable surface logic.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer run <file.univer|file.unv> --file <script.js>
+[stderr]   univer run <file.univer|file.unv> --code <script>
+[stderr]   univer run <file.univer|file.unv> <script.js>
+[stderr]   printf '<script>' | univer run <file.univer|file.unv> -
+[stderr] 
+[stderr] Options:
+[stderr]   --code <script> - Inline JavaScript arrow function to execute.
+[stderr]   --file <script.js> - Script file containing bounded edit logic.
+[stderr]   <script.js> - Positional script file accepted when --code and --file are absent.
+[stderr]   - - Read JavaScript source from stdin.
+[stderr] 
+[stderr] Output:
+[stderr]   The run command is the workbook-local programmable surface for scripts.
+[stderr]   Scripts can read workbook state, compute results, and write workbook state.
+[stderr]   Use only APIs documented by the run manual; do not guess method names.
+[stderr]   Runs the script through the runtime-backed command path.
+[stderr]   Returns the script result as JSON-compatible stdout.
+[stderr] 
+[stderr] Examples:
+[stderr]   univer run ./budget.univer --file ./task.js
+[stderr]   univer run ./budget.univer --code '() => ({ success: true })'
+[stderr] 
+[stderr] Manual Topics:
+[stderr]   overview - command selection, hard rules, and progressive discovery
+[stderr]   core - univerAPI, workbook access, worksheet access, A1 notation, and coordinates
+[stderr]   ranges - range reads, writes, shape rules, formulas, merges, clear, cell shifts, and AutoFill
+[stderr]   formulas - formula writes, async calculation waits, and stale-readback getchas
+[stderr]   sheets - worksheet creation, rename, row or column structure, freezing, gridlines, and visibility
+[stderr]   formatting - font, fill, alignment, border, number-format, and clear-format APIs
+[stderr]   conditional-formatting - conditional formatting builders, range binding, and worksheet rule-list APIs
+[stderr]   charts - chart builders, source ranges, readback, update or remove, and viewer rendering notes
+[stderr]   shapes - shape builders, connectors, connection sites, readback, update or remove, and viewer rendering notes
+[stderr]   images - floating image builders, source positioning, readback, update or delete, and viewer rendering notes
+[stderr] 
+[stderr] Manual Aliases:
+[stderr]   a1-reference -> core (A1 Notation)
+[stderr]   coordinates -> core (Coordinate Model)
+[stderr]   autofill -> ranges (AutoFill)
+[stderr]   fill-series -> ranges (AutoFill)
+[stderr]   get-values -> ranges (Reading From FRange)
+[stderr]   read-range -> ranges (Reading From FRange)
+[stderr]   formula-readback -> formulas (Formula Calculation)
+[stderr]   calculation -> formulas (Formula Calculation)
+[stderr]   freeze-panes -> sheets (Freeze Rows And Columns)
+[stderr]   number-format -> formatting (Number Formats)
+[stderr]   conditional-format -> conditional-formatting (Core Workflow)
+[stderr]   condition-format -> conditional-formatting (Core Workflow)
+[stderr]   color-scale -> conditional-formatting (Color Scales)
+[stderr]   data-bar -> conditional-formatting (Data Bars)
+[stderr]   icon-set -> conditional-formatting (Icon Sets)
+[stderr]   chart -> charts (Core Workflow)
+[stderr]   insert-chart -> charts (Core Workflow)
+[stderr]   chart-builder -> charts (Chart Builder)
+[stderr]   shape -> shapes (Core Workflow)
+[stderr]   insert-shape -> shapes (Core Workflow)
+[stderr]   connector-shape -> shapes (Connector Shapes)
+[stderr]   connect-shapes -> shapes (Connect Shapes)
+[stderr]   image -> images (Core Workflow)
+[stderr]   floating-image -> images (Core Workflow)
+[stderr]   insert-image -> images (Core Workflow)
+[stderr] 
+[stderr] Read Manual:
+[stderr]   univer help run ranges
+[stderr]   univer help run autofill
+[stderr]   univer help run charts
+[stderr]   univer help run shapes
+[stderr]   univer help run images
+[stderr] 
+[stderr] Related:
+[stderr]   univer pipe in
+[stderr]   univer daemon status
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run ranges | sed -n '1,220p'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run formulas | sed -n '1,220p'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer help export | sed -n '1,140p'" in /task
+[stderr]  succeeded in 404ms:
+[stderr] # Ranges
+[stderr] 
+[stderr] This topic groups cell and range operations for ordinary `run` tasks.
+[stderr] 
+[stderr] ## Reading From FRange
+[stderr] 
+[stderr] Get a range from `sheet.getRange(...)`, then use these reads:
+[stderr] 
+[stderr] - `getValue() -> any` - get the top-left cell value as the normal displayed value
+[stderr] - `getRawValue() -> any` - get the top-left cell raw underlying value
+[stderr] - `getValues() -> any[][]` - get all cell values in the range as a 2D array
+[stderr] - `getRawValues() -> any[][]` - get all underlying raw values in the range as a 2D array
+[stderr] - `getFormulas() -> string[][]` - get formulas in A1 notation
+[stderr] - `getA1Notation(withSheet?) -> string` - get the range A1 notation; `withSheet=true` includes the sheet name
+[stderr] - `forEach(callback) -> void` - iterate cells in the range
+[stderr] - `isMerged() -> boolean` - check whether the range itself is merged
+[stderr] - `isPartOfMerge() -> boolean` - check whether the range falls inside a merged region
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   const range = sheet.getRange("A1:C3");
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     a1: range.getA1Notation(),
+[stderr]     values: range.getValues(),
+[stderr]     formulas: range.getFormulas()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Writing To FRange
+[stderr] 
+[stderr] Core writes:
+[stderr] 
+[stderr] - `setValue(value) -> FRange` - set one value across the target range; if the value starts with `=`, it can also write a formula
+[stderr] - `setValues(values) -> FRange` - batch set values from a 2D array
+[stderr] - `setFormula(formula) -> void` - set a formula in A1 notation such as `=SUM(A1:B10)`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setValue("Total");
+[stderr]   sheet.getRange("B2:C3").setValues([
+[stderr]     [10, 20],
+[stderr]     [30, 40]
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## setValues() Shape Rules
+[stderr] 
+[stderr] `setValues()` expects a rectangular 2D array whose shape matches the target range:
+[stderr] 
+[stderr] - one row per worksheet row in the target range
+[stderr] - one column per worksheet column in the target range
+[stderr] - keep every inner array the same length
+[stderr] - use `getRange('A1:C10')` or `getRange(0, 0, 10, 3)` to define the full target shape
+[stderr] - `getRange(row, col)` without size only targets a single cell
+[stderr] 
+[stderr] Correct:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([
+[stderr]   ["Name", "Score"],
+[stderr]   ["Ada", 95]
+[stderr] ]);
+[stderr] ```
+[stderr] 
+[stderr] Incorrect shape:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([["Name"], ["Ada", 95, "extra"]]);
+[stderr] ```
+[stderr] 
+[stderr] When writing a single cell, use `setValue()` unless the task specifically benefits from 2D shape handling.
+[stderr] 
+[stderr] ## Formulas And Async Readback
+[stderr] 
+[stderr] Formula calculation is asynchronous. This applies to:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] If you need the calculated result in the same `run`, wait for formula application:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] 
+[stderr] ## Merge And Unmerge
+[stderr] 
+[stderr] Merge APIs:
+[stderr] 
+[stderr] - `merge(options?) -> void` - merge cells into one block
+[stderr] - `breakApart() -> void` - unmerge cells
+[stderr] - `mergeAcross() -> void` - merge each row across the selected columns
+[stderr] - `mergeVertically() -> void` - merge each column down the selected rows
+[stderr] 
+[stderr] Typical uses:
+[stderr] 
+[stderr] - `merge()` for one combined block
+[stderr] - `mergeAcross()` to merge each row across the selected columns
+[stderr] - `mergeVertically()` to merge each column down the selected rows
+[stderr] - `breakApart()` to remove merges
+[stderr] - use `merge({ isForceMerge: true })` if you need to clear overlapping merges first
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D1").merge();
+[stderr]   sheet.getRange("A3:D4").mergeAcross();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     titleMerged: sheet.getRange("A1").isPartOfMerge()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Clear And Cell Shift Operations
+[stderr] 
+[stderr] Clear APIs:
+[stderr] 
+[stderr] - `clear() -> void` - clear the full range
+[stderr] - `clearContent() -> void` - clear only content and keep formatting
+[stderr] - `clearFormat() -> void` - clear only formatting and keep content
+[stderr] 
+[stderr] Use `clear()` when the task is to clear the full range. Use `clearContent()` or `clearFormat()` when you only want one part of that behavior.
+[stderr] 
+[stderr] Cell shift APIs:
+[stderr] 
+[stderr] - `insertCells(dimension) -> void` - insert cells and shift existing cells in the given dimension
+[stderr] - `deleteCells(dimension) -> void` - delete cells and shift remaining cells in the given dimension
+[stderr] 
+[stderr] Dimension constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.Dimension.ROWS`
+[stderr] - `univerAPI.Enum.Dimension.COLUMNS`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Queue");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Queue" not found' };
+[stderr] 
+[stderr]   sheet.getRange("B2:C3").clear();
+[stderr]   sheet.getRange("D2:D10").insertCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## AutoFill
+[stderr] 
+[stderr] Use `autoFill()` when a correct seed pattern already exists and the workbook should propagate it.
+[stderr] 
+[stderr] - `autoFill(destRange, fillType?) -> Promise<void>` - propagate from the source range into a larger destination that includes the source
+[stderr] 
+[stderr] Notes:
+[stderr] 
+[stderr] - `destRange` must include the source range
+[stderr] - `fillType` can be `'SERIES'` (default) or `'COPY'`
+[stderr] - this method is async; use `await`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Series");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Series" not found' };
+[stderr] 
+[stderr]   const source = sheet.getRange("A1:A2");
+[stderr]   const dest = sheet.getRange("A1:A10");
+[stderr]   await source.autoFill(dest);
+[stderr] 
+[stderr]   return { success: true, values: dest.getValues() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Run-Specific Getchas
+[stderr] 
+[stderr] - all `run` code must be wrapped in an arrow function: `() => { ... }` or `async () => { ... }`
+[stderr] 
+[stderr]  succeeded in 419ms:
+[stderr] # Formulas
+[stderr] 
+[stderr] This topic focuses on formula writes, calculation waits, and readback behavior inside `run`.
+[stderr] 
+[stderr] ## What This Topic Is For
+[stderr] 
+[stderr] Use this topic when the task needs workbook-native recalculation and the result must remain consistent with how the workbook computes formulas.
+[stderr] 
+[stderr] ## Formula Writes
+[stderr] 
+[stderr] You can write formulas with either of these APIs:
+[stderr] 
+[stderr] - `setFormula(formula) -> void`
+[stderr] - `setValue(value) -> FRange` when `value` starts with `=`
+[stderr] 
+[stderr] This applies to both:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] ## Formula Calculation
+[stderr] 
+[stderr] Formula calculation is asynchronous. If you need the calculated result in the same `run`, wait for calculation to finish:
+[stderr] 
+[stderr] ```javascript
+[stderr] await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] - note: if a real calculation runs, it resolves when results are applied; if no calculation starts quickly, it can resolve automatically instead of hanging forever
+[stderr] 
+[stderr] ## Formula Warning
+[stderr] 
+[stderr] Without the wait, readback can be stale.
+[stderr] 
+[stderr] ## Copyable Example
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     formula: sheet.getRange("A1").getFormulas(),
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Formula Readback With setValue()
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A2").setValue("=SUM(B2:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A2").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Getchas
+[stderr] 
+[stderr] - do not read the computed result immediately after writing a formula
+[stderr] - always verify formula output with workbook-visible reads after the command
+[stderr] - if the task is only propagation from an existing seed, prefer `ranges -> AutoFill` over custom formula scripting
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `ranges` for formula writes alongside value writes, shape rules, merges, clear, and AutoFill.
+[stderr] - See `overview` for hard rules and command-selection guidance.
+[stderr] 
+[stderr]  succeeded in 457ms:
+[stderr] univer export - Export a workbook package to an external spreadsheet format.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer export <file.univer|file.unv> <output.xlsx|csv>
+[stderr] 
+[stderr] Options:
+[stderr]   --json - Print successful export output as JSON.
+[stderr] 
+[stderr] Output:
+[stderr]   Exports workbook data when implementation is available.
+[stderr] 
+[stderr] JSON Output:
+[stderr]   success
+[stderr]   filePath
+[stderr]   outputPath
+[stderr] 
+[stderr] Examples:
+[stderr]   univer export ./budget.univer ./budget.xlsx
+[stderr] 
+[stderr] Related:
+[stderr]   univer import
+[stderr]   univer pipe out
+[stderr] 
+[stderr] codex
+[stderr] I’m about to edit the workbook. The formulas will remain formulas, not static values, and the target column will point to `LAESTAB` rather than `ESTAB` while trimming the postcode coming from column `L`.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/fix_dfes_check.js
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..a840c2d93a3a005abff14dc8984f30b03e34ad06
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,31 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..a840c2d93a3a005abff14dc8984f30b03e34ad06
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,31 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/fix_dfes_check.js' in /task
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..a840c2d93a3a005abff14dc8984f30b03e34ad06
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,31 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  exited 1 in 545ms:
+[stderr] ERROR CLI_ERROR
+[stderr] 
+[stderr] Range is out of bounds. Max rows: 1420, Max columns: 37, Given range: {"startRow":1,"startColumn":1,"endRow":1460,"endColumn":1,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0,"unitId":"ajWQJsTwPRhc7fcZH6w","sheetId":"uni1"}
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer help <command...>
+[stderr] 
+[stderr] Try:
+[stderr]   univer help
+[stderr] 
+[stderr] Trace ID: 8a3e61376f5e1777bf2184c569d13bf8
+[stderr] 
+[stderr] codex
+[stderr] The target sheet currently has 1,420 rows, so `B1461` is outside the sheet bounds even though the requested answer range goes that far. I’ll extend the sheet to the requested row boundary, then write only column `B` in that requested range.
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run sheets | sed -n '1,220p'" in /task
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..a840c2d93a3a005abff14dc8984f30b03e34ad06
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,31 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 1503ms:
+[stderr] # Sheets
+[stderr] 
+[stderr] This topic focuses on worksheet creation, worksheet structure, row or column presentation, freezing, gridlines, and visibility changes.
+[stderr] 
+[stderr] ## What This Topic Is For
+[stderr] 
+[stderr] Use this topic when the task is about sheet-level or row/column-level structure instead of direct cell value changes.
+[stderr] 
+[stderr] ## Worksheet Lifecycle
+[stderr] 
+[stderr] Use the workbook object to locate, list, create, and delete sheets.
+[stderr] 
+[stderr] - `getSheetByName(name) -> FWorksheet | null` - recommended explicit lookup by sheet name
+[stderr] - `getSheets() -> FWorksheet[]` - list all worksheets; useful when the task first needs sheet names
+[stderr] - `create(name, rows, cols) -> FWorksheet` - create a new worksheet with an initial shape
+[stderr] - `deleteSheet(sheetId) -> boolean` - delete the specified worksheet by sheet id
+[stderr] - `getSheetId() -> number` - worksheet id
+[stderr] - `getSheetName() -> string` - worksheet name
+[stderr] - `setName(name) -> void` - rename the worksheet
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const existing = workbook.getSheetByName("Summary");
+[stderr]   if (existing) {
+[stderr]     existing.setName("Executive Summary");
+[stderr]     return { success: true, sheetName: existing.getSheetName() };
+[stderr]   }
+[stderr] 
+[stderr]   const sheet = workbook.create("Summary", 100, 20);
+[stderr]   return { success: true, sheetName: sheet.getSheetName() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Rows And Columns
+[stderr] 
+[stderr] - `insertRows(rowIndex, numRows) -> FWorksheet` - insert rows at a 0-based starting index
+[stderr] - `deleteRows(rowIndex, numRows) -> FWorksheet` - delete rows at a 0-based starting index
+[stderr] - `insertColumns(columnIndex, numColumns) -> FWorksheet` - insert columns at a 0-based starting index
+[stderr] - `deleteColumns(columnIndex, numColumns) -> FWorksheet` - delete columns at a 0-based starting index
+[stderr] - `getLastRow() -> number` - 0-based index of the last row with data
+[stderr] - `getLastColumn() -> number` - 0-based index of the last column with data
+[stderr] 
+[stderr] ## Freeze Rows And Columns
+[stderr] 
+[stderr] - `setFrozenRows(rows)` or `setFrozenRows(startRow, endRow) -> FWorksheet` - freeze the first `rows` rows, or freeze a row range
+[stderr] - `setFrozenColumns(columns)` or `setFrozenColumns(startColumn, endColumn) -> FWorksheet` - freeze the first `columns` columns, or freeze a column range
+[stderr] 
+[stderr] Insert rows and freeze the header:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Ops");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Ops" not found' };
+[stderr] 
+[stderr]   sheet.insertRows(1, 2);
+[stderr]   sheet.setFrozenRows(1);
+[stderr] 
+[stderr]   return { success: true, lastRow: sheet.getLastRow() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Gridlines
+[stderr] 
+[stderr] - `hasHiddenGridLines() -> boolean` - check whether gridlines are hidden
+[stderr] - `setHiddenGridlines(hidden) -> FWorksheet` - show or hide sheet gridlines
+[stderr] - `setGridLinesColor(color) -> FWorksheet` - set gridline color; `undefined` or `null` resets to default
+[stderr] 
+[stderr] Hide gridlines and set their color:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Dashboard");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Dashboard" not found' };
+[stderr] 
+[stderr]   sheet.setHiddenGridlines(true);
+[stderr]   sheet.setGridLinesColor("#D9D9D9");
+[stderr] 
+[stderr]   return { success: true, hidden: sheet.hasHiddenGridLines() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Row And Column Presentation
+[stderr] 
+[stderr] - `setRowHeight(rowIndex, height) -> FWorksheet` - set one row height in pixels
+[stderr] - `setRowHeights(startRow, numRows, height) -> FWorksheet` - set multiple row heights
+[stderr] - `showRows(rowIndex, numRows) -> FWorksheet` - show hidden rows
+[stderr] - `hideRows(rowIndex, numRows) -> FWorksheet` - hide rows
+[stderr] - `autoResizeRows(startRow, numRows) -> FWorksheet` - auto-size row heights to content
+[stderr] - `setColumnWidth(columnIndex, width) -> FWorksheet` - set one column width in pixels
+[stderr] - `setColumnWidths(startColumn, numColumns, width) -> FWorksheet` - set multiple column widths
+[stderr] - `showColumns(columnIndex, numColumns) -> FWorksheet` - show hidden columns
+[stderr] - `hideColumns(columnIndex, numColumns) -> FWorksheet` - hide columns
+[stderr] - `autoResizeColumns(startColumn, numColumns) -> FWorksheet` - auto-size column widths to content
+[stderr] 
+[stderr] ## Getchas
+[stderr] 
+[stderr] - imported workbooks can contain non-English worksheet names and still work normally
+[stderr] - quote the full range string in the shell, for example `--range '工作表1!A1:J3'`
+[stderr] - verify imported templates by reading a small anchor range and checking a few exact cells plus one non-empty cell
+[stderr] - for workbook-visible structure checks, prefer `inspect workbook` over package metadata
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `core` for workbook entry points, `getRange()`, A1 notation, and coordinates.
+[stderr] - See `formatting` for cell-level visual formatting after the sheet structure is in place.
+[stderr] 
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..a840c2d93a3a005abff14dc8984f30b03e34ad06
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,31 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/fix_dfes_check.js
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/fix_dfes_check.js' in /task
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 1592ms:
+[stderr] {"success":true,"changedRange":"Compiled and located schools da!B2:B1461","formulaCount":1460,"sampleFormulas":[["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L3),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L4),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L5),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L6),'URN lookup'!$K$2:$K$1461,0))"]],"sampleCellDatas":[[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))","v":9092002,"t":2}],[{"s":"R0","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L3),'URN lookup'!$K$2:$K$1461,0))","v":"#N/A","t":1}],[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L4),'URN lookup'!$K$2:$K$1461,0))","v":9095402,"t":2}],[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L5),'URN lookup'!$K$2:$K$1461,0))","v":9093102,"t":2}],[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L6),'URN lookup'!$K$2:$K$1461,0))","v":9093102,"t":2}]]}
+[stderr] 
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] The edit succeeded. The first rows now resolve numeric DfE/LAESTAB values where a trimmed postcode matches; rows with no lookup match still show `#N/A`, which is expected for unmatched postcodes rather than a formula failure. I’m doing one final model-level verification and then exporting the `.xlsx`.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/verify_dfes_check.js
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_dfes_check.js b/work/verify_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..114d300aa79b70a61f8d8db70249d499d2e4ac46
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_dfes_check.js
+[stderr] @@ -0,0 +1,21 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +
+[stderr] +  const ranges = ["B2:B6", "B1419:B1422", "B1461:B1461"];
+[stderr] +  const checks = {};
+[stderr] +  for (const a1 of ranges) {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    checks[a1] = {
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +      cellDatas: range.getCellDatas()
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow: sheet.getLastRow(),
+[stderr] +    lastColumn: sheet.getLastColumn(),
+[stderr] +    checks
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_dfes_check.js b/work/verify_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..114d300aa79b70a61f8d8db70249d499d2e4ac46
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_dfes_check.js
+[stderr] @@ -0,0 +1,21 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +
+[stderr] +  const ranges = ["B2:B6", "B1419:B1422", "B1461:B1461"];
+[stderr] +  const checks = {};
+[stderr] +  for (const a1 of ranges) {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    checks[a1] = {
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +      cellDatas: range.getCellDatas()
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow: sheet.getLastRow(),
+[stderr] +    lastColumn: sheet.getLastColumn(),
+[stderr] +    checks
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/verify_dfes_check.js' in /task
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_dfes_check.js b/work/verify_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..114d300aa79b70a61f8d8db70249d499d2e4ac46
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_dfes_check.js
+[stderr] @@ -0,0 +1,21 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +
+[stderr] +  const ranges = ["B2:B6", "B1419:B1422", "B1461:B1461"];
+[stderr] +  const checks = {};
+[stderr] +  for (const a1 of ranges) {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    checks[a1] = {
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +      cellDatas: range.getCellDatas()
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow: sheet.getLastRow(),
+[stderr] +    lastColumn: sheet.getLastColumn(),
+[stderr] +    checks
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 441ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Compiled and located schools da
+[stderr] Sheet Count: 3
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Compiled and located schools da | A1:AJ1461 | 1 | 1460 |
+[stderr] | 2 | URN lookup | A1:X1461 | 1 | 0 |
+[stderr] | 3 | KS4 data | A1:L278 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'Compiled and located schools da'
+[stderr] 
+[stderr] - Used Range: A1:AJ1461
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 1460 covering 1460 cells
+[stderr] 
+[stderr] ### Table 1: A1:AJ1461
+[stderr] |A1,URN|B1,DFES check|C1,DfE Number|D1,County|E1,Name|F1,Type|
+[stderr] |A2,|B2,9092002|C2,|D2,Cumbria|E2,Abbotsmead CDC|F2,Community Dev Centre|
+[stderr] |A3,|B3,#N/A|C3,|D3,Cumbria|E3,Accessing Hawthorn Education Services|F3,Other Independent Es|
+[stderr] |A4,|B4,9095402|C4,|D4,Cumbria|E4,Adult Education Carlisle|F4,Adult Education Cent|
+[stderr] |A5,|B5,9093102|C5,|D5,Cumbria|E5,All Saints CDC|F5,Community Dev Centre|
+[stderr] 
+[stderr] ### Formulas (1 groups, 1460 cells)
+[stderr] - B2:B1461 <- B2 =INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))
+[stderr] 
+[stderr] ## Sheet: 'URN lookup'
+[stderr] 
+[stderr] - Used Range: A1:X1461
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:X1461
+[stderr] |A1,URN|B1,LANAME|C1,LA|D1,ESTAB|E1,LAESTAB|F1,SCHNAME|
+[stderr] |A2,112100|B2,Cumbria|C2,909|D2,2001|E2,9092001|F2,Allonby Primary School|
+[stderr] |A3,112101|B3,Cumbria|C3,909|D3,2004|E3,9092004|F3,Alston Primary School|
+[stderr] |A4,112102|B4,Cumbria|C4,909|D4,2005|E4,9092005|F4,Armathwaite School|
+[stderr] |A5,112103|B5,Cumbria|C5,909|D5,2008|E5,9092008|F5,Bewcastle School|
+[stderr] 
+[stderr] ## Sheet: 'KS4 data'
+[stderr] 
+[stderr] - Used Range: A1:L278
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:L278
+[stderr] |A1,LEA|B1,ESTAB|C1,URN|D1,SCHNAME|E1,ATT8SCR|F1,P8PUP|
+[stderr] |A2,North Yorkshire|B2,4518|C2,136664|D2,Skipton Girls' High School|E2,71.2|F2,106|
+[stderr] |A3,North Yorkshire|B3,4605|C3,121715|D3,St Francis Xavier School|E3,58.8|F3,87|
+[stderr] |A4,North Yorkshire|B4,4608|C4,121716|D4,Ermysted's Grammar School|E4,71.5|F4,106|
+[stderr] |A5,North Yorkshire|B5,4007|C5,146769|D5,Graham School|E5,|F5,|
+[stderr] 
+[stderr]  succeeded in 439ms:
+[stderr] {"success":true,"lastRow":1460,"lastColumn":35,"checks":{"B2:B6":{"formulas":[["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L3),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L4),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L5),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L6),'URN lookup'!$K$2:$K$1461,0))"]],"cellDatas":[[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))","v":9092002,"t":2}],[{"s":"R0","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L3),'URN lookup'!$K$2:$K$1461,0))","v":"#N/A","t":1}],[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L4),'URN lookup'!$K$2:$K$1461,0))","v":9095402,"t":2}],[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L5),'URN lookup'!$K$2:$K$1461,0))","v":9093102,"t":2}],[{"s":"RC2-1","f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L6),'URN lookup'!$K$2:$K$1461,0))","v":9093102,"t":2}]]},"B1419:B1422":{"formulas":[["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1419),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1420),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1421),'URN lookup'!$K$2:$K$1461,0))"],["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1422),'URN lookup'!$K$2:$K$1461,0))"]],"cellDatas":[[{"f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1419),'URN lookup'!$K$2:$K$1461,0))","v":8153130,"s":"1H2J9E","t":2}],[{"f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1420),'URN lookup'!$K$2:$K$1461,0))","v":"#N/A","t":1}],[{"f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1421),'URN lookup'!$K$2:$K$1461,0))","v":"#N/A","t":1}],[{"f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1422),'URN lookup'!$K$2:$K$1461,0))","v":"#N/A","t":1}]]},"B1461:B1461":{"formulas":[["=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1461),'URN lookup'!$K$2:$K$1461,0))"]],"cellDatas":[[{"f":"=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L1461),'URN lookup'!$K$2:$K$1461,0))","v":"#N/A","t":1}]]}}}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx --json' in /task
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_dfes_check.js b/work/verify_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..114d300aa79b70a61f8d8db70249d499d2e4ac46
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_dfes_check.js
+[stderr] @@ -0,0 +1,21 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +
+[stderr] +  const ranges = ["B2:B6", "B1419:B1422", "B1461:B1461"];
+[stderr] +  const checks = {};
+[stderr] +  for (const a1 of ranges) {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    checks[a1] = {
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +      cellDatas: range.getCellDatas()
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow: sheet.getLastRow(),
+[stderr] +    lastColumn: sheet.getLastColumn(),
+[stderr] +    checks
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 1176ms:
+[stderr] {"success":true,"filePath":"/task/cases/case_1/input.univer","outputPath":"/task/outputs/case_1/output.xlsx","meta":{"trace_id":"fca276ee7ebf9810c172c3e675d6bc6d"}}
+[stderr] 
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_dfes_check.js b/work/verify_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..114d300aa79b70a61f8d8db70249d499d2e4ac46
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_dfes_check.js
+[stderr] @@ -0,0 +1,21 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +
+[stderr] +  const ranges = ["B2:B6", "B1419:B1422", "B1461:B1461"];
+[stderr] +  const checks = {};
+[stderr] +  for (const a1 of ranges) {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    checks[a1] = {
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +      cellDatas: range.getCellDatas()
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow: sheet.getLastRow(),
+[stderr] +    lastColumn: sheet.getLastColumn(),
+[stderr] +    checks
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] Completed case 1 and exported the workbook to:
+[stderr] 
+[stderr] `/task/outputs/case_1/output.xlsx`
+[stderr] 
+[stderr] I updated only `Compiled and located schools da!B2:B1461`. The formula now uses:
+[stderr] 
+[stderr] ```excel
+[stderr] =INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))
+[stderr] ```
+[stderr] 
+[stderr] The original issue was that `L` postcodes had leading spaces, so exact `MATCH` failed, and the formula was returning `URN lookup` column `D` (`ESTAB`) instead of column `E` (`LAESTAB` / full DfE number). Verified 1,460 formulas in `B2:B1461` before export.
+[stderr] diff --git a/work/fix_dfes_check.js b/work/fix_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..4351a28a586886dbcc47a9564c3e7ebe9fb04970
+[stderr] --- /dev/null
+[stderr] +++ b/work/fix_dfes_check.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +async () => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  const lookup = workbook.getSheetByName("URN lookup");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +  if (!lookup) return { success: false, error: "Lookup sheet not found" };
+[stderr] +
+[stderr] +  const startRow = 2;
+[stderr] +  const endRow = 1461;
+[stderr] +  if (typeof sheet.setRowCount === "function") {
+[stderr] +    sheet.setRowCount(endRow);
+[stderr] +  }
+[stderr] +  const formulas = [];
+[stderr] +  for (let row = startRow; row <= endRow; row += 1) {
+[stderr] +    formulas.push([{
+[stderr] +      f: `=INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L${row}),'URN lookup'!$K$2:$K$1461,0))`
+[stderr] +    }]);
+[stderr] +  }
+[stderr] +
+[stderr] +  const target = sheet.getRange(`B${startRow}:B${endRow}`);
+[stderr] +  target.setValues(formulas);
+[stderr] +  await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] +
+[stderr] +  const sampleRange = sheet.getRange("B2:B6");
+[stderr] +  const sampleFormulas = sampleRange.getFormulas();
+[stderr] +  const sampleCellDatas = sampleRange.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `Compiled and located schools da!B${startRow}:B${endRow}`,
+[stderr] +    formulaCount: formulas.length,
+[stderr] +    sampleFormulas,
+[stderr] +    sampleCellDatas
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_dfes_check.js b/work/verify_dfes_check.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..114d300aa79b70a61f8d8db70249d499d2e4ac46
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_dfes_check.js
+[stderr] @@ -0,0 +1,21 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Compiled and located schools da");
+[stderr] +  if (!sheet) return { success: false, error: "Target sheet not found" };
+[stderr] +
+[stderr] +  const ranges = ["B2:B6", "B1419:B1422", "B1461:B1461"];
+[stderr] +  const checks = {};
+[stderr] +  for (const a1 of ranges) {
+[stderr] +    const range = sheet.getRange(a1);
+[stderr] +    checks[a1] = {
+[stderr] +      formulas: range.getFormulas(),
+[stderr] +      cellDatas: range.getCellDatas()
+[stderr] +    };
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow: sheet.getLastRow(),
+[stderr] +    lastColumn: sheet.getLastColumn(),
+[stderr] +    checks
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] tokens used
+[stderr] 73,995
+[stdout] Completed case 1 and exported the workbook to:
+[stdout] 
+[stdout] `/task/outputs/case_1/output.xlsx`
+[stdout] 
+[stdout] I updated only `Compiled and located schools da!B2:B1461`. The formula now uses:
+[stdout] 
+[stdout] ```excel
+[stdout] =INDEX('URN lookup'!$E$2:$E$1461,MATCH(TRIM(L2),'URN lookup'!$K$2:$K$1461,0))
+[stdout] ```
+[stdout] 
+[stdout] The original issue was that `L` postcodes had leading spaces, so exact `MATCH` failed, and the formula was returning `URN lookup` column `D` (`ESTAB`) instead of column `E` (`LAESTAB` / full DfE number). Verified 1,460 formulas in `B2:B1461` before export.

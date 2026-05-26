@@ -1,0 +1,1 @@
+[stderr] /usr/local/bin/spreadsheetbench-agent-task: line 67: /usr/local/bin/claude: Argument list too long

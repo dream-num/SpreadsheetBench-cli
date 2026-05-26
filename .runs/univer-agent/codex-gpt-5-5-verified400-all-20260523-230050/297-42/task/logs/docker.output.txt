@@ -1,0 +1,1886 @@
+[stderr] Reading additional input from stdin...
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e555d-5349-7de1-a57b-896e791c6571
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 297-42
+[stderr] 
+[stderr] ### instruction
+[stderr] Running my macro only creates a new sheet named 'combined' without pulling in the data from the other sheets. Use a macro or similar function to copy the data from the existing sheets into the newly created 'combined' sheet. I have given the header of the expected output in the 'combined sheet' in the attachment. Please start from cell A2 to output the answer, pay attention to the position, mapping between the answer and the header name.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: combined
+[stderr] Full Name	Hire Date	Hire Month	City	Province	Employment type	Years	Base Salary	Bonus	Overtime	Commission	Total Compensation	Department	PTO Days	Sick Days
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: sindh
+[stderr] Full Name	Hire Date	Hire Month	City	Province	Employment type	Years	Base Salary	Bonus	Overtime	Commission	Total Compensation	Department	PTO Days	Sick Days
+[stderr] Fatima	42794	42794	Karachi	Sindh	Full-time	42794	161713	24257	16171	16171	185970	Marketing	11	4
+[stderr] Asma	43187	43187	Karachi	Sindh	Full-time	43187	185574	27836	18557	18557	213410	Administration	11	4
+[stderr] Abbas	43028	43028	Hyderabad	Sindh	Full-time	43028	149071	22361	0	0	171432	R&D	11	3
+[stderr] Tufail	43768	43768	Karachi	Sindh	Full-time	43768	39144	5872	0	0	45016	Finance	15	4
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: punjab
+[stderr] Full Name	Hire Date	Hire Month	City	Province	Employment type	Years	Base Salary	Bonus	Overtime	Commission	Total Compensation	Department	PTO Days	Sick Days
+[stderr] Abid	43090	43090	Lahore	Punjab	Full-time	43090	70551	10583	0	0	81134	Finance	15	5
+[stderr] Amin	44082	44082	Lahore	Punjab	Full-time	44082	119093	17864	0	0	136957	Customer Support	10	4
+[stderr] Afsheen	43081	43081	Lahore	Punjab	Full-time	43081	63567	9535	0	0	73102	Sales	14	2
+[stderr] Abid	43786	43786	Lahore	Punjab	Full-time	43786	104358	15654	0	0	120012	R&D	12	4
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: baluchistan
+[stderr] Full Name	Hire Date	Hire Month	City	Province	Employment type	Years	Base Salary	Bonus	Overtime	Commission	Total Compensation	Department	PTO Days	Sick Days
+[stderr] Benazir	42748	42748	Quetta	Baluchistan	Full-time	42748	76148	11422	0	0	87570	Marketing	14	2
+[stderr] Taufeeq	44006	44006	Quetta	Baluchistan	Full-time	44006	145413	21812	0	0	167225	Marketing	16	2
+[stderr] Afsheen	43151	43151	Quetta	Baluchistan	Full-time	43151	53353	8003	0	0	61356	Human Resources	11	1
+[stderr] Afsheen	43278	43278	Quetta	Baluchistan	Full-time	43278	190290	28544	19029	19029	218834	IT	20	2
+[stderr] --------------------------------------------------
+[stderr] Sheet Name: Khyber Pakhtoonkhawa
+[stderr] Full Name	Hire Date	Hire Month	City	Province	Employment type	Years	Base Salary	Bonus	Overtime	Commission	Total Compensation	Department	PTO Days	Sick Days
+[stderr] Abid	42868	42868	Peshawar	Khyber-pakhtoonKhawa	Full-time	42868	186937	28041	18694	18694	214978	R&D	13	2
+[stderr] Aleem	43850	43850	Peshawar	Khyber-pakhtoonKhawa	Full-time	43850	46554	6983	0	0	53537	Marketing	16	3
+[stderr] Benazir	43989	43989	Peshawar	Khyber-pakhtoonKhawa	Full-time	43989	142195	21329	0	0	163524	Administration	14	4
+[stderr] Amin	43311	43311	Peshawar	Khyber-pakhtoonKhawa	Full-time	43311	67386	10108	0	0	77494	R&D	17	4
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Sheet-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] combined'!A2:O822
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export: compare formula text, raw value, number format, cell type, and visible display where relevant. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json`; use `pipe out --format json --type formula` for formulas; if needed, use `univer run` to return explicit `{ row1, col1, value, formula }` objects.
+[stderr] - Note: `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer run-script `getRawValues()` behavior from `pipe out --type rawValue`, especially for dates, currency, percentages, and formatted IDs.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type: 1=STRING, 2=NUMBER, 3=BOOLEAN, 4=FORCE_STRING), `f` (formula), `p` (rich text), `s` (style/number format), and `custom` (custom data).
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not treat `getValues()` + `setValues()` as a general read/write pattern.
+[stderr]   3. Choose reads by intent: display values use `getValues()` or `getDisplayValues()`; raw values without model preservation use `getRawValues()`; complete cell models use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`.
+[stderr]   4. Choose writes by intent: simple new values may be plain `string`, `number`, or `boolean`; explicit types, formulas, dates, formats, rich text, or forced text should use complete `ICellData`; formulas use `setFormula('=A1+B1')` or `{ f: '=A1+B1' }`; literal formula text uses `{ v: '=A1+B1', t: 4 }`; leading-zero IDs or codes use `{ v: '00123', t: 4 }`.
+[stderr]   5. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`.
+[stderr]   6. When reading existing cells and writing them elsewhere: display-only copies may use `getValues()`/`getDisplayValues()` -> `setValues()`; raw-value-only copies may use `getRawValues()` -> `setValues()`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   7. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   8. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] codex
+[stderr] I’ll use the `univer-cli` skill first, then inspect the workbook structure and consolidate the source sheets into `combined!A2:O822` while preserving cell models where possible.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,220p' /home/node/.agents/skills/univer-cli/SKILL.md && which univer && univer --help | sed -n '1,120p'" in /task
+[stderr]  succeeded in 262ms:
+[stderr] univer - spreadsheet editing CLI for agents
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer --help
+[stderr]   univer help <command...>
+[stderr]   univer <command> --help
+[stderr] 
+[stderr] Commands:
+[stderr]   Workbooks:
+[stderr]     univer new <file.univer|file.unv>
+[stderr]     univer import <input.xlsx|csv> <file.univer|file.unv>
+[stderr]     univer export <file.univer|file.unv> <output.xlsx|csv>
+[stderr] 
+[stderr]   Read:
+[stderr]     univer inspect workbook <file.univer|file.unv>
+[stderr]     univer inspect sheet <file.univer|file.unv> [sheet]
+[stderr]     univer inspect range <file.univer|file.unv> [sheet!A1:B2]
+[stderr]     univer inspect formulas <file.univer|file.unv> [sheet]
+[stderr]     univer inspect lint <file.univer|file.unv>
+[stderr]     univer search <file.univer|file.unv> <query>
+[stderr]     univer view <file.univer|file.unv>
+[stderr]     univer view comments <file.univer|file.unv> [--all] [--json]
+[stderr]     univer view status [--json]
+[stderr]     univer view stop [--json]
+[stderr] 
+[stderr]   Write:
+[stderr]     univer run <file.univer|file.unv> --file <script.js>
+[stderr] 
+[stderr]   Configuration:
+[stderr]     univer config <path|list|get|set|unset>
+[stderr] 
+[stderr]   Stream:
+[stderr]     univer pipe out <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr]     univer pipe in <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr] 
+[stderr]   Health:
+[stderr]     univer doctor [--json]
+[stderr]     univer doctor collect --last <duration>
+[stderr]     univer doctor collect [--trace-id <id>]
+[stderr]     univer doctor collect --all
+[stderr]     univer update [--force]
+[stderr] 
+[stderr]   Daemon:
+[stderr]     univer daemon status [--json]
+[stderr]     univer daemon start
+[stderr]     univer daemon stop
+[stderr] 
+[stderr]   Versioning:
+[stderr]     univer status <file.univer|file.unv>
+[stderr]     univer commit <file.univer|file.unv> --message <message>
+[stderr]     univer clone <file.univer|file.unv> --unit-id <unitID>
+[stderr]     univer restore <file.univer|file.unv>
+[stderr]     univer reset <file.univer|file.unv> --soft HEAD~N
+[stderr]     univer sync <file.univer|file.unv>
+[stderr]     univer pull <file.univer|file.unv>
+[stderr] 
+[stderr] codex
+[stderr] The skill is loaded. I’m going to inspect sheet dimensions and headers now, then I’ll write one bounded script that clears only the requested target body range and copies rows from the province sheets into `combined` starting at A2.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/work /task/outputs/case_1 && univer inspect range /task/cases/case_1/input.univer --range "combined!A1:O5"' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run | sed -n '1,180p'" in /task
+[stderr]  succeeded in 370ms:
+[stderr] univer run - Run workbook-local programmable surface logic.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer run <file.univer|file.unv> --file <script.js>
+[stderr]   univer run <file.univer|file.unv> --code <script>
+[stderr]   univer run <file.univer|file.unv> <script.js>
+[stderr]   printf '<script>' | univer run <file.univer|file.unv> -
+[stderr] 
+[stderr] Options:
+[stderr]   --code <script> - Inline JavaScript arrow function to execute.
+[stderr]   --file <script.js> - Script file containing bounded edit logic.
+[stderr]   <script.js> - Positional script file accepted when --code and --file are absent.
+[stderr]   - - Read JavaScript source from stdin.
+[stderr] 
+[stderr] Output:
+[stderr]   The run command is the workbook-local programmable surface for scripts.
+[stderr]   Scripts can read workbook state, compute results, and write workbook state.
+[stderr]   Use only APIs documented by the run manual; do not guess method names.
+[stderr]   Runs the script through the runtime-backed command path.
+[stderr]   Returns the script result as JSON-compatible stdout.
+[stderr] 
+[stderr] Examples:
+[stderr]   univer run ./budget.univer --file ./task.js
+[stderr]   univer run ./budget.univer --code '() => ({ success: true })'
+[stderr] 
+[stderr] Manual Topics:
+[stderr]   overview - command selection, hard rules, and progressive discovery
+[stderr]   core - univerAPI, workbook access, worksheet access, A1 notation, and coordinates
+[stderr]   ranges - range reads, writes, shape rules, formulas, merges, clear, cell shifts, and AutoFill
+[stderr]   formulas - formula writes, async calculation waits, and stale-readback getchas
+[stderr]   sheets - worksheet creation, rename, row or column structure, freezing, gridlines, and visibility
+[stderr]   formatting - font, fill, alignment, border, number-format, and clear-format APIs
+[stderr]   conditional-formatting - conditional formatting builders, range binding, and worksheet rule-list APIs
+[stderr]   charts - chart builders, source ranges, readback, update or remove, and viewer rendering notes
+[stderr]   shapes - shape builders, connectors, connection sites, readback, update or remove, and viewer rendering notes
+[stderr]   images - floating image builders, source positioning, readback, update or delete, and viewer rendering notes
+[stderr] 
+[stderr] Manual Aliases:
+[stderr]   a1-reference -> core (A1 Notation)
+[stderr]   coordinates -> core (Coordinate Model)
+[stderr]   autofill -> ranges (AutoFill)
+[stderr]   fill-series -> ranges (AutoFill)
+[stderr]   get-values -> ranges (Reading From FRange)
+[stderr]   read-range -> ranges (Reading From FRange)
+[stderr]   formula-readback -> formulas (Formula Calculation)
+[stderr]   calculation -> formulas (Formula Calculation)
+[stderr]   freeze-panes -> sheets (Freeze Rows And Columns)
+[stderr]   number-format -> formatting (Number Formats)
+[stderr]   conditional-format -> conditional-formatting (Core Workflow)
+[stderr]   condition-format -> conditional-formatting (Core Workflow)
+[stderr]   color-scale -> conditional-formatting (Color Scales)
+[stderr]   data-bar -> conditional-formatting (Data Bars)
+[stderr]   icon-set -> conditional-formatting (Icon Sets)
+[stderr]   chart -> charts (Core Workflow)
+[stderr]   insert-chart -> charts (Core Workflow)
+[stderr]   chart-builder -> charts (Chart Builder)
+[stderr]   shape -> shapes (Core Workflow)
+[stderr]   insert-shape -> shapes (Core Workflow)
+[stderr]   connector-shape -> shapes (Connector Shapes)
+[stderr]   connect-shapes -> shapes (Connect Shapes)
+[stderr]   image -> images (Core Workflow)
+[stderr]   floating-image -> images (Core Workflow)
+[stderr]   insert-image -> images (Core Workflow)
+[stderr] 
+[stderr] Read Manual:
+[stderr]   univer help run ranges
+[stderr]   univer help run autofill
+[stderr]   univer help run charts
+[stderr]   univer help run shapes
+[stderr]   univer help run images
+[stderr] 
+[stderr] Related:
+[stderr]   univer pipe in
+[stderr]   univer daemon status
+[stderr] 
+[stderr]  succeeded in 1449ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: combined!A1:O5
+[stderr] Rows: 5 (4 data rows; first row is header)
+[stderr] Columns: 15
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | Full Name | text | 0/4 | all empty | - |
+[stderr] | B | Hire Date | text | 0/4 | all empty | - |
+[stderr] | C | Hire Month | text | 0/4 | all empty | - |
+[stderr] | D | City | text | 0/4 | all empty | - |
+[stderr] | E | Province | text | 0/4 | all empty | - |
+[stderr] | O | Sick Days | text | 0/4 | all empty | - |
+[stderr] 
+[stderr] *Note: 9 columns omitted from profile preview*
+[stderr] 
+[stderr] ## Preview
+[stderr] |A1,Full Name|B1,Hire Date|C1,Hire Month|D1,City|E1,Province|...|O1,Sick Days|
+[stderr] |A2,|B2,|C2,|D2,|E2,|...|O2,|
+[stderr] |A3,|B3,|C3,|D3,|E3,|...|O3,|
+[stderr] |A4,|B4,|C4,|D4,|E4,|...|O4,|
+[stderr] |A5,|B5,|C5,|D5,|E5,|...|O5,|
+[stderr] 
+[stderr] *Note: 9 columns omitted from data preview*
+[stderr] 
+[stderr]  succeeded in 1472ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: combined
+[stderr] Sheet Count: 5
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | combined | A1:O1 | 1 | 0 |
+[stderr] | 2 | sindh | A1:O324 | 1 | 0 |
+[stderr] | 3 | punjab | A1:O160 | 1 | 0 |
+[stderr] | 4 | baluchistan | A1:O176 | 1 | 0 |
+[stderr] | 5 | Khyber Pakhtoonkhawa | A1:O165 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'combined'
+[stderr] 
+[stderr] - Used Range: A1:O1
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:O1
+[stderr] |A1,Full Name|B1,Hire Date|C1,Hire Month|D1,City|E1,Province|F1,Employment type|
+[stderr] 
+[stderr] ## Sheet: 'sindh'
+[stderr] 
+[stderr] - Used Range: A1:O324
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:O324
+[stderr] |A1,Full Name|B1,Hire Date|C1,Hire Month|D1,City|E1,Province|F1,Employment type|
+[stderr] |A2,Fatima|B2,42794|C2,42794|D2,Karachi|E2,Sindh|F2,Full-time|
+[stderr] |A3,Asma|B3,43187|C3,43187|D3,Karachi|E3,Sindh|F3,Full-time|
+[stderr] |A4,Abbas|B4,43028|C4,43028|D4,Hyderabad|E4,Sindh|F4,Full-time|
+[stderr] |A5,Tufail|B5,43768|C5,43768|D5,Karachi|E5,Sindh|F5,Full-time|
+[stderr] 
+[stderr] ## Sheet: 'punjab'
+[stderr] 
+[stderr] - Used Range: A1:O160
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:O160
+[stderr] |A1,Full Name|B1,Hire Date|C1,Hire Month|D1,City|E1,Province|F1,Employment type|
+[stderr] |A2,Abid|B2,43090|C2,43090|D2,Lahore|E2,Punjab|F2,Full-time|
+[stderr] |A3,Amin|B3,44082|C3,44082|D3,Lahore|E3,Punjab|F3,Full-time|
+[stderr] |A4,Afsheen|B4,43081|C4,43081|D4,Lahore|E4,Punjab|F4,Full-time|
+[stderr] |A5,Abid|B5,43786|C5,43786|D5,Lahore|E5,Punjab|F5,Full-time|
+[stderr] 
+[stderr] ## Sheet: 'baluchistan'
+[stderr] 
+[stderr] - Used Range: A1:O176
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:O176
+[stderr] |A1,Full Name|B1,Hire Date|C1,Hire Month|D1,City|E1,Province|F1,Employment type|
+[stderr] |A2,Benazir|B2,42748|C2,42748|D2,Quetta|E2,Baluchistan|F2,Full-time|
+[stderr] |A3,Taufeeq|B3,44006|C3,44006|D3,Quetta|E3,Baluchistan|F3,Full-time|
+[stderr] |A4,Afsheen|B4,43151|C4,43151|D4,Quetta|E4,Baluchistan|F4,Full-time|
+[stderr] |A5,Afsheen|B5,43278|C5,43278|D5,Quetta|E5,Baluchistan|F5,Full-time|
+[stderr] 
+[stderr] ## Sheet: 'Khyber Pakhtoonkhawa'
+[stderr] 
+[stderr] - Used Range: A1:O165
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:O165
+[stderr] |A1,Full Name|B1,Hire Date|C1,Hire Month|D1,City|E1,Province|F1,Employment type|
+[stderr] |A2,Abid|B2,42868|C2,42868|D2,Peshawar|E2,Khyber-pakhtoonKhawa|F2,Full-time|
+[stderr] |A3,Aleem|B3,43850|C3,43850|D3,Peshawar|E3,Khyber-pakhtoonKhawa|F3,Full-time|
+[stderr] |A4,Benazir|B4,43989|C4,43989|D4,Peshawar|E4,Khyber-pakhtoonKhawa|F4,Full-time|
+[stderr] |A5,Amin|B5,43311|C5,43311|D5,Peshawar|E5,Khyber-pakhtoonKhawa|F5,Full-time|
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run ranges | sed -n '1,220p'" in /task
+[stderr]  succeeded in 379ms:
+[stderr] # Ranges
+[stderr] 
+[stderr] This topic groups cell and range operations for ordinary `run` tasks.
+[stderr] 
+[stderr] ## Reading From FRange
+[stderr] 
+[stderr] Get a range from `sheet.getRange(...)`, then use these reads:
+[stderr] 
+[stderr] - `getValue() -> any` - get the top-left cell value as the normal displayed value
+[stderr] - `getRawValue() -> any` - get the top-left cell raw underlying value
+[stderr] - `getValues() -> any[][]` - get all cell values in the range as a 2D array
+[stderr] - `getRawValues() -> any[][]` - get all underlying raw values in the range as a 2D array
+[stderr] - `getFormulas() -> string[][]` - get formulas in A1 notation
+[stderr] - `getA1Notation(withSheet?) -> string` - get the range A1 notation; `withSheet=true` includes the sheet name
+[stderr] - `forEach(callback) -> void` - iterate cells in the range
+[stderr] - `isMerged() -> boolean` - check whether the range itself is merged
+[stderr] - `isPartOfMerge() -> boolean` - check whether the range falls inside a merged region
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   const range = sheet.getRange("A1:C3");
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     a1: range.getA1Notation(),
+[stderr]     values: range.getValues(),
+[stderr]     formulas: range.getFormulas()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Writing To FRange
+[stderr] 
+[stderr] Core writes:
+[stderr] 
+[stderr] - `setValue(value) -> FRange` - set one value across the target range; if the value starts with `=`, it can also write a formula
+[stderr] - `setValues(values) -> FRange` - batch set values from a 2D array
+[stderr] - `setFormula(formula) -> void` - set a formula in A1 notation such as `=SUM(A1:B10)`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setValue("Total");
+[stderr]   sheet.getRange("B2:C3").setValues([
+[stderr]     [10, 20],
+[stderr]     [30, 40]
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## setValues() Shape Rules
+[stderr] 
+[stderr] `setValues()` expects a rectangular 2D array whose shape matches the target range:
+[stderr] 
+[stderr] - one row per worksheet row in the target range
+[stderr] - one column per worksheet column in the target range
+[stderr] - keep every inner array the same length
+[stderr] - use `getRange('A1:C10')` or `getRange(0, 0, 10, 3)` to define the full target shape
+[stderr] - `getRange(row, col)` without size only targets a single cell
+[stderr] 
+[stderr] Correct:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([
+[stderr]   ["Name", "Score"],
+[stderr]   ["Ada", 95]
+[stderr] ]);
+[stderr] ```
+[stderr] 
+[stderr] Incorrect shape:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([["Name"], ["Ada", 95, "extra"]]);
+[stderr] ```
+[stderr] 
+[stderr] When writing a single cell, use `setValue()` unless the task specifically benefits from 2D shape handling.
+[stderr] 
+[stderr] ## Formulas And Async Readback
+[stderr] 
+[stderr] Formula calculation is asynchronous. This applies to:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] If you need the calculated result in the same `run`, wait for formula application:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] 
+[stderr] ## Merge And Unmerge
+[stderr] 
+[stderr] Merge APIs:
+[stderr] 
+[stderr] - `merge(options?) -> void` - merge cells into one block
+[stderr] - `breakApart() -> void` - unmerge cells
+[stderr] - `mergeAcross() -> void` - merge each row across the selected columns
+[stderr] - `mergeVertically() -> void` - merge each column down the selected rows
+[stderr] 
+[stderr] Typical uses:
+[stderr] 
+[stderr] - `merge()` for one combined block
+[stderr] - `mergeAcross()` to merge each row across the selected columns
+[stderr] - `mergeVertically()` to merge each column down the selected rows
+[stderr] - `breakApart()` to remove merges
+[stderr] - use `merge({ isForceMerge: true })` if you need to clear overlapping merges first
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D1").merge();
+[stderr]   sheet.getRange("A3:D4").mergeAcross();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     titleMerged: sheet.getRange("A1").isPartOfMerge()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Clear And Cell Shift Operations
+[stderr] 
+[stderr] Clear APIs:
+[stderr] 
+[stderr] - `clear() -> void` - clear the full range
+[stderr] - `clearContent() -> void` - clear only content and keep formatting
+[stderr] - `clearFormat() -> void` - clear only formatting and keep content
+[stderr] 
+[stderr] Use `clear()` when the task is to clear the full range. Use `clearContent()` or `clearFormat()` when you only want one part of that behavior.
+[stderr] 
+[stderr] Cell shift APIs:
+[stderr] 
+[stderr] - `insertCells(dimension) -> void` - insert cells and shift existing cells in the given dimension
+[stderr] - `deleteCells(dimension) -> void` - delete cells and shift remaining cells in the given dimension
+[stderr] 
+[stderr] Dimension constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.Dimension.ROWS`
+[stderr] - `univerAPI.Enum.Dimension.COLUMNS`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Queue");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Queue" not found' };
+[stderr] 
+[stderr]   sheet.getRange("B2:C3").clear();
+[stderr]   sheet.getRange("D2:D10").insertCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## AutoFill
+[stderr] 
+[stderr] Use `autoFill()` when a correct seed pattern already exists and the workbook should propagate it.
+[stderr] 
+[stderr] - `autoFill(destRange, fillType?) -> Promise<void>` - propagate from the source range into a larger destination that includes the source
+[stderr] 
+[stderr] Notes:
+[stderr] 
+[stderr] - `destRange` must include the source range
+[stderr] - `fillType` can be `'SERIES'` (default) or `'COPY'`
+[stderr] - this method is async; use `await`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Series");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Series" not found' };
+[stderr] 
+[stderr]   const source = sheet.getRange("A1:A2");
+[stderr]   const dest = sheet.getRange("A1:A10");
+[stderr]   await source.autoFill(dest);
+[stderr] 
+[stderr]   return { success: true, values: dest.getValues() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Run-Specific Getchas
+[stderr] 
+[stderr] - all `run` code must be wrapped in an arrow function: `() => { ... }` or `async () => { ... }`
+[stderr] 
+[stderr] codex
+[stderr] The workbook has 323 Sindh rows, 159 Punjab rows, 175 Baluchistan rows, and 164 Khyber rows, which totals 821 rows. That exactly fills `combined!A2:O822`, so the output range is fully accounted for.
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run core | sed -n '1,220p' && univer help run sheets | sed -n '1,220p'" in /task
+[stderr]  succeeded in 684ms:
+[stderr] # Core
+[stderr] 
+[stderr] This topic groups the workbook, worksheet, and structural APIs behind most `run` tasks.
+[stderr] 
+[stderr] ## Object Hierarchy
+[stderr] 
+[stderr] ```text
+[stderr] univerAPI
+[stderr]   -> getActiveWorkbook() -> FWorkbook
+[stderr]     -> getSheetByName(name) -> FWorksheet | null
+[stderr]       -> getRange(...) -> FRange
+[stderr] ```
+[stderr] 
+[stderr] ## Entry Point
+[stderr] 
+[stderr] Start from the active workbook:
+[stderr] 
+[stderr] ```javascript
+[stderr] const workbook = univerAPI.getActiveWorkbook();
+[stderr] ```
+[stderr] 
+[stderr] Top-level APIs used most often:
+[stderr] 
+[stderr] - `univerAPI.getActiveWorkbook() -> FWorkbook` - get the current active workbook
+[stderr] - `univerAPI.getFormula() -> FFormula` - get the formula engine instance used for calculation synchronization
+[stderr] 
+[stderr] Dimension constants used by `insertCells()` and `deleteCells()`:
+[stderr] 
+[stderr] - `univerAPI.Enum.Dimension.ROWS` - row dimension constant for `insertCells()` and `deleteCells()`
+[stderr] - `univerAPI.Enum.Dimension.COLUMNS` - column dimension constant for `insertCells()` and `deleteCells()`
+[stderr] 
+[stderr] ## Workbook And Worksheet Access
+[stderr] 
+[stderr] Use the workbook object to locate, list, create, and delete sheets.
+[stderr] 
+[stderr] - `getSheetByName(name) -> FWorksheet | null` - recommended explicit lookup by sheet name
+[stderr] - `getSheets() -> FWorksheet[]` - list all worksheets; useful when the task first needs sheet names
+[stderr] - `create(name, rows, cols) -> FWorksheet` - create a new worksheet with an initial shape
+[stderr] - `deleteSheet(sheetId) -> boolean` - delete the specified worksheet by sheet id
+[stderr] 
+[stderr] Common worksheet reads:
+[stderr] 
+[stderr] - `getSheetId() -> number`
+[stderr] - `getSheetName() -> string`
+[stderr] - `getLastRow() -> number` - 0-based index of the last row with data
+[stderr] - `getLastColumn() -> number` - 0-based index of the last column with data
+[stderr] - `hasHiddenGridLines() -> boolean`
+[stderr] 
+[stderr] Common worksheet writes:
+[stderr] 
+[stderr] - `setName(name) -> void`
+[stderr] - `insertRows(rowIndex, numRows) -> FWorksheet`
+[stderr] - `deleteRows(rowIndex, numRows) -> FWorksheet`
+[stderr] - `insertColumns(columnIndex, numColumns) -> FWorksheet`
+[stderr] - `deleteColumns(columnIndex, numColumns) -> FWorksheet`
+[stderr] - `setFrozenRows(rows)` or `setFrozenRows(startRow, endRow) -> FWorksheet`
+[stderr] - `setFrozenColumns(columns)` or `setFrozenColumns(startColumn, endColumn) -> FWorksheet`
+[stderr] - `setHiddenGridlines(hidden) -> FWorksheet`
+[stderr] - `setGridLinesColor(color) -> FWorksheet` - `undefined` or `null` resets to default
+[stderr] - `setRowHeight(rowIndex, height) -> FWorksheet`
+[stderr] - `setRowHeights(startRow, numRows, height) -> FWorksheet`
+[stderr] - `showRows(rowIndex, numRows) -> FWorksheet`
+[stderr] - `hideRows(rowIndex, numRows) -> FWorksheet`
+[stderr] - `autoResizeRows(startRow, numRows) -> FWorksheet`
+[stderr] - `setColumnWidth(columnIndex, width) -> FWorksheet`
+[stderr] - `setColumnWidths(startColumn, numColumns, width) -> FWorksheet`
+[stderr] - `showColumns(columnIndex, numColumns) -> FWorksheet`
+[stderr] - `hideColumns(columnIndex, numColumns) -> FWorksheet`
+[stderr] - `autoResizeColumns(startColumn, numColumns) -> FWorksheet`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const existing = workbook.getSheetByName("Summary");
+[stderr]   if (existing) {
+[stderr]     return { success: true, sheetName: existing.getSheetName() };
+[stderr]   }
+[stderr] 
+[stderr]   const sheet = workbook.create("Summary", 100, 20);
+[stderr]   return { success: true, sheetName: sheet.getSheetName() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] Formula wait API:
+[stderr] 
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait until formula-calculation results are applied before reading computed values
+[stderr] - note: if a real calculation runs, it resolves when results are applied; if no calculation starts quickly, it can resolve automatically instead of hanging forever
+[stderr] 
+[stderr] ## getRange()
+[stderr] 
+[stderr] `getRange()` is the standard bridge from a worksheet to cell-level work.
+[stderr] 
+[stderr] Supported forms:
+[stderr] 
+[stderr] - `getRange('A1')`
+[stderr] - `getRange('A1:C10')`
+[stderr] - `getRange('A:A')`
+[stderr] - `getRange('1:1')`
+[stderr] - `getRange(row, col)`
+[stderr] - `getRange(row, col, rowCount, colCount)`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   const header = sheet.getRange("A1:C1").getValues();
+[stderr]   const firstCell = sheet.getRange(0, 0).getValue();
+[stderr] 
+[stderr]   return { success: true, header, firstCell };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Coordinate Model
+[stderr] 
+[stderr] Numeric coordinates are 0-based:
+[stderr] 
+[stderr] - `getRange(0, 0)` is `A1`
+[stderr] - `getRange(1, 2)` is `C2`
+[stderr] - `getRange(0, 0, 2, 2)` is `A1:B2`
+[stderr] - `insertRows(4, 3)` inserts 3 rows starting at spreadsheet row 5
+[stderr] - `insertColumns(1, 2)` inserts 2 columns starting at spreadsheet column B
+[stderr] 
+[stderr] Use numeric coordinates for loops or generated positions. Use A1 notation when the target is fixed and workbook-facing.
+[stderr] 
+[stderr] ## A1 Notation
+[stderr] 
+[stderr] Prefer A1 notation for explicit workbook-facing locations:
+[stderr] 
+[stderr] - `'A1'`
+[stderr] - `'A1:B10'`
+[stderr] - `'A:A'`
+[stderr] - `'1:1'`
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `sheets` for worksheet-focused structure and presentation tasks.
+[stderr] - See `ranges` for cell reads, writes, formulas, merges, clear, cell shifts, and AutoFill.
+[stderr] - See `overview` when you need the command shape, execution rules, and hard rules.
+[stderr] # Sheets
+[stderr] 
+[stderr] This topic focuses on worksheet creation, worksheet structure, row or column presentation, freezing, gridlines, and visibility changes.
+[stderr] 
+[stderr] ## What This Topic Is For
+[stderr] 
+[stderr] Use this topic when the task is about sheet-level or row/column-level structure instead of direct cell value changes.
+[stderr] 
+[stderr] ## Worksheet Lifecycle
+[stderr] 
+[stderr] Use the workbook object to locate, list, create, and delete sheets.
+[stderr] 
+[stderr] - `getSheetByName(name) -> FWorksheet | null` - recommended explicit lookup by sheet name
+[stderr] - `getSheets() -> FWorksheet[]` - list all worksheets; useful when the task first needs sheet names
+[stderr] - `create(name, rows, cols) -> FWorksheet` - create a new worksheet with an initial shape
+[stderr] - `deleteSheet(sheetId) -> boolean` - delete the specified worksheet by sheet id
+[stderr] - `getSheetId() -> number` - worksheet id
+[stderr] - `getSheetName() -> string` - worksheet name
+[stderr] - `setName(name) -> void` - rename the worksheet
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const existing = workbook.getSheetByName("Summary");
+[stderr]   if (existing) {
+[stderr]     existing.setName("Executive Summary");
+[stderr]     return { success: true, sheetName: existing.getSheetName() };
+[stderr]   }
+[stderr] 
+[stderr]   const sheet = workbook.create("Summary", 100, 20);
+[stderr]   return { success: true, sheetName: sheet.getSheetName() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Rows And Columns
+[stderr] 
+[stderr] - `insertRows(rowIndex, numRows) -> FWorksheet` - insert rows at a 0-based starting index
+[stderr] - `deleteRows(rowIndex, numRows) -> FWorksheet` - delete rows at a 0-based starting index
+[stderr] - `insertColumns(columnIndex, numColumns) -> FWorksheet` - insert columns at a 0-based starting index
+[stderr] - `deleteColumns(columnIndex, numColumns) -> FWorksheet` - delete columns at a 0-based starting index
+[stderr] - `getLastRow() -> number` - 0-based index of the last row with data
+[stderr] - `getLastColumn() -> number` - 0-based index of the last column with data
+[stderr] 
+[stderr] ## Freeze Rows And Columns
+[stderr] 
+[stderr] - `setFrozenRows(rows)` or `setFrozenRows(startRow, endRow) -> FWorksheet` - freeze the first `rows` rows, or freeze a row range
+[stderr] - `setFrozenColumns(columns)` or `setFrozenColumns(startColumn, endColumn) -> FWorksheet` - freeze the first `columns` columns, or freeze a column range
+[stderr] 
+[stderr] Insert rows and freeze the header:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Ops");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Ops" not found' };
+[stderr] 
+[stderr]   sheet.insertRows(1, 2);
+[stderr]   sheet.setFrozenRows(1);
+[stderr] 
+[stderr]   return { success: true, lastRow: sheet.getLastRow() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Gridlines
+[stderr] 
+[stderr] - `hasHiddenGridLines() -> boolean` - check whether gridlines are hidden
+[stderr] - `setHiddenGridlines(hidden) -> FWorksheet` - show or hide sheet gridlines
+[stderr] - `setGridLinesColor(color) -> FWorksheet` - set gridline color; `undefined` or `null` resets to default
+[stderr] 
+[stderr] Hide gridlines and set their color:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Dashboard");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Dashboard" not found' };
+[stderr] 
+[stderr]   sheet.setHiddenGridlines(true);
+[stderr]   sheet.setGridLinesColor("#D9D9D9");
+[stderr] 
+[stderr]   return { success: true, hidden: sheet.hasHiddenGridLines() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Row And Column Presentation
+[stderr] 
+[stderr] - `setRowHeight(rowIndex, height) -> FWorksheet` - set one row height in pixels
+[stderr] - `setRowHeights(startRow, numRows, height) -> FWorksheet` - set multiple row heights
+[stderr] - `showRows(rowIndex, numRows) -> FWorksheet` - show hidden rows
+[stderr] - `hideRows(rowIndex, numRows) -> FWorksheet` - hide rows
+[stderr] - `autoResizeRows(startRow, numRows) -> FWorksheet` - auto-size row heights to content
+[stderr] - `setColumnWidth(columnIndex, width) -> FWorksheet` - set one column width in pixels
+[stderr] - `setColumnWidths(startColumn, numColumns, width) -> FWorksheet` - set multiple column widths
+[stderr] - `showColumns(columnIndex, numColumns) -> FWorksheet` - show hidden columns
+[stderr] - `hideColumns(columnIndex, numColumns) -> FWorksheet` - hide columns
+[stderr] - `autoResizeColumns(startColumn, numColumns) -> FWorksheet` - auto-size column widths to content
+[stderr] 
+[stderr] ## Getchas
+[stderr] 
+[stderr] - imported workbooks can contain non-English worksheet names and still work normally
+[stderr] - quote the full range string in the shell, for example `--range '工作表1!A1:J3'`
+[stderr] - verify imported templates by reading a small anchor range and checking a few exact cells plus one non-empty cell
+[stderr] - for workbook-visible structure checks, prefer `inspect workbook` over package metadata
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `core` for workbook entry points, `getRange()`, A1 notation, and coordinates.
+[stderr] - See `formatting` for cell-level visual formatting after the sheet structure is in place.
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run ranges | rg -n "Cell|Data|style|getCell|setCell|raw|format"' in /task
+[stderr]  exited 127 in 343ms:
+[stderr] exec
+[stderr] /bin/sh -lc "univer help run ranges | grep -n \"Cell\\|Data\\|style\\|getCell\\|setCell\\|raw\\|format\"" in /task
+[stderr]  succeeded in 305ms:
+[stderr] 10:- `getRawValue() -> any` - get the top-left cell raw underlying value
+[stderr] 12:- `getRawValues() -> any[][]` - get all underlying raw values in the range as a 2D array
+[stderr] 155:## Clear And Cell Shift Operations
+[stderr] 160:- `clearContent() -> void` - clear only content and keep formatting
+[stderr] 161:- `clearFormat() -> void` - clear only formatting and keep content
+[stderr] 165:Cell shift APIs:
+[stderr] 167:- `insertCells(dimension) -> void` - insert cells and shift existing cells in the given dimension
+[stderr] 168:- `deleteCells(dimension) -> void` - delete cells and shift remaining cells in the given dimension
+[stderr] 184:  sheet.getRange("D2:D10").insertCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] 231:- See `formatting` when the job is primarily visual formatting instead of values or structure.
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'sindh"'!A1:O3'"' --format json > /task/work/sindh_A1O3.json && sed -n '1,160p' /task/work/sindh_A1O3.json" in /task
+[stderr]  succeeded in 293ms:
+[stderr] [["Full Name","Hire Date","Hire Month","City","Province","Employment type","Years","Base Salary","Bonus","Overtime","Commission","Total Compensation","Department","PTO Days","Sick Days"],["Fatima","42794","42794","Karachi","Sindh","Full-time","42794","161713","24257","16171","16171","185970","Marketing","11","4"],["Asma","43187","43187","Karachi","Sindh","Full-time","43187","185574","27836","18557","18557","213410","Administration","11","4"]]
+[stderr] 
+[stderr] codex
+[stderr] I’m checking the available run API for model-level copying. If the installed CLI exposes cell-data reads, I’ll use that; otherwise the source data appears value-only, so I’ll use the documented range value APIs and verify the consolidated rows and sample cells.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/probe_range_methods.js
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/probe_range_methods.js' in /task
+[stderr]  succeeded in 337ms:
+[stderr] {"success":true,"methods":["_collectRectAreaData","_createDataValidationError","_formulaDataModel","_getConditionalFormattingRuleModel","activateAsCurrentCell","addConditionalFormattingRule","clearConditionalFormatRules","clearFormat","createConditionalFormattingRule","deleteCells","deleteConditionalFormattingRule","getCellData","getCellDataGrid","getCellDatas","getCellStyle","getCellStyleData","getCellStyles","getConditionalFormattingRules","getCustomMetaData","getCustomMetaDatas","getDataRegion","getDataValidation","getDataValidationErrorAsync","getDataValidations","getDisplayValue","getDisplayValues","getNumberFormat","getNumberFormats","getRawValue","getRawValues","getRectAreaData","getRichTextValue","getRichTextValues","getStyleUsages","getStyleUsagesAsA1","getUsedThemeStyle","getValue","getValueAndRichTextValue","getValueAndRichTextValues","getValues","insertCells","moveConditionalFormattingRule","removeThemeStyle","setConditionalFormattingRule","setCustomMetaData","setCustomMetaDatas","setDataValidation","setFontStyle","setNumberFormat","setNumberFormats","setRichTextValueForCell","setRichTextValues","setValue","setValueForCell","setValues","useThemeStyle","valueOf"]}
+[stderr] 
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/probe_cell_data.js
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/probe_cell_data.js' in /task
+[stderr]  succeeded in 425ms:
+[stderr] {"success":true,"isArray":true,"sample":[[{"v":"Fatima","t":1,"s":"R0"},{"v":"42794","t":2,"s":"R0"},{"v":"42794","t":2,"s":"R0"},{"v":"Karachi","t":1,"s":"R0"},{"v":"Sindh","t":1,"s":"R0"},{"v":"Full-time","t":1,"s":"R0"},{"v":"42794","t":2,"s":"R0"},{"v":"161713","t":2,"s":"R0"},{"v":"24257","t":2,"s":"R0"},{"v":"16171","t":2,"s":"R0"},{"v":"16171","t":2,"s":"R0"},{"v":"185970","t":2,"s":"R0"},{"v":"Marketing","t":1,"s":"R0"},{"v":"11","t":2,"s":"R0"},{"v":"4","t":2,"s":"R0"}]]}
+[stderr] 
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer run /task/cases/case_1/input.univer --code '() => { const s = univerAPI.getActiveWorkbook().getSheetByName(\"combined\"); const names=[]; let o=s; while(o){ for (const n of Object.getOwnPropertyNames(o)) if("'!names.includes(n)) names.push(n); o=Object.getPrototypeOf(o);} return {success:true, methods:names.filter(n=>/row|column|count|max/i.test(n)).sort(), lastRow:s.getLastRow(), lastCol:s.getLastColumn()}; }'"'" in /task
+[stderr]  succeeded in 298ms:
+[stderr] {"success":true,"methods":["appendRow","autoFitRow","deleteColumn","deleteColumns","deleteColumnsByPoints","deleteRow","deleteRows","deleteRowsByPoints","getColumnCustomMetadata","getColumnDefaultStyle","getColumnWidth","getFrozenColumnRange","getFrozenColumns","getFrozenRowRange","getFrozenRows","getLastColumn","getLastColumns","getLastRow","getLastRows","getMaxColumns","getMaxRows","getRowCustomMetadata","getRowDefaultStyle","getRowHeight","hideColumn","hideColumns","hideRow","hideRows","insertColumnAfter","insertColumnBefore","insertColumns","insertColumnsAfter","insertColumnsBefore","insertRowAfter","insertRowBefore","insertRows","insertRowsAfter","insertRowsBefore","moveColumns","moveRows","setColumnCount","setColumnCustom","setColumnCustomMetadata","setColumnDefaultStyle","setColumnWidth","setColumnWidths","setFrozenColumns","setFrozenRows","setRowAutoHeight","setRowCount","setRowCustom","setRowCustomMetadata","setRowDefaultStyle","setRowHeight","setRowHeights","setRowHeightsForced","showColumns","showRows","unhideColumn","unhideRow"],"lastRow":0,"lastCol":14}
+[stderr] 
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer run /task/cases/case_1/input.univer --code '() => { const s = univerAPI.getActiveWorkbook().getSheetByName(\"combined\"); return {success:true, maxRows:s.getMaxRows(), maxCols:s.getMaxColumns()}; }'" in /task
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 288ms:
+[stderr] {"success":true,"maxRows":150,"maxCols":26}
+[stderr] 
+[stderr] codex
+[stderr] Implementation plan: source ranges are each province sheet’s rows 2 through its last used row, columns A:O. Target is `combined!A2:O822`. I’ll map columns by the `combined` header row, preserve each source cell’s cell-data model, copy sheets in workbook order after `combined`, then verify row count, first/last rows, and a copied numeric cell model before exporting.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/consolidate_combined.js
+[stderr] diff --git a/work/consolidate_combined.js b/work/consolidate_combined.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247b9c7949371f1364805b55654f3a6b07b942ae
+[stderr] --- /dev/null
+[stderr] +++ b/work/consolidate_combined.js
+[stderr] @@ -0,0 +1,63 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const target = workbook.getSheetByName("combined");
+[stderr] +  if (!target) return { success: false, error: 'Sheet "combined" not found' };
+[stderr] +
+[stderr] +  const sourceNames = ["sindh", "punjab", "baluchistan", "Khyber Pakhtoonkhawa"];
+[stderr] +  const targetHeaders = target.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +  const output = [];
+[stderr] +  const sourceRowCounts = {};
+[stderr] +
+[stderr] +  for (const sourceName of sourceNames) {
+[stderr] +    const source = workbook.getSheetByName(sourceName);
+[stderr] +    if (!source) return { success: false, error: `Sheet "${sourceName}" not found` };
+[stderr] +
+[stderr] +    const lastRow = source.getLastRow();
+[stderr] +    const lastColumn = source.getLastColumn();
+[stderr] +    if (lastRow < 1) {
+[stderr] +      sourceRowCounts[sourceName] = 0;
+[stderr] +      continue;
+[stderr] +    }
+[stderr] +    if (lastColumn < 14) {
+[stderr] +      return { success: false, error: `Sheet "${sourceName}" does not include columns A:O` };
+[stderr] +    }
+[stderr] +
+[stderr] +    const sourceHeaders = source.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +    const headerIndex = new Map(sourceHeaders.map((header, index) => [header, index]));
+[stderr] +    const sourceData = source.getRange(1, 0, lastRow, 15).getCellDatas();
+[stderr] +    sourceRowCounts[sourceName] = sourceData.length;
+[stderr] +
+[stderr] +    for (const row of sourceData) {
+[stderr] +      const mappedRow = targetHeaders.map((header) => {
+[stderr] +        const sourceIndex = headerIndex.get(header);
+[stderr] +        if (sourceIndex === undefined) return null;
+[stderr] +        const cell = row[sourceIndex];
+[stderr] +        return cell == null ? null : JSON.parse(JSON.stringify(cell));
+[stderr] +      });
+[stderr] +      output.push(mappedRow);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  const targetRows = 821;
+[stderr] +  const targetColumns = 15;
+[stderr] +  if (output.length !== targetRows) {
+[stderr] +    return { success: false, error: `Expected ${targetRows} rows, got ${output.length}`, sourceRowCounts };
+[stderr] +  }
+[stderr] +
+[stderr] +  if (target.getMaxRows() < 822) target.setRowCount(822);
+[stderr] +  if (target.getMaxColumns() < targetColumns) target.setColumnCount(targetColumns);
+[stderr] +
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).clearContent();
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).setValues(output);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "combined!A2:O822",
+[stderr] +    sourceRowCounts,
+[stderr] +    rowsWritten: output.length,
+[stderr] +    columnsWritten: targetColumns,
+[stderr] +    firstOutputRow: target.getRange("A2:O2").getValues()[0],
+[stderr] +    lastOutputRow: target.getRange("A822:O822").getValues()[0],
+[stderr] +    copiedModelSample: target.getRange("B2").getCellData(),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/consolidate_combined.js b/work/consolidate_combined.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247b9c7949371f1364805b55654f3a6b07b942ae
+[stderr] --- /dev/null
+[stderr] +++ b/work/consolidate_combined.js
+[stderr] @@ -0,0 +1,63 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const target = workbook.getSheetByName("combined");
+[stderr] +  if (!target) return { success: false, error: 'Sheet "combined" not found' };
+[stderr] +
+[stderr] +  const sourceNames = ["sindh", "punjab", "baluchistan", "Khyber Pakhtoonkhawa"];
+[stderr] +  const targetHeaders = target.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +  const output = [];
+[stderr] +  const sourceRowCounts = {};
+[stderr] +
+[stderr] +  for (const sourceName of sourceNames) {
+[stderr] +    const source = workbook.getSheetByName(sourceName);
+[stderr] +    if (!source) return { success: false, error: `Sheet "${sourceName}" not found` };
+[stderr] +
+[stderr] +    const lastRow = source.getLastRow();
+[stderr] +    const lastColumn = source.getLastColumn();
+[stderr] +    if (lastRow < 1) {
+[stderr] +      sourceRowCounts[sourceName] = 0;
+[stderr] +      continue;
+[stderr] +    }
+[stderr] +    if (lastColumn < 14) {
+[stderr] +      return { success: false, error: `Sheet "${sourceName}" does not include columns A:O` };
+[stderr] +    }
+[stderr] +
+[stderr] +    const sourceHeaders = source.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +    const headerIndex = new Map(sourceHeaders.map((header, index) => [header, index]));
+[stderr] +    const sourceData = source.getRange(1, 0, lastRow, 15).getCellDatas();
+[stderr] +    sourceRowCounts[sourceName] = sourceData.length;
+[stderr] +
+[stderr] +    for (const row of sourceData) {
+[stderr] +      const mappedRow = targetHeaders.map((header) => {
+[stderr] +        const sourceIndex = headerIndex.get(header);
+[stderr] +        if (sourceIndex === undefined) return null;
+[stderr] +        const cell = row[sourceIndex];
+[stderr] +        return cell == null ? null : JSON.parse(JSON.stringify(cell));
+[stderr] +      });
+[stderr] +      output.push(mappedRow);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  const targetRows = 821;
+[stderr] +  const targetColumns = 15;
+[stderr] +  if (output.length !== targetRows) {
+[stderr] +    return { success: false, error: `Expected ${targetRows} rows, got ${output.length}`, sourceRowCounts };
+[stderr] +  }
+[stderr] +
+[stderr] +  if (target.getMaxRows() < 822) target.setRowCount(822);
+[stderr] +  if (target.getMaxColumns() < targetColumns) target.setColumnCount(targetColumns);
+[stderr] +
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).clearContent();
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).setValues(output);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "combined!A2:O822",
+[stderr] +    sourceRowCounts,
+[stderr] +    rowsWritten: output.length,
+[stderr] +    columnsWritten: targetColumns,
+[stderr] +    firstOutputRow: target.getRange("A2:O2").getValues()[0],
+[stderr] +    lastOutputRow: target.getRange("A822:O822").getValues()[0],
+[stderr] +    copiedModelSample: target.getRange("B2").getCellData(),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/consolidate_combined.js' in /task
+[stderr] diff --git a/work/consolidate_combined.js b/work/consolidate_combined.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247b9c7949371f1364805b55654f3a6b07b942ae
+[stderr] --- /dev/null
+[stderr] +++ b/work/consolidate_combined.js
+[stderr] @@ -0,0 +1,63 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const target = workbook.getSheetByName("combined");
+[stderr] +  if (!target) return { success: false, error: 'Sheet "combined" not found' };
+[stderr] +
+[stderr] +  const sourceNames = ["sindh", "punjab", "baluchistan", "Khyber Pakhtoonkhawa"];
+[stderr] +  const targetHeaders = target.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +  const output = [];
+[stderr] +  const sourceRowCounts = {};
+[stderr] +
+[stderr] +  for (const sourceName of sourceNames) {
+[stderr] +    const source = workbook.getSheetByName(sourceName);
+[stderr] +    if (!source) return { success: false, error: `Sheet "${sourceName}" not found` };
+[stderr] +
+[stderr] +    const lastRow = source.getLastRow();
+[stderr] +    const lastColumn = source.getLastColumn();
+[stderr] +    if (lastRow < 1) {
+[stderr] +      sourceRowCounts[sourceName] = 0;
+[stderr] +      continue;
+[stderr] +    }
+[stderr] +    if (lastColumn < 14) {
+[stderr] +      return { success: false, error: `Sheet "${sourceName}" does not include columns A:O` };
+[stderr] +    }
+[stderr] +
+[stderr] +    const sourceHeaders = source.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +    const headerIndex = new Map(sourceHeaders.map((header, index) => [header, index]));
+[stderr] +    const sourceData = source.getRange(1, 0, lastRow, 15).getCellDatas();
+[stderr] +    sourceRowCounts[sourceName] = sourceData.length;
+[stderr] +
+[stderr] +    for (const row of sourceData) {
+[stderr] +      const mappedRow = targetHeaders.map((header) => {
+[stderr] +        const sourceIndex = headerIndex.get(header);
+[stderr] +        if (sourceIndex === undefined) return null;
+[stderr] +        const cell = row[sourceIndex];
+[stderr] +        return cell == null ? null : JSON.parse(JSON.stringify(cell));
+[stderr] +      });
+[stderr] +      output.push(mappedRow);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  const targetRows = 821;
+[stderr] +  const targetColumns = 15;
+[stderr] +  if (output.length !== targetRows) {
+[stderr] +    return { success: false, error: `Expected ${targetRows} rows, got ${output.length}`, sourceRowCounts };
+[stderr] +  }
+[stderr] +
+[stderr] +  if (target.getMaxRows() < 822) target.setRowCount(822);
+[stderr] +  if (target.getMaxColumns() < targetColumns) target.setColumnCount(targetColumns);
+[stderr] +
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).clearContent();
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).setValues(output);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "combined!A2:O822",
+[stderr] +    sourceRowCounts,
+[stderr] +    rowsWritten: output.length,
+[stderr] +    columnsWritten: targetColumns,
+[stderr] +    firstOutputRow: target.getRange("A2:O2").getValues()[0],
+[stderr] +    lastOutputRow: target.getRange("A822:O822").getValues()[0],
+[stderr] +    copiedModelSample: target.getRange("B2").getCellData(),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 1024ms:
+[stderr] {"success":true,"changedRange":"combined!A2:O822","sourceRowCounts":{"sindh":323,"punjab":159,"baluchistan":175,"Khyber Pakhtoonkhawa":164},"rowsWritten":821,"columnsWritten":15,"firstOutputRow":["Fatima",42794,42794,"Karachi","Sindh","Full-time",42794,161713,24257,16171,16171,185970,"Marketing",11,4],"lastOutputRow":["Amin",43983,43983,"Peshawar","Khyber-pakhtoonKhawa","Full-time",43983,44606,6691,0,0,51297,"Finance",16,2],"copiedModelSample":{"v":42794,"s":"R0","t":2}}
+[stderr] 
+[stderr] codex
+[stderr] The consolidation script completed and wrote 821 rows. I’m doing a workbook-visible verification at the sheet boundaries now, then I’ll export the edited `.univer` package to the requested `.xlsx`.
+[stderr] exec
+[stderr] /bin/sh -lc "univer run /task/cases/case_1/input.univer --code '() => { const s = univerAPI.getActiveWorkbook().getSheetByName(\"combined\"); const checks = { usedLastRow:s.getLastRow(), usedLastColumn:s.getLastColumn(), A2O2:s.getRange(\"A2:O2\").getValues()[0], A324O324:s.getRange(\"A324:O324\").getValues()[0], A325O325:s.getRange(\"A325:O325\").getValues()[0], A483O483:s.getRange(\"A483:O483\").getValues()[0], A484O484:s.getRange(\"A484:O484\").getValues()[0], A658O658:s.getRange(\"A658:O658\").getValues()[0], A659O659:s.getRange(\"A659:O659\").getValues()[0], A822O822:s.getRange(\"A822:O822\").getValues()[0], B2Model:s.getRange(\"B2\").getCellData(), L822Model:s.getRange(\"L822\").getCellData() }; return {success:true, checks}; }'" in /task
+[stderr]  succeeded in 309ms:
+[stderr] {"success":true,"checks":{"usedLastRow":821,"usedLastColumn":14,"A2O2":["Fatima",42794,42794,"Karachi","Sindh","Full-time",42794,161713,24257,16171,16171,185970,"Marketing",11,4],"A324O324":["Sarwar",43121,43121,"Hyderabad","Sindh","Full-time",43121,91796,13769,0,0,105565,"IT",10,1],"A325O325":["Abid",43090,43090,"Lahore","Punjab","Full-time",43090,70551,10583,0,0,81134,"Finance",15,5],"A483O483":["Shoaib",43939,43939,"Lahore","Punjab","Full-time",43939,73811,11072,0,0,84883,"Finance",18,4],"A484O484":["Benazir",42748,42748,"Quetta","Baluchistan","Full-time",42748,76148,11422,0,0,87570,"Marketing",14,2],"A658O658":["Afsheen",42812,42812,"Quetta","Baluchistan","Full-time",42812,52246,7837,0,0,60083,"Sales",10,4],"A659O659":["Abid",42868,42868,"Peshawar","Khyber-pakhtoonKhawa","Full-time",42868,186937,28041,18694,18694,214978,"R&D",13,2],"A822O822":["Amin",43983,43983,"Peshawar","Khyber-pakhtoonKhawa","Full-time",43983,44606,6691,0,0,51297,"Finance",16,2],"B2Model":{"v":42794,"s":"R0","t":2},"L822Model":{"v":51297,"s":"R0","t":2}}}
+[stderr] 
+[stderr] diff --git a/work/consolidate_combined.js b/work/consolidate_combined.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247b9c7949371f1364805b55654f3a6b07b942ae
+[stderr] --- /dev/null
+[stderr] +++ b/work/consolidate_combined.js
+[stderr] @@ -0,0 +1,63 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const target = workbook.getSheetByName("combined");
+[stderr] +  if (!target) return { success: false, error: 'Sheet "combined" not found' };
+[stderr] +
+[stderr] +  const sourceNames = ["sindh", "punjab", "baluchistan", "Khyber Pakhtoonkhawa"];
+[stderr] +  const targetHeaders = target.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +  const output = [];
+[stderr] +  const sourceRowCounts = {};
+[stderr] +
+[stderr] +  for (const sourceName of sourceNames) {
+[stderr] +    const source = workbook.getSheetByName(sourceName);
+[stderr] +    if (!source) return { success: false, error: `Sheet "${sourceName}" not found` };
+[stderr] +
+[stderr] +    const lastRow = source.getLastRow();
+[stderr] +    const lastColumn = source.getLastColumn();
+[stderr] +    if (lastRow < 1) {
+[stderr] +      sourceRowCounts[sourceName] = 0;
+[stderr] +      continue;
+[stderr] +    }
+[stderr] +    if (lastColumn < 14) {
+[stderr] +      return { success: false, error: `Sheet "${sourceName}" does not include columns A:O` };
+[stderr] +    }
+[stderr] +
+[stderr] +    const sourceHeaders = source.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +    const headerIndex = new Map(sourceHeaders.map((header, index) => [header, index]));
+[stderr] +    const sourceData = source.getRange(1, 0, lastRow, 15).getCellDatas();
+[stderr] +    sourceRowCounts[sourceName] = sourceData.length;
+[stderr] +
+[stderr] +    for (const row of sourceData) {
+[stderr] +      const mappedRow = targetHeaders.map((header) => {
+[stderr] +        const sourceIndex = headerIndex.get(header);
+[stderr] +        if (sourceIndex === undefined) return null;
+[stderr] +        const cell = row[sourceIndex];
+[stderr] +        return cell == null ? null : JSON.parse(JSON.stringify(cell));
+[stderr] +      });
+[stderr] +      output.push(mappedRow);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  const targetRows = 821;
+[stderr] +  const targetColumns = 15;
+[stderr] +  if (output.length !== targetRows) {
+[stderr] +    return { success: false, error: `Expected ${targetRows} rows, got ${output.length}`, sourceRowCounts };
+[stderr] +  }
+[stderr] +
+[stderr] +  if (target.getMaxRows() < 822) target.setRowCount(822);
+[stderr] +  if (target.getMaxColumns() < targetColumns) target.setColumnCount(targetColumns);
+[stderr] +
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).clearContent();
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).setValues(output);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "combined!A2:O822",
+[stderr] +    sourceRowCounts,
+[stderr] +    rowsWritten: output.length,
+[stderr] +    columnsWritten: targetColumns,
+[stderr] +    firstOutputRow: target.getRange("A2:O2").getValues()[0],
+[stderr] +    lastOutputRow: target.getRange("A822:O822").getValues()[0],
+[stderr] +    copiedModelSample: target.getRange("B2").getCellData(),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx && ls -l /task/outputs/case_1/output.xlsx' in /task
+[stderr] diff --git a/work/consolidate_combined.js b/work/consolidate_combined.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247b9c7949371f1364805b55654f3a6b07b942ae
+[stderr] --- /dev/null
+[stderr] +++ b/work/consolidate_combined.js
+[stderr] @@ -0,0 +1,63 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const target = workbook.getSheetByName("combined");
+[stderr] +  if (!target) return { success: false, error: 'Sheet "combined" not found' };
+[stderr] +
+[stderr] +  const sourceNames = ["sindh", "punjab", "baluchistan", "Khyber Pakhtoonkhawa"];
+[stderr] +  const targetHeaders = target.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +  const output = [];
+[stderr] +  const sourceRowCounts = {};
+[stderr] +
+[stderr] +  for (const sourceName of sourceNames) {
+[stderr] +    const source = workbook.getSheetByName(sourceName);
+[stderr] +    if (!source) return { success: false, error: `Sheet "${sourceName}" not found` };
+[stderr] +
+[stderr] +    const lastRow = source.getLastRow();
+[stderr] +    const lastColumn = source.getLastColumn();
+[stderr] +    if (lastRow < 1) {
+[stderr] +      sourceRowCounts[sourceName] = 0;
+[stderr] +      continue;
+[stderr] +    }
+[stderr] +    if (lastColumn < 14) {
+[stderr] +      return { success: false, error: `Sheet "${sourceName}" does not include columns A:O` };
+[stderr] +    }
+[stderr] +
+[stderr] +    const sourceHeaders = source.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +    const headerIndex = new Map(sourceHeaders.map((header, index) => [header, index]));
+[stderr] +    const sourceData = source.getRange(1, 0, lastRow, 15).getCellDatas();
+[stderr] +    sourceRowCounts[sourceName] = sourceData.length;
+[stderr] +
+[stderr] +    for (const row of sourceData) {
+[stderr] +      const mappedRow = targetHeaders.map((header) => {
+[stderr] +        const sourceIndex = headerIndex.get(header);
+[stderr] +        if (sourceIndex === undefined) return null;
+[stderr] +        const cell = row[sourceIndex];
+[stderr] +        return cell == null ? null : JSON.parse(JSON.stringify(cell));
+[stderr] +      });
+[stderr] +      output.push(mappedRow);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  const targetRows = 821;
+[stderr] +  const targetColumns = 15;
+[stderr] +  if (output.length !== targetRows) {
+[stderr] +    return { success: false, error: `Expected ${targetRows} rows, got ${output.length}`, sourceRowCounts };
+[stderr] +  }
+[stderr] +
+[stderr] +  if (target.getMaxRows() < 822) target.setRowCount(822);
+[stderr] +  if (target.getMaxColumns() < targetColumns) target.setColumnCount(targetColumns);
+[stderr] +
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).clearContent();
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).setValues(output);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "combined!A2:O822",
+[stderr] +    sourceRowCounts,
+[stderr] +    rowsWritten: output.length,
+[stderr] +    columnsWritten: targetColumns,
+[stderr] +    firstOutputRow: target.getRange("A2:O2").getValues()[0],
+[stderr] +    lastOutputRow: target.getRange("A822:O822").getValues()[0],
+[stderr] +    copiedModelSample: target.getRange("B2").getCellData(),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 898ms:
+[stderr] exported /task/cases/case_1/input.univer -> /task/outputs/case_1/output.xlsx
+[stderr] -rw-r--r--    1 node     node        123041 May 23 15:06 /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] codex
+[stderr] Done. I consolidated the four existing data sheets into `combined!A2:O822`, preserving the header mapping and copied cell models for the data.
+[stderr] 
+[stderr] Verified:
+[stderr] - 821 rows written
+[stderr] - Sheet boundaries line up correctly: Sindh, Punjab, Baluchistan, then Khyber Pakhtoonkhawa
+[stderr] - `combined` used range is now through row 822
+[stderr] - Export created at `/task/outputs/case_1/output.xlsx`
+[stderr] diff --git a/work/consolidate_combined.js b/work/consolidate_combined.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..247b9c7949371f1364805b55654f3a6b07b942ae
+[stderr] --- /dev/null
+[stderr] +++ b/work/consolidate_combined.js
+[stderr] @@ -0,0 +1,63 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const target = workbook.getSheetByName("combined");
+[stderr] +  if (!target) return { success: false, error: 'Sheet "combined" not found' };
+[stderr] +
+[stderr] +  const sourceNames = ["sindh", "punjab", "baluchistan", "Khyber Pakhtoonkhawa"];
+[stderr] +  const targetHeaders = target.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +  const output = [];
+[stderr] +  const sourceRowCounts = {};
+[stderr] +
+[stderr] +  for (const sourceName of sourceNames) {
+[stderr] +    const source = workbook.getSheetByName(sourceName);
+[stderr] +    if (!source) return { success: false, error: `Sheet "${sourceName}" not found` };
+[stderr] +
+[stderr] +    const lastRow = source.getLastRow();
+[stderr] +    const lastColumn = source.getLastColumn();
+[stderr] +    if (lastRow < 1) {
+[stderr] +      sourceRowCounts[sourceName] = 0;
+[stderr] +      continue;
+[stderr] +    }
+[stderr] +    if (lastColumn < 14) {
+[stderr] +      return { success: false, error: `Sheet "${sourceName}" does not include columns A:O` };
+[stderr] +    }
+[stderr] +
+[stderr] +    const sourceHeaders = source.getRange("A1:O1").getValues()[0].map((v) => String(v ?? "").trim());
+[stderr] +    const headerIndex = new Map(sourceHeaders.map((header, index) => [header, index]));
+[stderr] +    const sourceData = source.getRange(1, 0, lastRow, 15).getCellDatas();
+[stderr] +    sourceRowCounts[sourceName] = sourceData.length;
+[stderr] +
+[stderr] +    for (const row of sourceData) {
+[stderr] +      const mappedRow = targetHeaders.map((header) => {
+[stderr] +        const sourceIndex = headerIndex.get(header);
+[stderr] +        if (sourceIndex === undefined) return null;
+[stderr] +        const cell = row[sourceIndex];
+[stderr] +        return cell == null ? null : JSON.parse(JSON.stringify(cell));
+[stderr] +      });
+[stderr] +      output.push(mappedRow);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  const targetRows = 821;
+[stderr] +  const targetColumns = 15;
+[stderr] +  if (output.length !== targetRows) {
+[stderr] +    return { success: false, error: `Expected ${targetRows} rows, got ${output.length}`, sourceRowCounts };
+[stderr] +  }
+[stderr] +
+[stderr] +  if (target.getMaxRows() < 822) target.setRowCount(822);
+[stderr] +  if (target.getMaxColumns() < targetColumns) target.setColumnCount(targetColumns);
+[stderr] +
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).clearContent();
+[stderr] +  target.getRange(1, 0, targetRows, targetColumns).setValues(output);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "combined!A2:O822",
+[stderr] +    sourceRowCounts,
+[stderr] +    rowsWritten: output.length,
+[stderr] +    columnsWritten: targetColumns,
+[stderr] +    firstOutputRow: target.getRange("A2:O2").getValues()[0],
+[stderr] +    lastOutputRow: target.getRange("A822:O822").getValues()[0],
+[stderr] +    copiedModelSample: target.getRange("B2").getCellData(),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_cell_data.js b/work/probe_cell_data.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6c5ffbb528eff850a11033ef4ed086911ba29aae
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_cell_data.js
+[stderr] @@ -0,0 +1,11 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    isArray: Array.isArray(data),
+[stderr] +    sample: data,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/probe_range_methods.js b/work/probe_range_methods.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..90a9f79d1770aec1db83acf6a0342e8c9a3011a4
+[stderr] --- /dev/null
+[stderr] +++ b/work/probe_range_methods.js
+[stderr] @@ -0,0 +1,17 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("sindh");
+[stderr] +  const range = sheet.getRange("A2:O2");
+[stderr] +  const names = [];
+[stderr] +  let obj = range;
+[stderr] +  while (obj) {
+[stderr] +    for (const name of Object.getOwnPropertyNames(obj)) {
+[stderr] +      if (!names.includes(name)) names.push(name);
+[stderr] +    }
+[stderr] +    obj = Object.getPrototypeOf(obj);
+[stderr] +  }
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    methods: names.filter((name) => /cell|data|value|style|format/i.test(name)).sort(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] tokens used
+[stderr] 50,858
+[stdout] Done. I consolidated the four existing data sheets into `combined!A2:O822`, preserving the header mapping and copied cell models for the data.
+[stdout] 
+[stdout] Verified:
+[stdout] - 821 rows written
+[stdout] - Sheet boundaries line up correctly: Sindh, Punjab, Baluchistan, then Khyber Pakhtoonkhawa
+[stdout] - `combined` used range is now through row 822
+[stdout] - Export created at `/task/outputs/case_1/output.xlsx`

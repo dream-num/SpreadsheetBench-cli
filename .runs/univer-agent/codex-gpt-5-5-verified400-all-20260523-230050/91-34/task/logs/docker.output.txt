@@ -1,0 +1,2336 @@
+[stderr] Reading additional input from stdin...
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e5560-06c0-7132-a30e-296a91ae1eb6
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 91-34
+[stderr] 
+[stderr] ### instruction
+[stderr] Create a macro or Delete only one entry of a person (same last name, first name, and DOB) marked 'Yes' in the 'Duplicate?' column, provided that the 'Relationship' column for these duplicates is anything but 'Employee'? For example, Emily Doees is listed twice as non-employee, so one entry should be deleted, but Lisa Doees, present as both a spouse and an employee, should not have either entry deleted.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: SwiftMD
+[stderr] 														
+[stderr] 	SSN	Last Name	First Name	Gender	Date Of Birth	Duplicate?	Relationship	Address	City	State	Zip	Employee #	Marital Status	Phone #
+[stderr] 		Due	John	Male	2002-04-11 00:00:00	No	Employee							
+[stderr] 		Dame	Jane	Female	1998-07-18 00:00:00	No	Employee							
+[stderr] 		Rattice	Matrha	Female	1983-08-11 00:00:00	No	Employee							
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Sheet-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] 'SwiftMD'!B2:O42
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export: compare formula text, raw value, number format, cell type, and visible display where relevant. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json`; use `pipe out --format json --type formula` for formulas; if needed, use `univer run` to return explicit `{ row1, col1, value, formula }` objects.
+[stderr] - Note: `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer run-script `getRawValues()` behavior from `pipe out --type rawValue`, especially for dates, currency, percentages, and formatted IDs.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type: 1=STRING, 2=NUMBER, 3=BOOLEAN, 4=FORCE_STRING), `f` (formula), `p` (rich text), `s` (style/number format), and `custom` (custom data).
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not treat `getValues()` + `setValues()` as a general read/write pattern.
+[stderr]   3. Choose reads by intent: display values use `getValues()` or `getDisplayValues()`; raw values without model preservation use `getRawValues()`; complete cell models use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`.
+[stderr]   4. Choose writes by intent: simple new values may be plain `string`, `number`, or `boolean`; explicit types, formulas, dates, formats, rich text, or forced text should use complete `ICellData`; formulas use `setFormula('=A1+B1')` or `{ f: '=A1+B1' }`; literal formula text uses `{ v: '=A1+B1', t: 4 }`; leading-zero IDs or codes use `{ v: '00123', t: 4 }`.
+[stderr]   5. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`.
+[stderr]   6. When reading existing cells and writing them elsewhere: display-only copies may use `getValues()`/`getDisplayValues()` -> `setValues()`; raw-value-only copies may use `getRawValues()` -> `setValues()`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   7. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   8. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] codex
+[stderr] I’ll load the Univer CLI skill first, then inspect the workbook through `univer` and apply the duplicate-removal effect only within `SwiftMD!B2:O42`.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,220p' /home/node/.agents/skills/univer-cli/SKILL.md" in /task
+[stderr]  succeeded in 0ms:
+[stderr] ---
+[stderr] name: univer-cli
+[stderr] description: "Use when solving spreadsheet workbook problems with the `univer` or `unv` CLI as a terminal-native spreadsheet engine: Excel-compatible `.xlsx` handoff, `.univer` or `.unv` packages, workbook inspection, range search, formulas, formatting, charts, shapes, floating images, rich spreadsheet edits, live preview and viewer review comments, versioning, shell-native `pipe out`/`pipe in` roundtrips, or bounded `run` scripts."
+[stderr] ---
+[stderr] 
+[stderr] # univer-cli
+[stderr] 
+[stderr] `univer` is a spreadsheet engine in the terminal. Use it when an agent needs real workbook semantics: sheets, ranges, formulas, formatting, layout, previews, imports, exports, or versioned workbook state.
+[stderr] 
+[stderr] Install the CLI with `npm i -g univer-cli`. Update the CLI with `univer update`. The executable is `univer`; `unv` may be available as a short alias.
+[stderr] 
+[stderr] ## Core Mental Model
+[stderr] 
+[stderr] Treat workbook-visible state as the source of truth. A successful command summary, package metadata, or an internal manifest does not prove that sheet names, cell values, formulas, formatting, or exported handoff files are correct.
+[stderr] 
+[stderr] The workbook path is the local identity. Pick one explicit path such as `./budget.univer` and use that path as the CLI target. Do not target workbooks by `unitId`, `sessionId`, manifest ids, or runtime ids.
+[stderr] 
+[stderr] `.univer` and `.unv` files are CLI operation targets, not agent-editable data stores. Read and write workbook data through public CLI surfaces such as `inspect`, `search`, `pipe`, `run`, `export`, `status`, and `commit`.
+[stderr] 
+[stderr] Use `univer help` and `univer help <command...>` for exact syntax. For `run` scripts, use `univer help run` and `univer help run <topic>` before relying on unfamiliar APIs.
+[stderr] 
+[stderr] ## Use When
+[stderr] 
+[stderr] Use this skill when the task involves spreadsheet or workbook work, especially:
+[stderr] 
+[stderr] - creating, importing, exporting, or handing off `.xlsx`, `.csv`, `.univer`, or `.unv` files
+[stderr] - inspecting workbook shape, sheets, ranges, formulas, formatting, or visible cell state
+[stderr] - locating content-defined rows, columns, headers, or cells before editing
+[stderr] - making bounded edits to cells, formulas, formatting, charts, shapes, floating images, layout, or sheet structure
+[stderr] - streaming rectangular workbook data through shell tools before reading it into context
+[stderr] - writing generated matrix data back into a sheet-qualified range
+[stderr] - previewing workbook state locally with `univer view`
+[stderr] - reading submitted local viewer review comments with `univer view comments`
+[stderr] - creating, restoring, resetting, pulling, or syncing local workbook changesets
+[stderr] - proving that a workbook-visible mutation or export is correct enough to hand back
+[stderr] 
+[stderr] ## Default Operating Loop
+[stderr] 
+[stderr] 1. Pick one explicit workbook path, for example `./budget.univer`.
+[stderr] 2. Create or import a workbook first if no `.univer` or `.unv` target exists.
+[stderr] 3. Inspect workbook-visible state before deciding where to write.
+[stderr] 4. Locate targets from visible headers, values, formulas, or inspected ranges.
+[stderr] 5. Choose the smallest public CLI surface that fits the task.
+[stderr] 6. Mutate through the CLI, not by editing package internals.
+[stderr] 7. Verify changed workbook-visible state with `inspect`, `pipe out`, or another public read.
+[stderr] 8. Export only after verification when the user needs a handoff file.
+[stderr] 9. After changes have been verified, if the user may need to inspect, audit, or review the final workbook, run `univer view "$WB" --no-open --json` to get a local preview link and include that link in your response.
+[stderr] 10. Commit or sync only after verified changes when versioning is part of the workflow.
+[stderr] 
+[stderr] ## Hard Rules
+[stderr] 
+[stderr] - Do not read `.univer` or `.unv` internals to infer workbook contents.
+[stderr] - Do not write, patch, unzip, rezip, rename internal files, or manipulate workbook package contents.
+[stderr] - Do not inspect `manifest.json`, snapshots, mutation logs, or package fragments as a substitute for workbook-visible reads.
+[stderr] - Do not guess sheet names, row numbers, formulas, ranges, or changed cells from memory or file metadata.
+[stderr] - Do not treat stdout summaries as proof of workbook state. Verify with a workbook-visible read.
+[stderr] - Do not invent commands or `run` APIs. Check `univer help` and documented run topics.
+[stderr] 
+[stderr] Direct package access can corrupt workbooks or teach the agent false state. If the CLI cannot read what you need, diagnose the CLI/runtime path instead of bypassing it.
+[stderr] 
+[stderr] ## Command Selection
+[stderr] 
+[stderr] | Need | Prefer |
+[stderr] | --- | --- |
+[stderr] | Discover exact command syntax | `univer help`, `univer help <command...>` |
+[stderr] | Start a workbook package | `univer new` or `univer import` |
+[stderr] | Hand back Excel-compatible output | `univer export` |
+[stderr] | Understand workbook shape before editing | `univer inspect workbook`, then `univer inspect range` |
+[stderr] | Locate content-defined cells | `univer search`, scoped with `--sheet` and/or `--range` when possible |
+[stderr] | Stream rectangular data through shell tools | `univer pipe out` |
+[stderr] | Write a known rectangular matrix back | `univer pipe in` |
+[stderr] | Apply bounded workbook-local logic | `univer run --file` |
+[stderr] | Create or maintain workbook charts | `univer run --file` with `univer help run charts` |
+[stderr] | Create or maintain workbook shapes and connectors | `univer run --file` with `univer help run shapes` |
+[stderr] | Create or maintain workbook floating images | `univer run --file` with `univer help run images` |
+[stderr] | Preview readonly workbook state | `univer view --no-open --json` or `univer view` |
+[stderr] | Read local viewer review feedback | `univer view comments "$WB" --json` |
+[stderr] | Check local versioning state | `univer status` |
+[stderr] | Create a local changeset from local mutations | `univer commit --message <message>` |
+[stderr] | Discard uncommitted local mutations | `univer restore` |
+[stderr] | Reset local unsynced commits | `univer reset --soft HEAD~N` or `univer reset --hard HEAD~N` |
+[stderr] | Initialize a local package from an existing remote unit | `univer clone --unit-id <unitID>` |
+[stderr] | Pull remote-only changes for a bound package | `univer pull` |
+[stderr] | Sync local and remote versioning state | `univer sync` |
+[stderr] | Diagnose runtime problems | `univer doctor`, `univer daemon status` |
+[stderr] | Prepare a bug report or Univer team support artifact after user authorization | `univer doctor collect` |
+[stderr] 
+[stderr] Use canonical command help such as `univer help inspect range` and `univer help pipe out`. Top-level help group headings are visual sections only; do not run group-prefixed topics such as `univer help read inspect range`.
+[stderr] 
+[stderr] ## Execution Results
+[stderr] 
+[stderr] Treat non-zero exit as failure even when stdout is partially present. Read stderr before changing approach; it usually contains the stable diagnostic code, usage, and retry examples.
+[stderr] 
+[stderr] Keep data stdout clean in shell pipelines. If diagnostics are needed, capture stderr separately so downstream tools receive only workbook data.
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20' > ./range.md 2> ./range.err
+[stderr] status=$?
+[stderr] if [ "$status" -ne 0 ]; then
+[stderr]   sed -n '1,80p' ./range.err
+[stderr]   exit "$status"
+[stderr] fi
+[stderr] sed -n '1,40p' ./range.md
+[stderr] ```
+[stderr] 
+[stderr] ## Workflow Recipes
+[stderr] 
+[stderr] These are verified command shapes. Replace paths, sheet names, and ranges with inspected workbook facts.
+[stderr] 
+[stderr] ### Create Or Import, Then Inspect
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./orders.univer
+[stderr] univer import ./orders.csv "$WB" --json
+[stderr] univer inspect workbook "$WB"
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D4'
+[stderr] ```
+[stderr] 
+[stderr] Use `new` when the task starts from a blank workbook:
+[stderr] 
+[stderr] ```bash
+[stderr] WB=./workbook.univer
+[stderr] univer new "$WB" --name "Workbook"
+[stderr] univer inspect workbook "$WB"
+[stderr] ```
+[stderr] 
+[stderr] ### Locate Before Editing
+[stderr] 
+[stderr] Use `search` before editing when the target is defined by visible workbook content:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West
+[stderr] ```
+[stderr] 
+[stderr] Plain text output is one A1 reference per matched cell, which keeps shell pipelines clean. With no
+[stderr] matches, stdout is empty and the command still succeeds. Use `--json` when you need match metadata,
+[stderr] the matched cell data preview, truncation flags, counts, or the searched scope:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" West --sheet Orders --range 'A1:Z200' --json
+[stderr] ```
+[stderr] 
+[stderr] By default, search checks `displayValue`, so formatted values such as dates are searchable by the
+[stderr] same strings a user sees in the sheet. Use `--type rawValue` for underlying numeric/string values
+[stderr] such as spreadsheet date serials, and `--type formula` for formulas:
+[stderr] 
+[stderr] ```bash
+[stderr] univer search "$WB" 2024-01-01
+[stderr] univer search "$WB" 45292 --type rawValue
+[stderr] univer search "$WB" SUM --type formula --json
+[stderr] ```
+[stderr] 
+[stderr] Useful narrowing options:
+[stderr] 
+[stderr] - `--sheet <name>` may be repeated.
+[stderr] - `--range <A1>` may be repeated; unqualified ranges require a `--sheet`.
+[stderr] - `--case-sensitive` and `--whole-cell` tighten matching.
+[stderr] - `--max-results` limits returned matches; truncation is reported on stderr for text output and in JSON fields for `--json`.
+[stderr] - `--max-cell-value-length` bounds previewed cell data in JSON.
+[stderr] 
+[stderr] If `search` fails, read stderr for the diagnostic message before changing approach. If the target is
+[stderr] not content-defined, inspect a bounded range and derive the edit boundary from visible headers and
+[stderr] sample rows:
+[stderr] 
+[stderr] ```bash
+[stderr] univer inspect range "$WB" --range 'Sheet1!A1:D20'
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe Out Through Shell Tools
+[stderr] 
+[stderr] Use `pipe out` when the shell can reduce or reshape rectangular data before the agent reads it. Prefer TSV for `awk`, JSON for `jq`, and `--type rawValue` when formatted display text is not safe enough for comparisons.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe out "$WB" --range 'Sheet1!A1:D4' --format tsv > ./orders.tsv
+[stderr] awk -F '\t' 'BEGIN{OFS="\t"} NR==1 || $2=="West" {print $1,$3}' ./orders.tsv > ./west.tsv
+[stderr] sed -n '1,5p' ./west.tsv
+[stderr] ```
+[stderr] 
+[stderr] ### Pipe In Generated Table Data
+[stderr] 
+[stderr] Write only a known matrix into an explicit, sheet-qualified range. Make `pipe in` the terminal stage of a pipeline unless you intentionally want its success summary downstream.
+[stderr] 
+[stderr] ```bash
+[stderr] univer pipe in "$WB" --range 'Sheet1!F1:G3' --input-format tsv --data-file ./west.tsv
+[stderr] univer inspect range "$WB" --range 'Sheet1!F1:G3'
+[stderr] univer pipe out "$WB" --range 'Sheet1!F1:G3' --format tsv
+[stderr] ```
+[stderr] 
+[stderr] Verify headers, sample rows, and key columns. Row count alone is weak evidence because shifted columns can still preserve row count.
+[stderr] 
+[stderr] ### Run A Bounded Workbook Script
+[stderr] 
+[stderr] Use `run --file` for workbook-native logic that does not fit `inspect`, `search`, `pipe`, or `export`. Check `univer help run` and the relevant `univer help run <topic>` manual before using unfamiliar APIs.
+[stderr] 
+[stderr] ```bash
+[stderr] cat > ./review.js <<'JS'
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] 
+[stderr]   sheet.getRange("I1:J3").setValues([
+[stderr]     ["metric", "value"],
+[stderr]     ["west_orders", 2],
+[stderr]     ["reviewed", "yes"],
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true, changedRanges: ["Sheet1!I1:J3"] };
+[stderr] }
+[stderr] JS
+[stderr] 
+[stderr] univer run "$WB" --file ./review.js
+[stderr] univer inspect range "$WB" --range 'Sheet1!I1:J3'
+[stderr] ```
+[stderr] 
+[stderr] `run` scripts should:
+[stderr] 
+[stderr] - wrap code in `() => { ... }` or `async () => { ... }`
+[stderr] - return a plain object with explicit success or error fields
+[stderr] - use explicit workbook, sheet, and A1 range boundaries
+[stderr] 
+[stderr] codex
+[stderr] The skill is loaded. I’m going to inspect the workbook shape and the bounded data range so the duplicate criteria are based on the actual sheet contents and row positions.
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'SwiftMD"'!B2:O42'"' --format json" in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr]  succeeded in 1368ms:
+[stderr] [["SSN","Last Name","First Name","Gender","Date Of Birth","Duplicate?","Relationship","Address","City","State","Zip","Employee #","Marital Status","Phone #"],["","Due","John","Male","04/11/2002","No","Employee","","","","","","",""],["","Dame","Jane","Female","07/18/1998","No","Employee","","","","","","",""],["","Rattice","Matrha","Female","08/11/1983","No","Employee","","","","","","",""],["","Smith","Antoinette","Female","05/21/1967","Yes","Employee","","","","","","",""],["","Smith","Antoinette","Female","05/21/1967","Yes","Spouse","","","","","","",""],["","Moon","Justice","Female","01/10/2002","Yes","Child living at home","","","","","","",""],["","Moon","Justice","Female","01/10/2002","Yes","Employee","","","","","","",""],["","America","Danielle","Female","04/03/1985","Yes","Employee","","","","","","",""],["","America","Danielle","Female","04/03/1985","Yes","Spouse","","","","","","",""],["","Doees","Emily","Female","04/06/2003","Yes","Child living at home","","","","","","",""],["","Doees","Emily","Female","04/06/2003","Yes","Child living at home","","","","","","",""],["","Doees","Ryan","Male","03/20/1999","Yes","Child living at home","","","","","","",""],["","Doees","Ryan","Male","03/20/1999","Yes","Child living at home","","","","","","",""],["","Doees","Frank","Male","08/18/1968","Yes","Employee","","","","","","",""],["","Doees","Lisa","Female","05/21/1970","Yes","Employee","","","","","","",""],["","Doees","Frank","Male","08/18/1968","Yes","Spouse","","","","","","",""],["","Doees","Lisa","Female","05/21/1970","Yes","Spouse","","","","","","",""],["","Jamica","Casey","Female","06/23/1993","Yes","Employee","","","","","","",""],["","Jamica","Casey","Female","06/23/1993","Yes","Other","","","","","","",""],["","Computer","Vannessa","Female","12/28/1995","Yes","Child living at home","","","","","","",""],["","Computer","Vannessa","Female","12/28/1995","Yes","Employee","","","","","","",""],["","Pond","Lynn","Male","11/02/1981","Yes","Employee","","","","","","",""],["","Pond","Lynn","Male","11/02/1981","Yes","Spouse","","","","","","",""],["","Car","Hayley","Female","05/22/2003","Yes","Child living at home","","","","","","",""],["","Car","Hayley","Female","05/22/2003","Yes","Employee","","","","","","",""],["","House","Alexandra","Female","08/01/1998","Yes","Child living at home","","","","","","",""],["","House","Alexandra","Female","08/01/1998","Yes","Employee","","","","","","",""],["","Monitor","Caroline","Female","01/18/1996","Yes","Child living at home","","","","","","",""],["","Monitor","Caroline","Female","01/18/1996","Yes","Employee","","","","","","",""],["","Excel","Fagr","Female","07/26/1999","Yes","Child living at home","","","","","","",""],["","Excel","Fagr","Female","07/26/1999","Yes","Employee","","","","","","",""],["","Gosh","Anthony","Male","07/18/2006","Yes","Child living at home","","","","","","",""],["","Jones","Christina","Female","09/11/1987","Yes","Employee","","","","","","",""],["","Jones","Seamus","Male","06/06/1987","Yes","Employee","","","","","","",""],["","Jones","Christina","Female","09/11/1987","Yes","Spouse","","","","","","",""],["","Jones","Seamus","Male","06/06/1987","Yes","Spouse","","","","","","",""],["","Plam","Aubrey","Female","12/23/2005","Yes","Child living at home","","","","","","",""],["","Plam","Aubrey","Female","12/23/2005","Yes","Employee","","","","","","",""],["","Character","Nickson","Male","06/09/2001","Yes","Child living at home","","","","","","",""],["","Character","Nickson","Male","06/09/2001","Yes","Child living at home","","","","","","",""]]
+[stderr] 
+[stderr]  succeeded in 1368ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: SwiftMD
+[stderr] Sheet Count: 1
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | SwiftMD | A1:O42 | 1 | 0 |
+[stderr] 
+[stderr] ## Sheet: 'SwiftMD'
+[stderr] 
+[stderr] - Used Range: A1:O42
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 0 covering 0 cells
+[stderr] 
+[stderr] ### Table 1: A1:O42
+[stderr] |A1,|B1,|C1,|D1,|E1,|F1,|
+[stderr] |A2,|B2,SSN|C2,Last Name|D2,First Name|E2,Gender|F2,Date Of Birth|
+[stderr] |A3,|B3,|C3,Due|D3,John|E3,Male|F3,04/11/2002|
+[stderr] |A4,|B4,|C4,Dame|D4,Jane|E4,Female|F4,07/18/1998|
+[stderr] |A5,|B5,|C5,Rattice|D5,Matrha|E5,Female|F5,08/11/1983|
+[stderr] 
+[stderr] codex
+[stderr] I found the relevant columns: Last Name `C`, First Name `D`, DOB `F`, Duplicate? `G`, Relationship `H` within `B2:O42`. The qualifying duplicate groups are the ones where every marked duplicate is non-employee; I’ll keep the first entry for each such group and remove one repeated entry by shifting the bounded range upward.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/work' in /task
+[stderr]  succeeded in 0ms:
+[stderr] codex
+[stderr] I’m creating a small Univer run script that reads the bounded table, identifies duplicate person keys marked `Yes`, excludes any key with an `Employee` relationship, then rewrites only `B2:O42` with the extra duplicate rows removed.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/remove_nonemployee_duplicates.js
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] The script is ready. I’m running it against the `.univer` package now, then I’ll verify the resulting rows before exporting.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/remove_nonemployee_duplicates.js' in /task
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 491ms:
+[stderr] {"success":true,"changedRange":"SwiftMD!B2:O42","removedRelativeRows":[11,13,40],"removedSheetRows":[13,15,42]}
+[stderr] 
+[stderr] codex
+[stderr] The workbook reports that it removed sheet rows 13, 15, and 42 from the bounded range, which correspond to the second Emily Doees, second Ryan Doees, and second Character Nickson entries. I’m checking the visible table to confirm employee/spouse pairs are still intact and the bottom rows were cleared after shifting.
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'SwiftMD"'!C10:H20'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'SwiftMD"'!C37:H42'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'SwiftMD"'!B2:O42'"' --format json" in /task
+[stderr]  succeeded in 505ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: SwiftMD!C37:H42
+[stderr] Rows: 6 (5 data rows; first row is header)
+[stderr] Columns: 6
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | C |  | text | 0/5 | all empty | - |
+[stderr] | D |  | text | 0/5 | all empty | - |
+[stderr] | E |  | text | 0/5 | all empty | - |
+[stderr] | F |  | text | 0/5 | all empty | - |
+[stderr] | G |  | text | 0/5 | all empty | - |
+[stderr] | H |  | text | 0/5 | all empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |C37,|D37,|E37,|F37,|G37,|H37,|
+[stderr] |C38,|D38,|E38,|F38,|G38,|H38,|
+[stderr] |C39,|D39,|E39,|F39,|G39,|H39,|
+[stderr] |C40,|D40,|E40,|F40,|G40,|H40,|
+[stderr] ...
+[stderr] |C42,|D42,|E42,|F42,|G42,|H42,|
+[stderr] 
+[stderr] *Note: 1 row omitted from data preview*
+[stderr] 
+[stderr]  succeeded in 507ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: SwiftMD!C10:H20
+[stderr] Rows: 11 (10 data rows; first row is header)
+[stderr] Columns: 6
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | C |  | text | 0/10 | all empty | - |
+[stderr] | D |  | text | 0/10 | all empty | - |
+[stderr] | E |  | text | 0/10 | all empty | - |
+[stderr] | F |  | text | 0/10 | all empty | - |
+[stderr] | G |  | text | 0/10 | all empty | - |
+[stderr] | H |  | text | 0/10 | all empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |C10,|D10,|E10,|F10,|G10,|H10,|
+[stderr] |C11,|D11,|E11,|F11,|G11,|H11,|
+[stderr] |C12,|D12,|E12,|F12,|G12,|H12,|
+[stderr] |C13,|D13,|E13,|F13,|G13,|H13,|
+[stderr] ...
+[stderr] |C20,|D20,|E20,|F20,|G20,|H20,|
+[stderr] 
+[stderr] *Note: 6 rows omitted from data preview*
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 531ms:
+[stderr] [["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""]]
+[stderr] 
+[stderr] codex
+[stderr] The first write attempt exposed an API mismatch: `getCellDatas()` did not round-trip through `setValues()` as expected, and the bounded range was cleared. I have the pre-edit table data from the verified `pipe out`, so I’m going to restore the requested result directly through Univer with explicit cell values and date formatting inside `B2:O42`.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer status /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run' in /task
+[stderr]  succeeded in 521ms:
+[stderr] workbook: /task/cases/case_1/input.univer
+[stderr] unitID: -
+[stderr] initRev: -
+[stderr] syncedRev: -
+[stderr] uncommitted mutations: 2
+[stderr] local changesets: 0
+[stderr] synced changesets: 0
+[stderr] 
+[stderr]  succeeded in 520ms:
+[stderr] univer run - Run workbook-local programmable surface logic.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer run <file.univer|file.unv> --file <script.js>
+[stderr]   univer run <file.univer|file.unv> --code <script>
+[stderr]   univer run <file.univer|file.unv> <script.js>
+[stderr]   printf '<script>' | univer run <file.univer|file.unv> -
+[stderr] 
+[stderr] Options:
+[stderr]   --code <script> - Inline JavaScript arrow function to execute.
+[stderr]   --file <script.js> - Script file containing bounded edit logic.
+[stderr]   <script.js> - Positional script file accepted when --code and --file are absent.
+[stderr]   - - Read JavaScript source from stdin.
+[stderr] 
+[stderr] Output:
+[stderr]   The run command is the workbook-local programmable surface for scripts.
+[stderr]   Scripts can read workbook state, compute results, and write workbook state.
+[stderr]   Use only APIs documented by the run manual; do not guess method names.
+[stderr]   Runs the script through the runtime-backed command path.
+[stderr]   Returns the script result as JSON-compatible stdout.
+[stderr] 
+[stderr] Examples:
+[stderr]   univer run ./budget.univer --file ./task.js
+[stderr]   univer run ./budget.univer --code '() => ({ success: true })'
+[stderr] 
+[stderr] Manual Topics:
+[stderr]   overview - command selection, hard rules, and progressive discovery
+[stderr]   core - univerAPI, workbook access, worksheet access, A1 notation, and coordinates
+[stderr]   ranges - range reads, writes, shape rules, formulas, merges, clear, cell shifts, and AutoFill
+[stderr]   formulas - formula writes, async calculation waits, and stale-readback getchas
+[stderr]   sheets - worksheet creation, rename, row or column structure, freezing, gridlines, and visibility
+[stderr]   formatting - font, fill, alignment, border, number-format, and clear-format APIs
+[stderr]   conditional-formatting - conditional formatting builders, range binding, and worksheet rule-list APIs
+[stderr]   charts - chart builders, source ranges, readback, update or remove, and viewer rendering notes
+[stderr]   shapes - shape builders, connectors, connection sites, readback, update or remove, and viewer rendering notes
+[stderr]   images - floating image builders, source positioning, readback, update or delete, and viewer rendering notes
+[stderr] 
+[stderr] Manual Aliases:
+[stderr]   a1-reference -> core (A1 Notation)
+[stderr]   coordinates -> core (Coordinate Model)
+[stderr]   autofill -> ranges (AutoFill)
+[stderr]   fill-series -> ranges (AutoFill)
+[stderr]   get-values -> ranges (Reading From FRange)
+[stderr]   read-range -> ranges (Reading From FRange)
+[stderr]   formula-readback -> formulas (Formula Calculation)
+[stderr]   calculation -> formulas (Formula Calculation)
+[stderr]   freeze-panes -> sheets (Freeze Rows And Columns)
+[stderr]   number-format -> formatting (Number Formats)
+[stderr]   conditional-format -> conditional-formatting (Core Workflow)
+[stderr]   condition-format -> conditional-formatting (Core Workflow)
+[stderr]   color-scale -> conditional-formatting (Color Scales)
+[stderr]   data-bar -> conditional-formatting (Data Bars)
+[stderr]   icon-set -> conditional-formatting (Icon Sets)
+[stderr]   chart -> charts (Core Workflow)
+[stderr]   insert-chart -> charts (Core Workflow)
+[stderr]   chart-builder -> charts (Chart Builder)
+[stderr]   shape -> shapes (Core Workflow)
+[stderr]   insert-shape -> shapes (Core Workflow)
+[stderr]   connector-shape -> shapes (Connector Shapes)
+[stderr]   connect-shapes -> shapes (Connect Shapes)
+[stderr]   image -> images (Core Workflow)
+[stderr]   floating-image -> images (Core Workflow)
+[stderr]   insert-image -> images (Core Workflow)
+[stderr] 
+[stderr] Read Manual:
+[stderr]   univer help run ranges
+[stderr]   univer help run autofill
+[stderr]   univer help run charts
+[stderr]   univer help run shapes
+[stderr]   univer help run images
+[stderr] 
+[stderr] Related:
+[stderr]   univer pipe in
+[stderr]   univer daemon status
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help restore' in /task
+[stderr]  succeeded in 548ms:
+[stderr] univer restore - Discard uncommitted local workbook mutations.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer restore <file.univer|file.unv>
+[stderr] 
+[stderr] Options:
+[stderr]   --json - Print successful restore output as JSON.
+[stderr] 
+[stderr] Output:
+[stderr]   Clears local mutations that have not been committed with `univer commit`.
+[stderr]   Local changesets, synced changesets, and remote binding metadata remain unchanged.
+[stderr] 
+[stderr] JSON Output:
+[stderr]   success
+[stderr]   filePath
+[stderr]   discardedLocalMutationCount
+[stderr]   status
+[stderr] 
+[stderr] Examples:
+[stderr]   univer restore ./budget.univer
+[stderr] 
+[stderr] Related:
+[stderr]   univer status
+[stderr]   univer commit
+[stderr]   univer reset
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run ranges' in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer restore /task/cases/case_1/input.univer --json' in /task
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..5fee3c8c6059dd91527860f565fa0130cb606280
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,62 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const rangeA1 = "B2:O42";
+[stderr] +  const range = sheet.getRange(rangeA1);
+[stderr] +  const display = range.getValues();
+[stderr] +  const cellDatas = range.getCellDatas();
+[stderr] +
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = display[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < display.length; r++) {
+[stderr] +    const row = display[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      r,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToRemove = new Set();
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToRemove.add(rows[i].r);
+[stderr] +  }
+[stderr] +
+[stderr] +  const keptRows = cellDatas.filter((_, r) => !rowsToRemove.has(r));
+[stderr] +  const width = display[0].length;
+[stderr] +  const blankRow = Array.from({ length: width }, () => null);
+[stderr] +  while (keptRows.length < cellDatas.length) keptRows.push(blankRow);
+[stderr] +
+[stderr] +  range.clearContent();
+[stderr] +  range.setValues(keptRows);
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: `SwiftMD!${rangeA1}`,
+[stderr] +    removedRelativeRows: Array.from(rowsToRemove).sort((a, b) => a - b),
+[stderr] +    removedSheetRows: Array.from(rowsToRemove).sort((a, b) => a - b).map((r) => r + 2),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 522ms:
+[stderr] # Ranges
+[stderr] 
+[stderr] This topic groups cell and range operations for ordinary `run` tasks.
+[stderr] 
+[stderr] ## Reading From FRange
+[stderr] 
+[stderr] Get a range from `sheet.getRange(...)`, then use these reads:
+[stderr] 
+[stderr] - `getValue() -> any` - get the top-left cell value as the normal displayed value
+[stderr] - `getRawValue() -> any` - get the top-left cell raw underlying value
+[stderr] - `getValues() -> any[][]` - get all cell values in the range as a 2D array
+[stderr] - `getRawValues() -> any[][]` - get all underlying raw values in the range as a 2D array
+[stderr] - `getFormulas() -> string[][]` - get formulas in A1 notation
+[stderr] - `getA1Notation(withSheet?) -> string` - get the range A1 notation; `withSheet=true` includes the sheet name
+[stderr] - `forEach(callback) -> void` - iterate cells in the range
+[stderr] - `isMerged() -> boolean` - check whether the range itself is merged
+[stderr] - `isPartOfMerge() -> boolean` - check whether the range falls inside a merged region
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   const range = sheet.getRange("A1:C3");
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     a1: range.getA1Notation(),
+[stderr]     values: range.getValues(),
+[stderr]     formulas: range.getFormulas()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Writing To FRange
+[stderr] 
+[stderr] Core writes:
+[stderr] 
+[stderr] - `setValue(value) -> FRange` - set one value across the target range; if the value starts with `=`, it can also write a formula
+[stderr] - `setValues(values) -> FRange` - batch set values from a 2D array
+[stderr] - `setFormula(formula) -> void` - set a formula in A1 notation such as `=SUM(A1:B10)`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sheet1");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sheet1" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setValue("Total");
+[stderr]   sheet.getRange("B2:C3").setValues([
+[stderr]     [10, 20],
+[stderr]     [30, 40]
+[stderr]   ]);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## setValues() Shape Rules
+[stderr] 
+[stderr] `setValues()` expects a rectangular 2D array whose shape matches the target range:
+[stderr] 
+[stderr] - one row per worksheet row in the target range
+[stderr] - one column per worksheet column in the target range
+[stderr] - keep every inner array the same length
+[stderr] - use `getRange('A1:C10')` or `getRange(0, 0, 10, 3)` to define the full target shape
+[stderr] - `getRange(row, col)` without size only targets a single cell
+[stderr] 
+[stderr] Correct:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([
+[stderr]   ["Name", "Score"],
+[stderr]   ["Ada", 95]
+[stderr] ]);
+[stderr] ```
+[stderr] 
+[stderr] Incorrect shape:
+[stderr] 
+[stderr] ```javascript
+[stderr] sheet.getRange("A1:B2").setValues([["Name"], ["Ada", 95, "extra"]]);
+[stderr] ```
+[stderr] 
+[stderr] When writing a single cell, use `setValue()` unless the task specifically benefits from 2D shape handling.
+[stderr] 
+[stderr] ## Formulas And Async Readback
+[stderr] 
+[stderr] Formula calculation is asynchronous. This applies to:
+[stderr] 
+[stderr] - `range.setFormula('=SUM(B1:B10)')`
+[stderr] - `range.setValue('=SUM(B1:B10)')`
+[stderr] 
+[stderr] If you need the calculated result in the same `run`, wait for formula application:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Sales");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Sales" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1").setFormula("=SUM(B1:B10)");
+[stderr]   await univerAPI.getFormula().onCalculationResultApplied();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     value: sheet.getRange("A1").getValue()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] Available formula wait API:
+[stderr] 
+[stderr] - `univerAPI.getFormula() -> FFormula`
+[stderr] - `onCalculationResultApplied() -> Promise<void>` - wait for formula-calculation results to be applied before reading the computed value
+[stderr] 
+[stderr] ## Merge And Unmerge
+[stderr] 
+[stderr] Merge APIs:
+[stderr] 
+[stderr] - `merge(options?) -> void` - merge cells into one block
+[stderr] - `breakApart() -> void` - unmerge cells
+[stderr] - `mergeAcross() -> void` - merge each row across the selected columns
+[stderr] - `mergeVertically() -> void` - merge each column down the selected rows
+[stderr] 
+[stderr] Typical uses:
+[stderr] 
+[stderr] - `merge()` for one combined block
+[stderr] - `mergeAcross()` to merge each row across the selected columns
+[stderr] - `mergeVertically()` to merge each column down the selected rows
+[stderr] - `breakApart()` to remove merges
+[stderr] - use `merge({ isForceMerge: true })` if you need to clear overlapping merges first
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Report");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Report" not found' };
+[stderr] 
+[stderr]   sheet.getRange("A1:D1").merge();
+[stderr]   sheet.getRange("A3:D4").mergeAcross();
+[stderr] 
+[stderr]   return {
+[stderr]     success: true,
+[stderr]     titleMerged: sheet.getRange("A1").isPartOfMerge()
+[stderr]   };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Clear And Cell Shift Operations
+[stderr] 
+[stderr] Clear APIs:
+[stderr] 
+[stderr] - `clear() -> void` - clear the full range
+[stderr] - `clearContent() -> void` - clear only content and keep formatting
+[stderr] - `clearFormat() -> void` - clear only formatting and keep content
+[stderr] 
+[stderr] Use `clear()` when the task is to clear the full range. Use `clearContent()` or `clearFormat()` when you only want one part of that behavior.
+[stderr] 
+[stderr] Cell shift APIs:
+[stderr] 
+[stderr] - `insertCells(dimension) -> void` - insert cells and shift existing cells in the given dimension
+[stderr] - `deleteCells(dimension) -> void` - delete cells and shift remaining cells in the given dimension
+[stderr] 
+[stderr] Dimension constants:
+[stderr] 
+[stderr] - `univerAPI.Enum.Dimension.ROWS`
+[stderr] - `univerAPI.Enum.Dimension.COLUMNS`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Queue");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Queue" not found' };
+[stderr] 
+[stderr]   sheet.getRange("B2:C3").clear();
+[stderr]   sheet.getRange("D2:D10").insertCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] 
+[stderr]   return { success: true };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## AutoFill
+[stderr] 
+[stderr] Use `autoFill()` when a correct seed pattern already exists and the workbook should propagate it.
+[stderr] 
+[stderr] - `autoFill(destRange, fillType?) -> Promise<void>` - propagate from the source range into a larger destination that includes the source
+[stderr] 
+[stderr] Notes:
+[stderr] 
+[stderr] - `destRange` must include the source range
+[stderr] - `fillType` can be `'SERIES'` (default) or `'COPY'`
+[stderr] - this method is async; use `await`
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] async () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Series");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Series" not found' };
+[stderr] 
+[stderr]   const source = sheet.getRange("A1:A2");
+[stderr]   const dest = sheet.getRange("A1:A10");
+[stderr]   await source.autoFill(dest);
+[stderr] 
+[stderr]   return { success: true, values: dest.getValues() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Run-Specific Getchas
+[stderr] 
+[stderr] - all `run` code must be wrapped in an arrow function: `() => { ... }` or `async () => { ... }`
+[stderr] - always return an object such as `{ success: true, ... }`; do not rely on implicit return values
+[stderr] - only use methods explicitly documented in the run manual topics; do not guess method names or overloads
+[stderr] - prefer `getSheetByName(...)` so the worksheet boundary stays explicit and reviewable
+[stderr] - numeric coordinate overloads are 0-based, so `getRange(0, 0)` is `A1`
+[stderr] - if `setValue('=...')` or `setFormula('=...')` writes a formula, wait for `await univerAPI.getFormula().onCalculationResultApplied()` before reading the computed result
+[stderr] - `setValues()` requires a rectangular 2D array whose shape exactly matches the target range; `getRange(row, col)` without size only targets one cell
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `formulas` for a formula-first guide to calculation waits and readback.
+[stderr] - See `formatting` when the job is primarily visual formatting instead of values or structure.
+[stderr] - See `core` for `getRange()` variants, A1 notation, and coordinate rules.
+[stderr] 
+[stderr]  succeeded in 555ms:
+[stderr] {"success":true,"filePath":"/task/cases/case_1/input.univer","discardedLocalMutationCount":2,"status":{"unitID":null,"initRev":null,"syncedRev":null,"localMutationCount":0,"localChangesetCount":0,"syncedChangesetCount":0},"meta":{"trace_id":"74a2346184e56b896b53d2b257a28710"}}
+[stderr] 
+[stderr] codex
+[stderr] I restored the workbook to its original uncommitted state using `univer restore`, so the bad mutation is gone. I also checked the run manual and will use the documented `deleteCells(...ROWS)` operation, which preserves workbook semantics while shifting only columns `B:O`.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/remove_nonemployee_duplicates.js
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/remove_nonemployee_duplicates.js
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/remove_nonemployee_duplicates.js' in /task
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 3848ms:
+[stderr] {"success":true,"changedRange":"SwiftMD!B2:O42","deletedSheetRows":[13,15,42]}
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] The documented cell-delete approach completed and reported the same three removals. I’m verifying by reading the full target range and checking that no non-employee-only duplicate person groups remain while employee-related duplicates remain.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/verify_duplicates.js
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'SwiftMD"'!B38:O42'"' --format json" in /task
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/verify_duplicates.js' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer pipe out /task/cases/case_1/input.univer --range 'SwiftMD"'!B10:O18'"' --format json" in /task
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 474ms:
+[stderr] {"success":true,"duplicateGroups":[{"person":"Antoinette Smith 05/21/1967","rows":[{"row":6,"relationship":"Employee"},{"row":7,"relationship":"Spouse"}]},{"person":"Justice Moon 01/10/2002","rows":[{"row":8,"relationship":"Child living at home"},{"row":9,"relationship":"Employee"}]},{"person":"Danielle America 04/03/1985","rows":[{"row":10,"relationship":"Employee"},{"row":11,"relationship":"Spouse"}]},{"person":"Frank Doees 08/18/1968","rows":[{"row":14,"relationship":"Employee"},{"row":16,"relationship":"Spouse"}]},{"person":"Lisa Doees 05/21/1970","rows":[{"row":15,"relationship":"Employee"},{"row":17,"relationship":"Spouse"}]},{"person":"Casey Jamica 06/23/1993","rows":[{"row":18,"relationship":"Employee"},{"row":19,"relationship":"Other"}]},{"person":"Vannessa Computer 12/28/1995","rows":[{"row":20,"relationship":"Child living at home"},{"row":21,"relationship":"Employee"}]},{"person":"Lynn Pond 11/02/1981","rows":[{"row":22,"relationship":"Employee"},{"row":23,"relationship":"Spouse"}]},{"person":"Hayley Car 05/22/2003","rows":[{"row":24,"relationship":"Child living at home"},{"row":25,"relationship":"Employee"}]},{"person":"Alexandra House 08/01/1998","rows":[{"row":26,"relationship":"Child living at home"},{"row":27,"relationship":"Employee"}]},{"person":"Caroline Monitor 01/18/1996","rows":[{"row":28,"relationship":"Child living at home"},{"row":29,"relationship":"Employee"}]},{"person":"Fagr Excel 07/26/1999","rows":[{"row":30,"relationship":"Child living at home"},{"row":31,"relationship":"Employee"}]},{"person":"Christina Jones 09/11/1987","rows":[{"row":33,"relationship":"Employee"},{"row":35,"relationship":"Spouse"}]},{"person":"Seamus Jones 06/06/1987","rows":[{"row":34,"relationship":"Employee"},{"row":36,"relationship":"Spouse"}]},{"person":"Aubrey Plam 12/23/2005","rows":[{"row":37,"relationship":"Child living at home"},{"row":38,"relationship":"Employee"}]}],"bottomRows":[[null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null]]}
+[stderr] 
+[stderr]  succeeded in 470ms:
+[stderr] [["","America","Danielle","Female","04/03/1985","Yes","Employee","","","","","","",""],["","America","Danielle","Female","04/03/1985","Yes","Spouse","","","","","","",""],["","Doees","Emily","Female","04/06/2003","Yes","Child living at home","","","","","","",""],["","Doees","Ryan","Male","03/20/1999","Yes","Child living at home","","","","","","",""],["","Doees","Frank","Male","08/18/1968","Yes","Employee","","","","","","",""],["","Doees","Lisa","Female","05/21/1970","Yes","Employee","","","","","","",""],["","Doees","Frank","Male","08/18/1968","Yes","Spouse","","","","","","",""],["","Doees","Lisa","Female","05/21/1970","Yes","Spouse","","","","","","",""],["","Jamica","Casey","Female","06/23/1993","Yes","Employee","","","","","","",""]]
+[stderr] 
+[stderr]  succeeded in 486ms:
+[stderr] [["","Plam","Aubrey","Female","12/23/2005","Yes","Employee","","","","","","",""],["","Character","Nickson","Male","06/09/2001","Yes","Child living at home","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""],["","","","","","","","","","","","","",""]]
+[stderr] 
+[stderr] codex
+[stderr] Verification shows Emily Doees, Ryan Doees, and Character Nickson now each have only one non-employee row, while duplicates involving an Employee relationship are still present. I’m exporting the edited workbook to the required `.xlsx` path.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/outputs/case_1 && univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx' in /task
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 1206ms:
+[stderr] exported /task/cases/case_1/input.univer -> /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'ls -l /task/outputs/case_1/output.xlsx' in /task
+[stderr]  succeeded in 0ms:
+[stderr] -rw-r--r--    1 node     node         10234 May 23 15:09 /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] Completed case 1 and exported the edited workbook to:
+[stderr] 
+[stderr] `/task/outputs/case_1/output.xlsx`
+[stderr] 
+[stderr] I verified that the non-employee-only duplicate rows were reduced to one entry each, while duplicate records involving an `Employee` relationship were left intact.
+[stderr] diff --git a/work/remove_nonemployee_duplicates.js b/work/remove_nonemployee_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..455d46568dcedc179e7d91fce19b32ffc8ae15bb
+[stderr] --- /dev/null
+[stderr] +++ b/work/remove_nonemployee_duplicates.js
+[stderr] @@ -0,0 +1,54 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  for (const [name, value] of Object.entries(idx)) {
+[stderr] +    if (value < 0) return { success: false, error: `Missing column: ${name}` };
+[stderr] +  }
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    const key = [
+[stderr] +      clean(row[idx.last]).toLowerCase(),
+[stderr] +      clean(row[idx.first]).toLowerCase(),
+[stderr] +      clean(row[idx.dob]),
+[stderr] +    ].join("\u0001");
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      sheetRow: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]).toLowerCase(),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const rowsToDelete = [];
+[stderr] +  for (const rows of groups.values()) {
+[stderr] +    if (rows.length < 2) continue;
+[stderr] +    if (rows.some((row) => row.relationship === "employee")) continue;
+[stderr] +    for (let i = 1; i < rows.length; i++) rowsToDelete.push(rows[i].sheetRow);
+[stderr] +  }
+[stderr] +
+[stderr] +  rowsToDelete.sort((a, b) => b - a);
+[stderr] +  for (const rowNum of rowsToDelete) {
+[stderr] +    sheet.getRange(`B${rowNum}:O${rowNum}`).deleteCells(univerAPI.Enum.Dimension.ROWS);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    changedRange: "SwiftMD!B2:O42",
+[stderr] +    deletedSheetRows: rowsToDelete.slice().sort((a, b) => a - b),
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/verify_duplicates.js b/work/verify_duplicates.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..6cac9bffc2be9e15097c3c8090220671b4100012
+[stderr] --- /dev/null
+[stderr] +++ b/work/verify_duplicates.js
+[stderr] @@ -0,0 +1,40 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("SwiftMD");
+[stderr] +  if (!sheet) return { success: false, error: "SwiftMD not found" };
+[stderr] +
+[stderr] +  const values = sheet.getRange("B2:O42").getValues();
+[stderr] +  const clean = (v) => String(v ?? "").replace(/\u00A0/g, " ").trim();
+[stderr] +  const header = values[0].map(clean);
+[stderr] +  const idx = {
+[stderr] +    last: header.indexOf("Last Name"),
+[stderr] +    first: header.indexOf("First Name"),
+[stderr] +    dob: header.indexOf("Date Of Birth"),
+[stderr] +    duplicate: header.indexOf("Duplicate?"),
+[stderr] +    relationship: header.indexOf("Relationship"),
+[stderr] +  };
+[stderr] +
+[stderr] +  const groups = new Map();
+[stderr] +  for (let r = 1; r < values.length; r++) {
+[stderr] +    const row = values[r];
+[stderr] +    if (clean(row[idx.duplicate]).toLowerCase() !== "yes") continue;
+[stderr] +    if (!clean(row[idx.last]) && !clean(row[idx.first]) && !clean(row[idx.dob])) continue;
+[stderr] +    const key = `${clean(row[idx.first])} ${clean(row[idx.last])} ${clean(row[idx.dob])}`;
+[stderr] +    if (!groups.has(key)) groups.set(key, []);
+[stderr] +    groups.get(key).push({
+[stderr] +      row: r + 2,
+[stderr] +      relationship: clean(row[idx.relationship]),
+[stderr] +    });
+[stderr] +  }
+[stderr] +
+[stderr] +  const duplicateGroups = [];
+[stderr] +  for (const [person, rows] of groups.entries()) {
+[stderr] +    if (rows.length > 1) duplicateGroups.push({ person, rows });
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    duplicateGroups,
+[stderr] +    bottomRows: sheet.getRange("B40:O42").getValues(),
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] tokens used
+[stdout] Completed case 1 and exported the edited workbook to:
+[stderr] 42,540
+[stdout] 
+[stdout] `/task/outputs/case_1/output.xlsx`
+[stdout] 
+[stdout] I verified that the non-employee-only duplicate rows were reduced to one entry each, while duplicate records involving an `Employee` relationship were left intact.

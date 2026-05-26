@@ -1,0 +1,794 @@
+{
+  "metadata": {
+    "run_id": "codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513",
+    "dataset": "spreadsheetbench_verified_400",
+    "dataset_path": "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+    "setting": "univer_agent",
+    "model": "gpt-5.5",
+    "agent": "codex",
+    "agent_command": false,
+    "cases": [
+      1
+    ],
+    "run_root": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent",
+    "stream_agent_output": false,
+    "workers": 10,
+    "docker_bin": "docker",
+    "docker_image": "spreadsheetbench-univer-cli-agent",
+    "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+    "env_file": "/Users/otime/project/SpreadsheetBench-cli/.env.codex",
+    "started_at": "2026-05-26T10:05:31",
+    "cwd": "/Users/otime/project/SpreadsheetBench-cli",
+    "finished_at": "2026-05-26T10:18:01"
+  },
+  "tasks": [
+    {
+      "id": "22-47",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/22-47",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/22-47/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_22-47_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:07:51",
+      "duration_seconds": 139.95
+    },
+    {
+      "id": "23-24",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/23-24",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/23-24/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_23-24_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:07:03",
+      "duration_seconds": 91.141
+    },
+    {
+      "id": "41-47",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/41-47",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/41-47/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_41-47_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:08:21",
+      "duration_seconds": 169.755
+    },
+    {
+      "id": "262-17",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/262-17",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/262-17/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_262-17_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:06:59",
+      "duration_seconds": 87.679
+    },
+    {
+      "id": "283-32",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/283-32",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/283-32/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_283-32_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:07:12",
+      "duration_seconds": 100.132
+    },
+    {
+      "id": "469-9",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/469-9",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/469-9/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_469-9_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:06:43",
+      "duration_seconds": 72.08
+    },
+    {
+      "id": "80-42",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/80-42",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/80-42/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_80-42_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:08:29",
+      "duration_seconds": 177.705
+    },
+    {
+      "id": "118-50",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/118-50",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/118-50/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_118-50_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:07:29",
+      "duration_seconds": 117.337
+    },
+    {
+      "id": "130-9",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/130-9",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/130-9/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_130-9_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:08:09",
+      "duration_seconds": 157.364
+    },
+    {
+      "id": "146-49",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/146-49",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/146-49/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_146-49_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:05:31",
+      "finished_at": "2026-05-26T10:06:56",
+      "duration_seconds": 84.802
+    },
+    {
+      "id": "157-4",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/157-4",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/157-4/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_157-4_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:06:43",
+      "finished_at": "2026-05-26T10:08:47",
+      "duration_seconds": 123.994
+    },
+    {
+      "id": "203-15",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/203-15",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/203-15/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_203-15_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:06:56",
+      "finished_at": "2026-05-26T10:08:32",
+      "duration_seconds": 95.793
+    },
+    {
+      "id": "208-20",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/208-20",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/208-20/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_208-20_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:06:59",
+      "finished_at": "2026-05-26T10:08:36",
+      "duration_seconds": 96.69
+    },
+    {
+      "id": "409-45",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/409-45",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/409-45/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_409-45_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:07:03",
+      "finished_at": "2026-05-26T10:08:50",
+      "duration_seconds": 107.405
+    },
+    {
+      "id": "414-20",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/414-20",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/414-20/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_414-20_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:07:12",
+      "finished_at": "2026-05-26T10:08:37",
+      "duration_seconds": 85.589
+    },
+    {
+      "id": "448-11",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/448-11",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/448-11/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_448-11_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:07:29",
+      "finished_at": "2026-05-26T10:09:03",
+      "duration_seconds": 94.232
+    },
+    {
+      "id": "486-17",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/486-17",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/486-17/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_486-17_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:07:51",
+      "finished_at": "2026-05-26T10:09:04",
+      "duration_seconds": 72.583
+    },
+    {
+      "id": "496-34",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/496-34",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/496-34/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_496-34_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:09",
+      "finished_at": "2026-05-26T10:10:17",
+      "duration_seconds": 128.499
+    },
+    {
+      "id": "524-31",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/524-31",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/524-31/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_524-31_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:21",
+      "finished_at": "2026-05-26T10:09:48",
+      "duration_seconds": 86.804
+    },
+    {
+      "id": "534-26",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/534-26",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/534-26/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_534-26_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:29",
+      "finished_at": "2026-05-26T10:09:53",
+      "duration_seconds": 83.968
+    },
+    {
+      "id": "31202",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/31202",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/31202/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_31202_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:32",
+      "finished_at": "2026-05-26T10:10:31",
+      "duration_seconds": 118.853
+    },
+    {
+      "id": "34033",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/34033",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/34033/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_34033_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:36",
+      "finished_at": "2026-05-26T10:10:31",
+      "duration_seconds": 115.334
+    },
+    {
+      "id": "37900",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/37900",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/37900/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_37900_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:37",
+      "finished_at": "2026-05-26T10:09:52",
+      "duration_seconds": 74.997
+    },
+    {
+      "id": "38074",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/38074",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/38074/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_38074_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:47",
+      "finished_at": "2026-05-26T10:12:28",
+      "duration_seconds": 220.79
+    },
+    {
+      "id": "38537",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/38537",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/38537/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_38537_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:08:50",
+      "finished_at": "2026-05-26T10:10:40",
+      "duration_seconds": 109.971
+    },
+    {
+      "id": "48643",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/48643",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/48643/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_48643_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:09:03",
+      "finished_at": "2026-05-26T10:10:50",
+      "duration_seconds": 106.797
+    },
+    {
+      "id": "48983",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/48983",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/48983/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_48983_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:09:04",
+      "finished_at": "2026-05-26T10:10:27",
+      "duration_seconds": 82.921
+    },
+    {
+      "id": "49036",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/49036",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/49036/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_49036_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:09:48",
+      "finished_at": "2026-05-26T10:11:03",
+      "duration_seconds": 75.176
+    },
+    {
+      "id": "49300",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/49300",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/49300/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_49300_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:09:52",
+      "finished_at": "2026-05-26T10:11:22",
+      "duration_seconds": 89.855
+    },
+    {
+      "id": "50193",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/50193",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/50193/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_50193_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:09:53",
+      "finished_at": "2026-05-26T10:13:47",
+      "duration_seconds": 234.18
+    },
+    {
+      "id": "51090",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/51090",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/51090/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_51090_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:10:17",
+      "finished_at": "2026-05-26T10:12:01",
+      "duration_seconds": 103.475
+    },
+    {
+      "id": "54590",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/54590",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/54590/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_54590_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:10:27",
+      "finished_at": "2026-05-26T10:11:33",
+      "duration_seconds": 66.628
+    },
+    {
+      "id": "1925",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/1925",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/1925/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_1925_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:10:31",
+      "finished_at": "2026-05-26T10:12:01",
+      "duration_seconds": 89.837
+    },
+    {
+      "id": "3002",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/3002",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/3002/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_3002_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:10:31",
+      "finished_at": "2026-05-26T10:12:01",
+      "duration_seconds": 90.115
+    },
+    {
+      "id": "3911",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/3911",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/3911/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_3911_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:10:40",
+      "finished_at": "2026-05-26T10:12:53",
+      "duration_seconds": 133.396
+    },
+    {
+      "id": "5835",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/5835",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/5835/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_5835_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:10:50",
+      "finished_at": "2026-05-26T10:12:54",
+      "duration_seconds": 123.897
+    },
+    {
+      "id": "13284",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/13284",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/13284/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_13284_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:11:03",
+      "finished_at": "2026-05-26T10:12:41",
+      "duration_seconds": 97.601
+    },
+    {
+      "id": "32023",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/32023",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/32023/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_32023_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:11:22",
+      "finished_at": "2026-05-26T10:12:39",
+      "duration_seconds": 76.894
+    },
+    {
+      "id": "32093",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/32093",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/32093/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_32093_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:11:33",
+      "finished_at": "2026-05-26T10:12:27",
+      "duration_seconds": 53.825
+    },
+    {
+      "id": "33157",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/33157",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/33157/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_33157_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:01",
+      "finished_at": "2026-05-26T10:13:33",
+      "duration_seconds": 92.296
+    },
+    {
+      "id": "35742",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/35742",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/35742/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_35742_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:01",
+      "finished_at": "2026-05-26T10:13:21",
+      "duration_seconds": 80.464
+    },
+    {
+      "id": "37462",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/37462",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/37462/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_37462_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:01",
+      "finished_at": "2026-05-26T10:15:21",
+      "duration_seconds": 199.717
+    },
+    {
+      "id": "41978",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/41978",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/41978/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_41978_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:27",
+      "finished_at": "2026-05-26T10:13:43",
+      "duration_seconds": 75.47
+    },
+    {
+      "id": "42216",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/42216",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/42216/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_42216_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:28",
+      "finished_at": "2026-05-26T10:15:25",
+      "duration_seconds": 176.475
+    },
+    {
+      "id": "42930",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/42930",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/42930/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_42930_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:39",
+      "finished_at": "2026-05-26T10:13:54",
+      "duration_seconds": 74.793
+    },
+    {
+      "id": "43436",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/43436",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/43436/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_43436_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:41",
+      "finished_at": "2026-05-26T10:14:24",
+      "duration_seconds": 102.952
+    },
+    {
+      "id": "44628",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/44628",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/44628/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_44628_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:53",
+      "finished_at": "2026-05-26T10:14:11",
+      "duration_seconds": 77.418
+    },
+    {
+      "id": "45738",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/45738",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/45738/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_45738_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:12:54",
+      "finished_at": "2026-05-26T10:15:16",
+      "duration_seconds": 142.737
+    },
+    {
+      "id": "45944",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/45944",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/45944/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_45944_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:13:21",
+      "finished_at": "2026-05-26T10:14:43",
+      "duration_seconds": 81.978
+    },
+    {
+      "id": "50486",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/50486",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/50486/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_50486_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:13:33",
+      "finished_at": "2026-05-26T10:14:41",
+      "duration_seconds": 68.178
+    },
+    {
+      "id": "51680",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/51680",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/51680/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_51680_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:13:43",
+      "finished_at": "2026-05-26T10:15:20",
+      "duration_seconds": 97.32
+    },
+    {
+      "id": "52305",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/52305",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/52305/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_52305_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:13:47",
+      "finished_at": "2026-05-26T10:16:18",
+      "duration_seconds": 151.073
+    },
+    {
+      "id": "52541",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/52541",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/52541/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_52541_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:13:54",
+      "finished_at": "2026-05-26T10:15:13",
+      "duration_seconds": 79.591
+    },
+    {
+      "id": "53161",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/53161",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/53161/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_53161_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:14:11",
+      "finished_at": "2026-05-26T10:15:53",
+      "duration_seconds": 102.002
+    },
+    {
+      "id": "54638",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/54638",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/54638/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_54638_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:14:24",
+      "finished_at": "2026-05-26T10:17:59",
+      "duration_seconds": 215.161
+    },
+    {
+      "id": "54667",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/54667",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/54667/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_54667_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:14:41",
+      "finished_at": "2026-05-26T10:15:58",
+      "duration_seconds": 77.283
+    },
+    {
+      "id": "55060",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/55060",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/55060/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_55060_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:14:43",
+      "finished_at": "2026-05-26T10:15:51",
+      "duration_seconds": 68.043
+    },
+    {
+      "id": "55427",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/55427",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/55427/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_55427_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:13",
+      "finished_at": "2026-05-26T10:17:22",
+      "duration_seconds": 129.137
+    },
+    {
+      "id": "44017",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/44017",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/44017/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_44017_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:16",
+      "finished_at": "2026-05-26T10:17:25",
+      "duration_seconds": 128.586
+    },
+    {
+      "id": "55977",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/55977",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/55977/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_55977_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:20",
+      "finished_at": "2026-05-26T10:16:50",
+      "duration_seconds": 90.29
+    },
+    {
+      "id": "56915",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/56915",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/56915/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_56915_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:21",
+      "finished_at": "2026-05-26T10:18:01",
+      "duration_seconds": 160.473
+    },
+    {
+      "id": "56953",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/56953",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/56953/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_56953_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:25",
+      "finished_at": "2026-05-26T10:17:06",
+      "duration_seconds": 101.223
+    },
+    {
+      "id": "57989",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/57989",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/57989/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_57989_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:51",
+      "finished_at": "2026-05-26T10:17:49",
+      "duration_seconds": 117.452
+    },
+    {
+      "id": "59884",
+      "status": "ok",
+      "workspace": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/59884",
+      "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.runs/univer-agent/codex-gpt-5-5-verified400-wrong64-rerun-w10-20260526-100513/59884/task",
+      "outputs": [
+        "/Users/otime/project/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_59884_output.xlsx"
+      ],
+      "started_at": "2026-05-26T10:15:53",
+      "finished_at": "2026-05-26T10:17:25",
+      "duration_seconds": 92.705
+    }
+  ]
+}

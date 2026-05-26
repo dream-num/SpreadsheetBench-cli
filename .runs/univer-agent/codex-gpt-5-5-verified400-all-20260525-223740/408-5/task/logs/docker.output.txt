@@ -1,0 +1,1973 @@
+[stderr] OpenAI Codex v0.133.0
+[stderr] --------
+[stderr] workdir: /task
+[stderr] model: gpt-5.5
+[stderr] provider: openai
+[stderr] approval: never
+[stderr] sandbox: danger-full-access
+[stderr] reasoning effort: medium
+[stderr] reasoning summaries: none
+[stderr] session id: 019e5f99-64a2-7ae0-975f-3e4bd75e8bf4
+[stderr] --------
+[stderr] user
+[stderr] You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+[stderr] Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+[stderr] 
+[stderr] The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
+[stderr] 
+[stderr] The request contains these types of information:
+[stderr] - instruction: The user's workbook editing request.
+[stderr] - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
+[stderr] - spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+[stderr] - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
+[stderr] - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+[stderr] - output_path: You need to generate modified spreadsheet files at these paths.
+[stderr] 
+[stderr] Request id: 408-5
+[stderr] 
+[stderr] ### instruction
+[stderr] How can I create a macro in Excel to calculate the sum of values in Column D for rows where Column E contains a zero, insert this result into Column D next to the row containing 'BR1 Sales' in Column C, and then delete all rows where Column E contains a zero except for the rows where the reference contains 'BR1 Sales'? Also delete blank lines. If Macro is not possible, just perform this task.
+[stderr] 
+[stderr] ### spreadsheet_path
+[stderr] - /task/cases/case_1/input.univer: pre-imported workbook for case 1.
+[stderr] 
+[stderr] ### spreadsheet_content
+[stderr] Sheet Name: Sheet1
+[stderr] Date	Branch	Reference	Amount	Match Ref and Val
+[stderr] 2021-06-01 00:00:00	BR1 PL	968390	-48.36	0
+[stderr] 2021-06-01 00:00:00	BR1 PL	968388	-791.2	0
+[stderr] 2021-06-01 00:00:00	BR1 PL	968388	-587.37	0
+[stderr] 2021-06-01 00:00:00	BR1 PL	968390	-5009.88	0
+[stderr] --------------------------------------------------
+[stderr] 
+[stderr] ### instruction_type
+[stderr] Sheet-Level Manipulation
+[stderr] 
+[stderr] ### answer_position
+[stderr] A1:E137
+[stderr] 
+[stderr] ### output_path
+[stderr] - /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] Rules:
+[stderr] - Load the `univer-cli` skill before inspecting or editing any workbook.
+[stderr] - Only use files under /task.
+[stderr] - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+[stderr] - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
+[stderr] - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+[stderr] - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
+[stderr] - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
+[stderr] - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+[stderr] - For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+[stderr] - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
+[stderr] - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
+[stderr] - When the requested result contains formulas, totals, calculated fields, dates, percentages, currencies, identifiers, or formatting-sensitive values, verify the workbook cell model before export with `getCellDatas()`: compare `v`, `t`, `f`, `p`, `si`, `s` or resolved style, and visible display where relevant. Do not use `getValues()` to verify value type. Do not replace required formulas with static calculated values unless the instruction explicitly asks for values only.
+[stderr] - `inspect` and `pipe out` are useful only for quickly understanding visible content, rough ranges, and formulas. They cannot prove value type or complete cell model. `pipe out --type rawValue` is not facade `getRawValues()`; currently it maps to `range.getValues()`. Do not infer true `v`, `t`, `f`, `s`, date serials, forced text, or number formats from `inspect`, `pipe out`, TSV/CSV/JSON previews, or display values. For value type and model verification, always use `univer run` with `range.getCellDatas()`.
+[stderr] - When verifying exact row numbers, section boundaries, TOTAL rows, blank separator rows, or formula ranges, bare `pipe out --format tsv/csv`, large-range `inspect range`, and `inspect formulas` Formula Groups are easy to misread: TSV/CSV has no row numbers and blank rows are hard to count, inspect previews can omit middle rows, and Formula Groups are summaries rather than per-cell formulas. Prefer `pipe out --format json` only for quick visible inspection; if exact coordinates, formulas, or cell models matter, use `univer run` to return explicit `{ row1, col1, value, formula, cellData }` objects from `getCellDatas()`.
+[stderr] - In Univer run scripts, `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used row/column indexes. Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column parameters, while `numRows` and `numColumns` are counts, not end indexes.
+[stderr] - Before writing to columns or rows outside the current sheet bounds, extend the sheet first and create the range only after extension. `getRange()` validates the current `rowCount` and `columnCount` when the range object is created; out-of-bounds ranges fail immediately. Use `setColumnCount(requiredColumnCount)` when you only need to make far-right columns writable. Use `insertColumns()`, `insertColumnsBefore()`, or `insertColumnsAfter()` only when the task requires inserting columns and shifting existing data.
+[stderr] - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+[stderr] - For rich text or partial text highlighting, use the official rich text builder API. Example:
+[stderr]   ```ts
+[stderr]   const richText = univerAPI.newRichText()
+[stderr]     .insertText('Hello World')
+[stderr]     .setStyle(0, 5, { bl: 1, cl: { rgb: '#ff0000' } });
+[stderr]   sheet.getRange('A1').setRichTextValueForCell(richText);
+[stderr]   ```
+[stderr]   For ranges, use `setRichTextValues([[richText, richText]])`. Read rich text with `getValue(true)` or `getValues(true)` when needed. Do not hand-write or guess `cell.p.body.textRuns` unless you are only diagnosing an existing file structure.
+[stderr] - `getRawValues()` returns stored values as-is: rich text returns `cell.p.body.dataStream`, otherwise it returns `cell.v`. It does not trim text, normalize NBSP (`\u00A0`), remove commas, or convert numeric-looking strings to numbers. For comparisons, blank detection, sums, sorting, and filters, normalize explicitly:
+[stderr]   ```ts
+[stderr]   const cleanText = (v) => String(v ?? '').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+[stderr]   const isBlank = (v) => cleanText(v) === '';
+[stderr]   const parseNumberLoose = (v) => {
+[stderr]     const s = cleanText(v).replace(/,/g, '');
+[stderr]     if (s === '') return null;
+[stderr]     const n = Number(s);
+[stderr]     return Number.isFinite(n) ? n : null;
+[stderr]   };
+[stderr]   ```
+[stderr]   Use normalization for internal logic, but do not blindly trim values written back when the task requires preserving original text, trailing spaces, or exact formatting.
+[stderr] - Univer Sheets cell value rules:
+[stderr]   1. The real cell model is `ICellData`, not a plain JavaScript value. Common fields include `v` (value), `t` (type enum), `f` (formula), `si` (formula id), `p` (rich text), `s` (style id or style object, including number format), and `custom` (custom data). The `t` enum values are: `1=STRING`, `2=NUMBER`, `3=BOOLEAN`, `4=FORCE_STRING`. If `t` is omitted, Univer may auto-detect the type, which can turn text like `2-2` into a date serial.
+[stderr]   2. `getValues()` is not a universal raw read. It returns facade/view-layer values that may be affected by number formats, interceptors, and display logic, and it does not preserve `t`, `f`, `p`, `s`, or `custom`. Do not use `getValues()` to verify value type, formula, number format, forced text, or cell model.
+[stderr]   3. Choose reads by intent: display-only planning may use `getValues()` or `getDisplayValues()`; raw values without model preservation may use `getRawValues()` for calculations; complete cell models and all value-type verification must use `getCellDatas()`; formulas use `getFormula()` or `getFormulas()`, and use `getCellDatas()` when formula cells also need model/type/format verification.
+[stderr]   4. Hard requirement for writes: whenever you write values into cells or ranges, use explicit `ICellData` objects instead of bare JavaScript values. Do not write `setValues([["2-2", 123, true]])`; write `setValues([[{ v: "2-2", t: 4 }, { v: 123, t: 2 }, { v: 1, t: 3 }]])`. Every written cell must make its semantic type explicit with `t`, `f`, and any needed `s` number format. Do not use `pipe in` for workbook edits because it writes tabular values without an explicit per-cell `ICellData` model.
+[stderr]   5. Choose write models by semantics: ordinary text uses `{ v: "text", t: 1 }`; text that must not be auto-converted uses `{ v: "2-2", t: 4 }`; numbers use `{ v: 123, t: 2 }`; booleans use `{ v: 1, t: 3 }` for TRUE and `{ v: 0, t: 3 }` for FALSE; formulas use `{ f: '=A1+B1' }` or `setFormula('=A1+B1')`; literal formula text uses `{ v: '=A1+B1', t: 4 }`.
+[stderr]   6. Values that look like dates, numbers, fractions, scores, ranges, codes, phone numbers, postal codes, or identifiers must use `t: 4` when the task semantics require text. Examples include scores like `2-2` or `3-1`, hyphenated codes, leading-zero IDs, SKU/account IDs, phone-like values, and ZIP/postal codes. Do not let Excel/OOXML auto-detect these as dates or numbers.
+[stderr]   7. Dates, percentages, and currencies are numbers plus number formats, not separate value types: date `{ v: serial, t: 2, s: { n: { pattern: 'yyyy-mm-dd' } } }`; percent `{ v: 0.25, t: 2, s: { n: { pattern: '0%' } } }`; currency `{ v: 1234.5, t: 2, s: { n: { pattern: '$#,##0.00' } } }`. After writing, `getCellDatas()` may show `s` as a style id string instead of an inline object; use `getCellStyleData()` / `getCellStyles()` or the workbook snapshot styles to resolve and verify the number format.
+[stderr]   8. When reading existing cells and writing them elsewhere: display-only reads may use `getValues()`/`getDisplayValues()` only for internal planning, but writes must still use explicit `ICellData`; preserving type, formula, format, rich text, or custom data requires `getCellDatas()` -> deep clone -> clear target range -> `setValues()`; moving ranges should prefer a move-range command or `moveRows`/`moveColumns`.
+[stderr]   9. If `p` rich text exists, it controls the displayed content even when `v` is also set. Use the rich text builder APIs for rich text tasks and verify `p` with `getCellDatas()`.
+[stderr]   10. Do not hand-author `si` formula ids. Preserve `si` only when deep-cloning existing formula cells with `getCellDatas()`; for new formulas use `f` or `setFormula()`.
+[stderr]   11. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
+[stderr]   12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+[stderr] - Create the required `output.xlsx` for every case. These files are the final deliverables.
+[stderr] - Keep temporary scripts and intermediates under `/task/work/`.
+[stderr] - Solve every case independently and only modify cells within `answer_position`.
+[stderr] - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
+[stderr] 
+[stderr] codex
+[stderr] I’ll use the `univer-cli` skill first as required, then inspect the workbook through `univer` before editing the requested range.
+[stderr] exec
+[stderr] /bin/sh -lc "sed -n '1,220p' /home/node/.agents/skills/univer-cli/SKILL.md && univer --help" in /task
+[stderr]  succeeded in 249ms:
+[stderr] univer - spreadsheet editing CLI for agents
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer --help
+[stderr]   univer help <command...>
+[stderr]   univer <command> --help
+[stderr] 
+[stderr] Commands:
+[stderr]   Workbooks:
+[stderr]     univer new <file.univer|file.unv>
+[stderr]     univer import <input.xlsx|csv> <file.univer|file.unv>
+[stderr]     univer export <file.univer|file.unv> <output.xlsx|csv>
+[stderr] 
+[stderr]   Read:
+[stderr]     univer inspect workbook <file.univer|file.unv>
+[stderr]     univer inspect sheet <file.univer|file.unv> [sheet]
+[stderr]     univer inspect range <file.univer|file.unv> [sheet!A1:B2]
+[stderr]     univer inspect formulas <file.univer|file.unv> [sheet]
+[stderr]     univer inspect lint <file.univer|file.unv>
+[stderr]     univer search <file.univer|file.unv> <query>
+[stderr]     univer view <file.univer|file.unv>
+[stderr]     univer view comments <file.univer|file.unv> [--all] [--json]
+[stderr]     univer view status [--json]
+[stderr]     univer view stop [--json]
+[stderr] 
+[stderr]   Write:
+[stderr]     univer run <file.univer|file.unv> --file <script.js>
+[stderr] 
+[stderr]   Configuration:
+[stderr]     univer config <path|list|get|set|unset>
+[stderr] 
+[stderr]   Stream:
+[stderr]     univer pipe out <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr]     univer pipe in <file.univer|file.unv> --range <sheet!A1:B2>
+[stderr] 
+[stderr]   Health:
+[stderr]     univer doctor [--json]
+[stderr]     univer doctor collect --last <duration>
+[stderr]     univer doctor collect [--trace-id <id>]
+[stderr]     univer doctor collect --all
+[stderr]     univer update [--force]
+[stderr] 
+[stderr]   Daemon:
+[stderr]     univer daemon status [--json]
+[stderr]     univer daemon start
+[stderr]     univer daemon stop
+[stderr] 
+[stderr]   Versioning:
+[stderr]     univer status <file.univer|file.unv>
+[stderr]     univer commit <file.univer|file.unv> --message <message>
+[stderr]     univer clone <file.univer|file.unv> --unit-id <unitID>
+[stderr]     univer restore <file.univer|file.unv>
+[stderr]     univer reset <file.univer|file.unv> --soft HEAD~N
+[stderr]     univer sync <file.univer|file.unv>
+[stderr]     univer pull <file.univer|file.unv>
+[stderr] 
+[stderr] codex
+[stderr] Implementation plan: I’ll identify the used range and the row containing `BR1 Sales`, sum Column D where Column E is zero, write that total into Column D on the `BR1 Sales` row, then remove rows in `A1:E137` where Column E is zero unless Column C contains `BR1 Sales`, plus blank rows. I’ll verify with `getCellDatas()` before exporting.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A1:E20'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer search /task/cases/case_1/input.univer 'BR1 Sales' --sheet Sheet1 --range 'A1:E137' --json" in /task
+[stderr]  succeeded in 1065ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A1:E20
+[stderr] Rows: 20 (19 data rows; first row is header)
+[stderr] Columns: 5
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | Date | text | 19/19 | 19 non-empty | - |
+[stderr] | B | Branch | text | 19/19 | 19 non-empty | - |
+[stderr] | C | Reference | text | 19/19 | 19 non-empty | - |
+[stderr] | D | Amount | text | 19/19 | 19 non-empty | - |
+[stderr] | E | Match Ref and Val | text | 19/19 | 19 non-empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |A1,Date|B1,Branch|C1,Reference|D1,Amount|E1,Match Ref and Val|
+[stderr] |A2,2021-6-1|B2,BR1 PL|C2,968390|D2,-48.36|E2,0|
+[stderr] |A3,2021-6-1|B3,BR1 PL|C3,968388|D3,-791.2|E3,0|
+[stderr] |A4,2021-6-1|B4,BR1 PL|C4,968388|D4,-587.37|E4,0|
+[stderr] ...
+[stderr] |A20,2021-6-7|B20,BR1 PL|C20,968398|D20,-3480.68|E20,0|
+[stderr] 
+[stderr] *Note: 15 rows omitted from data preview*
+[stderr] 
+[stderr]  succeeded in 1088ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Sheet1
+[stderr] Sheet Count: 1
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Sheet1 | A1:E137 | 1 | 1 |
+[stderr] 
+[stderr] ## Sheet: 'Sheet1'
+[stderr] 
+[stderr] - Used Range: A1:E137
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 1 covering 1 cells
+[stderr] 
+[stderr] ### Table 1: A1:E137
+[stderr] |A1,Date|B1,Branch|C1,Reference|D1,Amount|E1,Match Ref and Val|
+[stderr] |A2,2021-6-1|B2,BR1 PL|C2,968390|D2,-48.36|E2,0|
+[stderr] |A3,2021-6-1|B3,BR1 PL|C3,968388|D3,-791.2|E3,0|
+[stderr] |A4,2021-6-1|B4,BR1 PL|C4,968388|D4,-587.37|E4,0|
+[stderr] |A5,2021-6-1|B5,BR1 PL|C5,968390|D5,-5009.88|E5,0|
+[stderr] 
+[stderr] ### Formulas (1 groups, 1 cells)
+[stderr] - D137 <- D137 =SUMIFS(D2:D135,E2:E135,0)
+[stderr] 
+[stderr]  succeeded in 1089ms:
+[stderr] {"ok":true,"caseSensitive":false,"matchCount":1,"matches":[{"cellData":{"v":"BR1 Sales JUN","t":1,"s":"R4","displayValue":"BR1 Sales JUN"},"reference":"Sheet1!C92","sheetId":"uni1","truncatedCellDataFields":[]}],"matchEntireCell":false,"maxCellValueLength":120,"maxResults":100,"query":"BR1 Sales","returnedCount":1,"scope":{"ranges":["A1:E137"],"sheets":["Sheet1"]},"searchedTypes":["displayValue"],"truncated":false,"meta":{"trace_id":"5dba6f10e01fe2c9c9cf98fda9883a28"}}
+[stderr] 
+[stderr] codex
+[stderr] The workbook already has a formula total in `D137`, but the requested result needs that total placed on the `BR1 Sales JUN` row at `C92`, followed by row cleanup. I’m checking the row APIs now so the deletion preserves the sheet structure rather than just clearing cells.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A130:E137'"'" in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A85:E100'"'" in /task
+[stderr]  succeeded in 287ms:
+[stderr] univer run - Run workbook-local programmable surface logic.
+[stderr] 
+[stderr] Usage:
+[stderr]   univer run <file.univer|file.unv> --file <script.js>
+[stderr]   univer run <file.univer|file.unv> --code <script>
+[stderr]   univer run <file.univer|file.unv> <script.js>
+[stderr]   printf '<script>' | univer run <file.univer|file.unv> -
+[stderr] 
+[stderr] Options:
+[stderr]   --code <script> - Inline JavaScript arrow function to execute.
+[stderr]   --file <script.js> - Script file containing bounded edit logic.
+[stderr]   <script.js> - Positional script file accepted when --code and --file are absent.
+[stderr]   - - Read JavaScript source from stdin.
+[stderr] 
+[stderr] Output:
+[stderr]   The run command is the workbook-local programmable surface for scripts.
+[stderr]   Scripts can read workbook state, compute results, and write workbook state.
+[stderr]   Use only APIs documented by the run manual; do not guess method names.
+[stderr]   Runs the script through the runtime-backed command path.
+[stderr]   Returns the script result as JSON-compatible stdout.
+[stderr] 
+[stderr] Examples:
+[stderr]   univer run ./budget.univer --file ./task.js
+[stderr]   univer run ./budget.univer --code '() => ({ success: true })'
+[stderr] 
+[stderr] Manual Topics:
+[stderr]   overview - command selection, hard rules, and progressive discovery
+[stderr]   core - univerAPI, workbook access, worksheet access, A1 notation, and coordinates
+[stderr]   ranges - range reads, writes, shape rules, formulas, merges, clear, cell shifts, and AutoFill
+[stderr]   formulas - formula writes, async calculation waits, and stale-readback getchas
+[stderr]   sheets - worksheet creation, rename, row or column structure, freezing, gridlines, and visibility
+[stderr]   formatting - font, fill, alignment, border, number-format, and clear-format APIs
+[stderr]   conditional-formatting - conditional formatting builders, range binding, and worksheet rule-list APIs
+[stderr]   charts - chart builders, source ranges, readback, update or remove, and viewer rendering notes
+[stderr]   shapes - shape builders, connectors, connection sites, readback, update or remove, and viewer rendering notes
+[stderr]   images - floating image builders, source positioning, readback, update or delete, and viewer rendering notes
+[stderr] 
+[stderr] Manual Aliases:
+[stderr]   a1-reference -> core (A1 Notation)
+[stderr]   coordinates -> core (Coordinate Model)
+[stderr]   autofill -> ranges (AutoFill)
+[stderr]   fill-series -> ranges (AutoFill)
+[stderr]   get-values -> ranges (Reading From FRange)
+[stderr]   read-range -> ranges (Reading From FRange)
+[stderr]   formula-readback -> formulas (Formula Calculation)
+[stderr]   calculation -> formulas (Formula Calculation)
+[stderr]   freeze-panes -> sheets (Freeze Rows And Columns)
+[stderr]   number-format -> formatting (Number Formats)
+[stderr]   conditional-format -> conditional-formatting (Core Workflow)
+[stderr]   condition-format -> conditional-formatting (Core Workflow)
+[stderr]   color-scale -> conditional-formatting (Color Scales)
+[stderr]   data-bar -> conditional-formatting (Data Bars)
+[stderr]   icon-set -> conditional-formatting (Icon Sets)
+[stderr]   chart -> charts (Core Workflow)
+[stderr]   insert-chart -> charts (Core Workflow)
+[stderr]   chart-builder -> charts (Chart Builder)
+[stderr]   shape -> shapes (Core Workflow)
+[stderr]   insert-shape -> shapes (Core Workflow)
+[stderr]   connector-shape -> shapes (Connector Shapes)
+[stderr]   connect-shapes -> shapes (Connect Shapes)
+[stderr]   image -> images (Core Workflow)
+[stderr]   floating-image -> images (Core Workflow)
+[stderr]   insert-image -> images (Core Workflow)
+[stderr] 
+[stderr] Read Manual:
+[stderr]   univer help run ranges
+[stderr]   univer help run autofill
+[stderr]   univer help run charts
+[stderr]   univer help run shapes
+[stderr]   univer help run images
+[stderr] 
+[stderr] Related:
+[stderr]   univer pipe in
+[stderr]   univer daemon status
+[stderr] 
+[stderr]  succeeded in 292ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A130:E137
+[stderr] Rows: 8 (7 data rows; first row is header)
+[stderr] Columns: 5
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | 2021-6-30 | text | 4/7 | 4 non-empty | - |
+[stderr] | B | BR1 Statement | text | 4/7 | 4 non-empty | - |
+[stderr] | C | 31443012 | text | 6/7 | 6 non-empty | - |
+[stderr] | D | 76.81 | text | 6/7 | 6 non-empty | =SUMIFS(D2:D135,E2:E135,0) |
+[stderr] | E | 0 | text | 5/7 | 5 non-empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |A130,2021-6-30|B130,BR1 Statement|C130,31443012|D130,76.81|E130,0|
+[stderr] |A131,2021-6-30|B131,BR1 Statement|C131,31443013|D131,15.41|E131,0|
+[stderr] |A132,2021-6-30|B132,BR1 Statement|C132,31443014|D132,1592.4|E132,0|
+[stderr] |A133,2021-6-30|B133,BR1 Statement|C133,31443033|D133,240.58|E133,0|
+[stderr] ...
+[stderr] |A137,|B137,|C137,Total Zero|D137,-74.96|E137,|
+[stderr] 
+[stderr] *Note: 3 rows omitted from data preview*
+[stderr] 
+[stderr] Formula Groups (1 groups):
+[stderr] - D137 <- D137 =SUMIFS(D2:D135,E2:E135,0)
+[stderr] 
+[stderr]  succeeded in 293ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A85:E100
+[stderr] Rows: 16 (15 data rows; first row is header)
+[stderr] Columns: 5
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | 2021-6-29 | text | 15/15 | 15 non-empty | - |
+[stderr] | B | BR1 PL | text | 15/15 | 15 non-empty | - |
+[stderr] | C | 968427 | text | 15/15 | 15 non-empty | - |
+[stderr] | D | -688.27 | text | 15/15 | 15 non-empty | - |
+[stderr] | E | 0 | text | 15/15 | 15 non-empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |A85,2021-6-29|B85,BR1 PL|C85,968427|D85,-688.27|E85,0|
+[stderr] |A86,2021-6-30|B86,BR1 PL|C86,992354|D86,-995.62|E86,0|
+[stderr] |A87,2021-6-30|B87,BR1 PL|C87,968430|D87,-15.41|E87,0|
+[stderr] |A88,2021-6-30|B88,BR1 PL|C88,968430|D88,-1592.4|E88,0|
+[stderr] ...
+[stderr] |A100,2021-6-17|B100,BR1 Statement|C100,968411|D100,123.72|E100,0|
+[stderr] 
+[stderr] *Note: 11 rows omitted from data preview*
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer help run sheets' in /task
+[stderr]  succeeded in 262ms:
+[stderr] # Sheets
+[stderr] 
+[stderr] This topic focuses on worksheet creation, worksheet structure, row or column presentation, freezing, gridlines, and visibility changes.
+[stderr] 
+[stderr] ## What This Topic Is For
+[stderr] 
+[stderr] Use this topic when the task is about sheet-level or row/column-level structure instead of direct cell value changes.
+[stderr] 
+[stderr] ## Worksheet Lifecycle
+[stderr] 
+[stderr] Use the workbook object to locate, list, create, and delete sheets.
+[stderr] 
+[stderr] - `getSheetByName(name) -> FWorksheet | null` - recommended explicit lookup by sheet name
+[stderr] - `getSheets() -> FWorksheet[]` - list all worksheets; useful when the task first needs sheet names
+[stderr] - `create(name, rows, cols) -> FWorksheet` - create a new worksheet with an initial shape
+[stderr] - `deleteSheet(sheetId) -> boolean` - delete the specified worksheet by sheet id
+[stderr] - `getSheetId() -> number` - worksheet id
+[stderr] - `getSheetName() -> string` - worksheet name
+[stderr] - `setName(name) -> void` - rename the worksheet
+[stderr] 
+[stderr] Example:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const existing = workbook.getSheetByName("Summary");
+[stderr]   if (existing) {
+[stderr]     existing.setName("Executive Summary");
+[stderr]     return { success: true, sheetName: existing.getSheetName() };
+[stderr]   }
+[stderr] 
+[stderr]   const sheet = workbook.create("Summary", 100, 20);
+[stderr]   return { success: true, sheetName: sheet.getSheetName() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Rows And Columns
+[stderr] 
+[stderr] - `insertRows(rowIndex, numRows) -> FWorksheet` - insert rows at a 0-based starting index
+[stderr] - `deleteRows(rowIndex, numRows) -> FWorksheet` - delete rows at a 0-based starting index
+[stderr] - `insertColumns(columnIndex, numColumns) -> FWorksheet` - insert columns at a 0-based starting index
+[stderr] - `deleteColumns(columnIndex, numColumns) -> FWorksheet` - delete columns at a 0-based starting index
+[stderr] - `getLastRow() -> number` - 0-based index of the last row with data
+[stderr] - `getLastColumn() -> number` - 0-based index of the last column with data
+[stderr] 
+[stderr] ## Freeze Rows And Columns
+[stderr] 
+[stderr] - `setFrozenRows(rows)` or `setFrozenRows(startRow, endRow) -> FWorksheet` - freeze the first `rows` rows, or freeze a row range
+[stderr] - `setFrozenColumns(columns)` or `setFrozenColumns(startColumn, endColumn) -> FWorksheet` - freeze the first `columns` columns, or freeze a column range
+[stderr] 
+[stderr] Insert rows and freeze the header:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Ops");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Ops" not found' };
+[stderr] 
+[stderr]   sheet.insertRows(1, 2);
+[stderr]   sheet.setFrozenRows(1);
+[stderr] 
+[stderr]   return { success: true, lastRow: sheet.getLastRow() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Gridlines
+[stderr] 
+[stderr] - `hasHiddenGridLines() -> boolean` - check whether gridlines are hidden
+[stderr] - `setHiddenGridlines(hidden) -> FWorksheet` - show or hide sheet gridlines
+[stderr] - `setGridLinesColor(color) -> FWorksheet` - set gridline color; `undefined` or `null` resets to default
+[stderr] 
+[stderr] Hide gridlines and set their color:
+[stderr] 
+[stderr] ```javascript
+[stderr] () => {
+[stderr]   const workbook = univerAPI.getActiveWorkbook();
+[stderr]   const sheet = workbook.getSheetByName("Dashboard");
+[stderr]   if (!sheet) return { success: false, error: 'Sheet "Dashboard" not found' };
+[stderr] 
+[stderr]   sheet.setHiddenGridlines(true);
+[stderr]   sheet.setGridLinesColor("#D9D9D9");
+[stderr] 
+[stderr]   return { success: true, hidden: sheet.hasHiddenGridLines() };
+[stderr] };
+[stderr] ```
+[stderr] 
+[stderr] ## Row And Column Presentation
+[stderr] 
+[stderr] - `setRowHeight(rowIndex, height) -> FWorksheet` - set one row height in pixels
+[stderr] - `setRowHeights(startRow, numRows, height) -> FWorksheet` - set multiple row heights
+[stderr] - `showRows(rowIndex, numRows) -> FWorksheet` - show hidden rows
+[stderr] - `hideRows(rowIndex, numRows) -> FWorksheet` - hide rows
+[stderr] - `autoResizeRows(startRow, numRows) -> FWorksheet` - auto-size row heights to content
+[stderr] - `setColumnWidth(columnIndex, width) -> FWorksheet` - set one column width in pixels
+[stderr] - `setColumnWidths(startColumn, numColumns, width) -> FWorksheet` - set multiple column widths
+[stderr] - `showColumns(columnIndex, numColumns) -> FWorksheet` - show hidden columns
+[stderr] - `hideColumns(columnIndex, numColumns) -> FWorksheet` - hide columns
+[stderr] - `autoResizeColumns(startColumn, numColumns) -> FWorksheet` - auto-size column widths to content
+[stderr] 
+[stderr] ## Getchas
+[stderr] 
+[stderr] - imported workbooks can contain non-English worksheet names and still work normally
+[stderr] - quote the full range string in the shell, for example `--range '工作表1!A1:J3'`
+[stderr] - verify imported templates by reading a small anchor range and checking a few exact cells plus one non-empty cell
+[stderr] - for workbook-visible structure checks, prefer `inspect workbook` over package metadata
+[stderr] 
+[stderr] ## Related Topics
+[stderr] 
+[stderr] - See `core` for workbook entry points, `getRange()`, A1 notation, and coordinates.
+[stderr] - See `formatting` for cell-level visual formatting after the sheet structure is in place.
+[stderr] 
+[stderr] codex
+[stderr] I found `BR1 Sales JUN` at `C92`; the existing `D137` formula calculates the same zero-match total. I’m going to compute the total from the cell data, write it to `D92` with numeric type, then delete matching rows from bottom to top so row numbers don’t drift during the operation.
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/work' in /task
+[stderr]  succeeded in 0ms:
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/case_1_edit.js
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/case_1_edit.js' in /task
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 299ms:
+[stderr] {"success":true,"total":-74.96,"originalSalesRow1Based":92,"deletedRows":133,"firstDeletedRows1Based":[2,3,4,5,6,7,8,9,10,11],"lastDeletedRows1Based":[126,127,128,129,130,131,132,133,134,136],"lastRowAfter":4}
+[stderr] 
+[stderr] codex
+[stderr] The edit ran successfully: it computed `-74.96`, wrote it to the original `D92`, and deleted 133 rows inside the requested range. I’m verifying the final visible rows and the underlying cell model before exporting.
+[stderr] exec
+[stderr] /bin/sh -lc 'univer inspect workbook /task/cases/case_1/input.univer' in /task
+[stderr] exec
+[stderr] /bin/sh -lc "univer inspect range /task/cases/case_1/input.univer --range 'Sheet1"'!A1:E10'"'" in /task
+[stderr]  succeeded in 266ms:
+[stderr] # Inspect Range
+[stderr] 
+[stderr] Range: Sheet1!A1:E10
+[stderr] Rows: 10 (9 data rows; first row is header)
+[stderr] Columns: 5
+[stderr] 
+[stderr] | Col | Header | Type | Non-null | Details | Formula |
+[stderr] | --- | --- | --- | ---: | --- | --- |
+[stderr] | A | Date | text | 1/9 | 1 non-empty | - |
+[stderr] | B | Branch | text | 1/9 | 1 non-empty | - |
+[stderr] | C | Reference | text | 3/9 | 3 non-empty | - |
+[stderr] | D | Amount | text | 3/9 | 3 non-empty | =SUMIFS(D2:D3,E2:E3,0) |
+[stderr] | E | Match Ref and Val | text | 2/9 | 2 non-empty | - |
+[stderr] 
+[stderr] ## Preview
+[stderr] |A1,Date|B1,Branch|C1,Reference|D1,Amount|E1,Match Ref and Val|
+[stderr] |A2,2021-6-30|B2,BR1 PL|C2,BR1 Sales JUN|D2,-74.96|E2,0|
+[stderr] |A3,|B3,|C3,31422220|D3,85|E3,1|
+[stderr] |A4,|B4,|C4,Total Zero|D4,-74.96|E4,|
+[stderr] ...
+[stderr] |A10,|B10,|C10,|D10,|E10,|
+[stderr] 
+[stderr] *Note: 5 rows omitted from data preview*
+[stderr] 
+[stderr] Formula Groups (1 groups):
+[stderr] - D4 <- D4 =SUMIFS(D2:D3,E2:E3,0)
+[stderr] 
+[stderr]  succeeded in 266ms:
+[stderr] # Spreadsheet Context
+[stderr] 
+[stderr] Active Sheet: Sheet1
+[stderr] Sheet Count: 1
+[stderr] 
+[stderr] | # | Sheet Name | Used Range | Tables | Formula Groups |
+[stderr] | - | --- | --- | ---: | ---: |
+[stderr] | 1 | Sheet1 | A1:E4 | 1 | 1 |
+[stderr] 
+[stderr] ## Sheet: 'Sheet1'
+[stderr] 
+[stderr] - Used Range: A1:E4
+[stderr] - Tables: 1
+[stderr] - Formula Groups Found: 1 covering 1 cells
+[stderr] 
+[stderr] ### Table 1: A1:E4
+[stderr] |A1,Date|B1,Branch|C1,Reference|D1,Amount|E1,Match Ref and Val|
+[stderr] |A2,2021-6-30|B2,BR1 PL|C2,BR1 Sales JUN|D2,-74.96|E2,0|
+[stderr] |A3,|B3,|C3,31422220|D3,85|E3,1|
+[stderr] |A4,|B4,|C4,Total Zero|D4,-74.96|E4,|
+[stderr] 
+[stderr] ### Formulas (1 groups, 1 cells)
+[stderr] - D4 <- D4 =SUMIFS(D2:D3,E2:E3,0)
+[stderr] 
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/case_1_verify.js
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e0272add87474b5f664b956660f8fcb547eddb00
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const full = sheet.getRange("A1:E137").getCellDatas();
+[stderr] +  for (let r = 0; r < 137; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e0272add87474b5f664b956660f8fcb547eddb00
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const full = sheet.getRange("A1:E137").getCellDatas();
+[stderr] +  for (let r = 0; r < 137; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/case_1_verify.js' in /task
+[stderr]  exited 1 in 265ms:
+[stderr] ERROR CLI_ERROR
+[stderr] 
+[stderr] Range is out of bounds. Max rows: 17, Max columns: 26, Given range: {"startRow":0,"startColumn":0,"endRow":136,"endColumn":4,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0,"unitId":"wkQlGHqkUWCLvYoDZ9L","sheetId":"uni1"}
+[stderr] 
+[stderr] Usage:
+[stderr]   univer <command> [args]
+[stderr]   univer help <command...>
+[stderr] 
+[stderr] Try:
+[stderr]   univer help
+[stderr] 
+[stderr] Trace ID: 2b51e0250ce6a5a5d3cadeada04b850c
+[stderr] 
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..e0272add87474b5f664b956660f8fcb547eddb00
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,34 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const full = sheet.getRange("A1:E137").getCellDatas();
+[stderr] +  for (let r = 0; r < 137; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] The first verification script asked for the original 137 rows after deletion, and the sheet now has fewer rows, so the CLI correctly rejected that range. I’m narrowing the verification to the current sheet bounds and then I’ll export.
+[stderr] apply patch
+[stderr] patch: completed
+[stderr] /task/work/case_1_verify.js
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..da9b15e042b8c66fbfe26b687b0b9b5cdbbd8b18
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,35 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const rowCount = sheet.getLastRow() + 1;
+[stderr] +  const full = sheet.getRange(0, 0, rowCount, 5).getCellDatas();
+[stderr] +  for (let r = 0; r < rowCount; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..da9b15e042b8c66fbfe26b687b0b9b5cdbbd8b18
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,35 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const rowCount = sheet.getLastRow() + 1;
+[stderr] +  const full = sheet.getRange(0, 0, rowCount, 5).getCellDatas();
+[stderr] +  for (let r = 0; r < rowCount; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'univer run /task/cases/case_1/input.univer --file /task/work/case_1_verify.js' in /task
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..da9b15e042b8c66fbfe26b687b0b9b5cdbbd8b18
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,35 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const rowCount = sheet.getLastRow() + 1;
+[stderr] +  const full = sheet.getRange(0, 0, rowCount, 5).getCellDatas();
+[stderr] +  for (let r = 0; r < rowCount; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 679ms:
+[stderr] {"success":true,"lastRow1Based":4,"topRows":[{"row1":1,"cells":{"A":{"v":"Date","t":1},"B":{"v":"Branch","t":1},"C":{"v":"Reference","t":1},"D":{"v":"Amount","t":1},"E":{"v":"Match Ref and Val","t":1}}},{"row1":2,"cells":{"A":{"v":"44377","t":2},"B":{"v":"BR1 PL","t":1},"C":{"v":"BR1 Sales JUN","t":1},"D":{"v":-74.96,"t":2},"E":{"v":"0","t":2}}},{"row1":3,"cells":{"A":null,"B":null,"C":{"v":"31422220","t":2},"D":{"v":"85","t":2},"E":{"v":"1","t":2}}},{"row1":4,"cells":{"A":null,"B":null,"C":{"v":"Total Zero","t":1},"D":{"v":-74.96,"t":2,"f":"=SUMIFS(D2:D3,E2:E3,0)"},"E":null}},{"row1":5,"cells":{"A":null,"B":null,"C":null,"D":null,"E":null}},{"row1":6,"cells":{"A":null,"B":null,"C":null,"D":null,"E":null}},{"row1":7,"cells":{"A":null,"B":null,"C":null,"D":null,"E":null}},{"row1":8,"cells":{"A":null,"B":null,"C":null,"D":null,"E":null}},{"row1":9,"cells":{"A":null,"B":null,"C":null,"D":null,"E":null}},{"row1":10,"cells":{"A":null,"B":null,"C":null,"D":null,"E":null}}],"usedRows":[{"row1":1,"vals":["Date","Branch","Reference","Amount","Match Ref and Val"]},{"row1":2,"vals":["44377","BR1 PL","BR1 Sales JUN",-74.96,"0"]},{"row1":3,"vals":["","","31422220","85","1"]},{"row1":4,"vals":["","","Total Zero",-74.96,""]}]}
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'mkdir -p /task/outputs/case_1 && univer export /task/cases/case_1/input.univer /task/outputs/case_1/output.xlsx' in /task
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..da9b15e042b8c66fbfe26b687b0b9b5cdbbd8b18
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,35 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const rowCount = sheet.getLastRow() + 1;
+[stderr] +  const full = sheet.getRange(0, 0, rowCount, 5).getCellDatas();
+[stderr] +  for (let r = 0; r < rowCount; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr]  succeeded in 508ms:
+[stderr] exported /task/cases/case_1/input.univer -> /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] exec
+[stderr] /bin/sh -lc 'ls -l /task/outputs/case_1/output.xlsx' in /task
+[stderr]  succeeded in 0ms:
+[stderr] -rw-r--r--    1 node     node          7487 May 25 14:47 /task/outputs/case_1/output.xlsx
+[stderr] 
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..da9b15e042b8c66fbfe26b687b0b9b5cdbbd8b18
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,35 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const rowCount = sheet.getLastRow() + 1;
+[stderr] +  const full = sheet.getRange(0, 0, rowCount, 5).getCellDatas();
+[stderr] +  for (let r = 0; r < rowCount; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] codex
+[stderr] Done. I edited `/task/cases/case_1/input.univer` with `univer`, verified the result, and exported:
+[stderr] 
+[stderr] `/task/outputs/case_1/output.xlsx`
+[stderr] 
+[stderr] Key result: `BR1 Sales JUN` now has `-74.96` in Column D, zero-match rows were removed except that BR1 Sales row, and blank rows were removed from the used range.
+[stderr] diff --git a/work/case_1_edit.js b/work/case_1_edit.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..0627f1b98f3f1eed31f16339b8530f9c8ecaa06d
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_edit.js
+[stderr] @@ -0,0 +1,70 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const range = sheet.getRange("A1:E137");
+[stderr] +  const data = range.getCellDatas();
+[stderr] +
+[stderr] +  const cleanText = (v) => String(v ?? "")
+[stderr] +    .replace(/\u00A0/g, " ")
+[stderr] +    .replace(/\r\n/g, "\n")
+[stderr] +    .replace(/\r/g, "\n")
+[stderr] +    .trim();
+[stderr] +  const parseNumberLoose = (v) => {
+[stderr] +    const s = cleanText(v).replace(/,/g, "");
+[stderr] +    if (s === "") return null;
+[stderr] +    const n = Number(s);
+[stderr] +    return Number.isFinite(n) ? n : null;
+[stderr] +  };
+[stderr] +  const cellValue = (r, c) => {
+[stderr] +    const cell = data?.[r]?.[c];
+[stderr] +    return cell ? cell.v : undefined;
+[stderr] +  };
+[stderr] +
+[stderr] +  let total = 0;
+[stderr] +  let salesRow = -1;
+[stderr] +  const rowsToDelete = [];
+[stderr] +
+[stderr] +  for (let r = 1; r < 137; r += 1) {
+[stderr] +    const rowValues = [0, 1, 2, 3, 4].map((c) => cellValue(r, c));
+[stderr] +    const reference = cleanText(rowValues[2]);
+[stderr] +    const matchVal = cleanText(rowValues[4]);
+[stderr] +    const isBlankRow = rowValues.every((v) => cleanText(v) === "");
+[stderr] +    const isZeroMatch = parseNumberLoose(rowValues[4]) === 0;
+[stderr] +    const isSalesReference = reference.includes("BR1 Sales");
+[stderr] +
+[stderr] +    if (isZeroMatch) {
+[stderr] +      const amount = parseNumberLoose(rowValues[3]);
+[stderr] +      if (amount !== null) total += amount;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isSalesReference && salesRow === -1) {
+[stderr] +      salesRow = r;
+[stderr] +    }
+[stderr] +
+[stderr] +    if (isBlankRow || (isZeroMatch && !isSalesReference)) {
+[stderr] +      rowsToDelete.push(r);
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  if (salesRow === -1) {
+[stderr] +    return { success: false, error: "No row with BR1 Sales in Column C" };
+[stderr] +  }
+[stderr] +
+[stderr] +  sheet.getRange(salesRow, 3, 1, 1).setValues([[{ v: Math.round(total * 100) / 100, t: 2 }]]);
+[stderr] +
+[stderr] +  for (let i = rowsToDelete.length - 1; i >= 0; i -= 1) {
+[stderr] +    sheet.deleteRows(rowsToDelete[i], 1);
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    total: Math.round(total * 100) / 100,
+[stderr] +    originalSalesRow1Based: salesRow + 1,
+[stderr] +    deletedRows: rowsToDelete.length,
+[stderr] +    firstDeletedRows1Based: rowsToDelete.slice(0, 10).map((r) => r + 1),
+[stderr] +    lastDeletedRows1Based: rowsToDelete.slice(-10).map((r) => r + 1),
+[stderr] +    lastRowAfter: sheet.getLastRow() + 1,
+[stderr] +  };
+[stderr] +}
+[stderr] diff --git a/work/case_1_verify.js b/work/case_1_verify.js
+[stderr] new file mode 100644
+[stderr] index 0000000000000000000000000000000000000000..da9b15e042b8c66fbfe26b687b0b9b5cdbbd8b18
+[stderr] --- /dev/null
+[stderr] +++ b/work/case_1_verify.js
+[stderr] @@ -0,0 +1,35 @@
+[stderr] +() => {
+[stderr] +  const workbook = univerAPI.getActiveWorkbook();
+[stderr] +  const sheet = workbook.getSheetByName("Sheet1");
+[stderr] +  if (!sheet) return { success: false, error: "Sheet1 not found" };
+[stderr] +
+[stderr] +  const data = sheet.getRange("A1:E10").getCellDatas();
+[stderr] +  const rows = [];
+[stderr] +  for (let r = 0; r < 10; r += 1) {
+[stderr] +    const row = {};
+[stderr] +    for (let c = 0; c < 5; c += 1) {
+[stderr] +      const cell = data?.[r]?.[c];
+[stderr] +      row[String.fromCharCode(65 + c)] = cell
+[stderr] +        ? { v: cell.v, t: cell.t, f: cell.f }
+[stderr] +        : null;
+[stderr] +    }
+[stderr] +    rows.push({ row1: r + 1, cells: row });
+[stderr] +  }
+[stderr] +
+[stderr] +  const usedRows = [];
+[stderr] +  const rowCount = sheet.getLastRow() + 1;
+[stderr] +  const full = sheet.getRange(0, 0, rowCount, 5).getCellDatas();
+[stderr] +  for (let r = 0; r < rowCount; r += 1) {
+[stderr] +    const vals = [0, 1, 2, 3, 4].map((c) => full?.[r]?.[c]?.v ?? "");
+[stderr] +    if (vals.some((v) => String(v ?? "").trim() !== "")) {
+[stderr] +      usedRows.push({ row1: r + 1, vals });
+[stderr] +    }
+[stderr] +  }
+[stderr] +
+[stderr] +  return {
+[stderr] +    success: true,
+[stderr] +    lastRow1Based: sheet.getLastRow() + 1,
+[stderr] +    topRows: rows,
+[stderr] +    usedRows,
+[stderr] +  };
+[stderr] +}
+[stderr] 
+[stderr] tokens used
+[stderr] 52,945
+[stdout] Done. I edited `/task/cases/case_1/input.univer` with `univer`, verified the result, and exported:
+[stdout] 
+[stdout] `/task/outputs/case_1/output.xlsx`
+[stdout] 
+[stdout] Key result: `BR1 Sales JUN` now has `-74.96` in Column D, zero-match rows were removed except that BR1 Sales row, and blank rows were removed from the used range.
