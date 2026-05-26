@@ -1,0 +1,1 @@
+{"id":"sheet.mutation.set-range-values","params":{"unitId":"64Y90fqfSjCdOhIrMRrSEA4","subUnitId":"uni1","cellValue":{"78":{"1":{"v":"issue#330: import 后 array formula 计算值错误; Excel 重算 1_59884_init.xlsx 保持 G2=0/I2:O2 空, 但 univer import 后 G2=1 且结果上移。见 issue/59884-array-formula-roundtrip-cache-pollution.md。","p":null,"f":null}}},"trigger":"sheet.command.set-range-values"},"type":2}
