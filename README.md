@@ -141,7 +141,7 @@ Build the solver image:
 bash scripts/build_agent_docker.sh
 ```
 
-Put API credentials and optional proxy settings in an env file. If `--env-file` is omitted, the runner uses `.env.<agent>`, for example `.env.codex` or `.env.claude`. If that file does not exist, the run fails before starting inference.
+Agent secrets are kept in agent-native config files, not directly in the env file. If `--env-file` is omitted, the runner uses `.env.<agent>`, for example `.env.codex` or `.env.claude`. If that file does not exist, or if a referenced config file is missing, the run fails before starting inference.
 
 Recommended env files by agent:
 
@@ -149,14 +149,22 @@ Recommended env files by agent:
 - `--agent claude`: defaults to `.env.claude`; missing file is an error.
 - `--agent-command`: pass the env file required by the custom command.
 
+Example `.env.codex`:
+
+```dotenv
+CODEX_AUTH_JSON=codex-auth.json
+CODEX_CONFIG_TOML=codex-config.toml
+```
+
 Example `.env.claude`:
 
 ```dotenv
-ANTHROPIC_AUTH_TOKEN=...
-ANTHROPIC_BASE_URL=...
-HTTP_PROXY=http://10.23.0.1:8080
-HTTPS_PROXY=http://10.23.0.1:8080
+CLAUDE_SETTINGS_JSON=claude-settings.json
 ```
+
+Copy `codex-auth-template.json`, `codex-config-template.toml`, or `claude-settings-template.json` to the corresponding non-template file and fill local credentials as needed. The real config files are ignored by git.
+
+For a quick local smoke run, you can also edit `.env.codex` or `.env.claude` to point at existing files under your home directory, for example `/Users/<you>/.codex/auth.json`, `/Users/<you>/.codex/config.toml`, or `/Users/<you>/.claude/settings.json`.
 
 For Codex runs, `.env.codex` is used by default:
 
@@ -170,7 +178,9 @@ bash scripts/run_univer_agent_eval.sh \
   --agent-timeout 600
 ```
 
-`.env.codex` can reuse the local Codex ChatGPT login by setting `CODEX_AUTH_JSON` to `~/.codex/auth.json`; the runner mounts that file read-only into the container.
+For Codex, the runner mounts `CODEX_AUTH_JSON` read-only to `/home/node/.codex/auth.json` and `CODEX_CONFIG_TOML` read-only to `/home/node/.codex/config.toml`. The model label is parsed from the top-level `model = "..."` in the mounted config.
+
+For Claude, the runner mounts `CLAUDE_SETTINGS_JSON` read-only to `/home/node/.claude/settings.json`. The model label is parsed from `env.ANTHROPIC_MODEL` in that settings file.
 
 Run a single task:
 

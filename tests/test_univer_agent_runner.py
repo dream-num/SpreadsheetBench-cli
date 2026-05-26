@@ -18,7 +18,7 @@ from openpyxl import Workbook
 from inference.univer_agent import RunnerConfig, output_xlsx_path, run_task, test_case_input_path
 from inference.univer_agent import cli
 from inference.univer_agent.agents import resolve_stream_agent_output
-from inference.univer_agent.cli import parse_option, reset_run_dir
+from inference.univer_agent.cli import env_file_model, parse_option, reset_run_dir
 from inference.univer_agent.docker_runner import prepare_docker_task_workspace, run_task_container
 
 
@@ -241,7 +241,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("/home/node/.claude/skills", dockerfile)
         self.assertIn("--global --yes --agent codex claude-code", dockerfile)
 
-    def test_codex_agent_can_bypass_nested_sandbox_inside_docker(self):
+    def test_codex_agent_bypasses_nested_sandbox_inside_docker(self):
         run_task_script = (
             Path(__file__).resolve().parents[1]
             / "docker"
@@ -249,8 +249,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
             / "run-task.sh"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("CODEX_BYPASS_SANDBOX", run_task_script)
         self.assertIn("--dangerously-bypass-approvals-and-sandbox", run_task_script)
+        self.assertNotIn("CODEX_BYPASS_SANDBOX", run_task_script)
 
     def test_codex_agent_reads_prompt_from_stdin_to_avoid_argument_limit(self):
         run_task_script = (
@@ -285,6 +285,18 @@ class UniverAgentRunnerTest(unittest.TestCase):
         for script_text in script_texts:
             self.assertNotIn(".env.agent", script_text)
             self.assertIn(".env.${AGENT_NAME}", script_text)
+
+    def test_pipeline_wrapper_reads_codex_model_from_config_toml(self):
+        script_text = (
+            Path(__file__).resolve().parents[1] / "scripts" / "run_univer_agent_eval.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("CODEX_CONFIG_TOML", script_text)
+        self.assertIn("codex_config_model", script_text)
+        self.assertIn("CLAUDE_SETTINGS_JSON", script_text)
+        self.assertIn("claude_settings_model", script_text)
+        self.assertNotIn("CODEX_MODEL)", script_text)
+        self.assertNotIn("ANTHROPIC_MODEL)", script_text)
 
     def test_shell_wrapper_errors_when_agent_env_file_is_missing(self):
         repo_root = Path(__file__).resolve().parents[1]
@@ -347,14 +359,21 @@ class UniverAgentRunnerTest(unittest.TestCase):
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1, 2))
             env_file = tmp_path / ".env.codex"
-            env_file.write_text("OPENAI_API_KEY=secret\n", encoding="utf-8")
+            auth_json = tmp_path / "codex-auth.json"
+            config_toml = tmp_path / "codex-config.toml"
+            auth_json.write_text('{"OPENAI_API_KEY":"sk-test"}\n', encoding="utf-8")
+            config_toml.write_text('model = "gpt-5.5"\n', encoding="utf-8")
+            env_file.write_text(
+                f"CODEX_AUTH_JSON={auth_json}\nCODEX_CONFIG_TOML={config_toml}\n",
+                encoding="utf-8",
+            )
             config = self.make_config(tmp_path, dataset_path, env_file=env_file)
             captured_args = {}
 
             def fake_popen(args, cwd, stdout, stderr, text, bufsize):
                 captured_args["args"] = args
                 captured_args["cwd"] = cwd
-                mount_value = args[args.index("-v") + 1]
+                mount_value = next(arg for arg in args if arg.endswith(":/task"))
                 host_task_dir = Path(mount_value.split(":", 1)[0])
                 for case_index in (1, 2):
                     output = host_task_dir / "outputs" / f"case_{case_index}" / "output.xlsx"
@@ -370,14 +389,13 @@ class UniverAgentRunnerTest(unittest.TestCase):
             args = captured_args["args"]
             self.assertEqual(args[0], "docker")
             self.assertIn("--rm", args)
-            self.assertIn("--env-file", args)
-            self.assertIn(str(env_file.resolve()), args)
+            self.assertNotIn("--env-file", args)
             self.assertIn("--name", args)
             self.assertEqual(args[args.index("--name") + 1], "spreadsheetbench-cli-run-1-task-1")
             self.assertIn("spreadsheetbench-univer-cli-agent", args)
             self.assertIn("--agent", args)
             self.assertIn("codex", args)
-            mount_value = args[args.index("-v") + 1]
+            mount_value = next(arg for arg in args if arg.endswith(":/task"))
             self.assertTrue(mount_value.endswith(":/task"))
             self.assertNotIn(str(dataset_path), mount_value)
             self.assertEqual(result["status"], "ok")
@@ -413,15 +431,17 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertEqual(args[args.index("--name") + 1], "spreadsheetbench-cli-claude-smoke-20260521-1930-cf-8830")
             self.assertIn("spreadsheetbench-univer-cli-agent", args)
 
-    def test_run_task_mounts_codex_auth_json_from_env_file_read_only(self):
+    def test_run_task_mounts_codex_files_from_env_file_read_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
             auth_json = tmp_path / "auth.json"
-            auth_json.write_text('{"auth_mode":"chatgpt"}\n', encoding="utf-8")
+            config_toml = tmp_path / "config.toml"
+            auth_json.write_text('{"OPENAI_API_KEY":"sk-test"}\n', encoding="utf-8")
+            config_toml.write_text('model = "gpt-5.5"\n', encoding="utf-8")
             env_file = tmp_path / ".env.codex"
             env_file.write_text(
-                f"CODEX_AUTH_JSON={auth_json}\n",
+                f"CODEX_AUTH_JSON={auth_json}\nCODEX_CONFIG_TOML={config_toml}\n",
                 encoding="utf-8",
             )
             config = self.make_config(tmp_path, dataset_path, env_file=env_file)
@@ -444,6 +464,83 @@ class UniverAgentRunnerTest(unittest.TestCase):
             args = captured_args["args"]
             self.assertIn("-v", args)
             self.assertIn(f"{auth_json.resolve()}:/home/node/.codex/auth.json:ro", args)
+            self.assertIn(f"{config_toml.resolve()}:/home/node/.codex/config.toml:ro", args)
+
+    def test_run_task_errors_when_codex_config_file_is_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
+            auth_json = tmp_path / "codex-auth.json"
+            auth_json.write_text('{"OPENAI_API_KEY":"sk-test"}\n', encoding="utf-8")
+            env_file = tmp_path / ".env.codex-api-univer"
+            env_file.write_text(
+                f"CODEX_AUTH_JSON={auth_json}\nCODEX_CONFIG_TOML={tmp_path / 'missing.toml'}\n",
+                encoding="utf-8",
+            )
+            config = self.make_config(tmp_path, dataset_path, env_file=env_file)
+
+            with patch(
+                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
+                side_effect=self.fake_import_xlsx_to_univer,
+            ):
+                with self.assertRaisesRegex(Exception, "CODEX_CONFIG_TOML file not found"):
+                    run_task(config, task, cases=[1])
+
+    def test_run_task_mounts_claude_settings_from_env_file_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
+            settings_json = tmp_path / "claude-settings.json"
+            settings_json.write_text('{"env":{"ANTHROPIC_MODEL":"DeepSeek-V4-Flash"}}\n', encoding="utf-8")
+            env_file = tmp_path / ".env.claude"
+            env_file.write_text(f"CLAUDE_SETTINGS_JSON={settings_json}\n", encoding="utf-8")
+            config = self.make_config(tmp_path, dataset_path, agent="claude", model="DeepSeek-V4-Flash", env_file=env_file)
+            captured_args = {}
+
+            def fake_popen(args, cwd, stdout, stderr, text, bufsize):
+                captured_args["args"] = args
+                mount_value = next(arg for arg in args if arg.endswith(":/task"))
+                host_task_dir = Path(mount_value.split(":", 1)[0])
+                output = host_task_dir / "outputs" / "case_1" / "output.xlsx"
+                output.write_bytes(b"output-1")
+                return self.make_fake_process(stdout="ok\n")
+
+            with patch(
+                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
+                side_effect=self.fake_import_xlsx_to_univer,
+            ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
+                run_task(config, task, cases=[1])
+
+            args = captured_args["args"]
+            self.assertNotIn("--env-file", args)
+            self.assertIn(f"{settings_json.resolve()}:/home/node/.claude/settings.json:ro", args)
+
+    def test_env_file_model_reads_codex_model_from_config_toml(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            config_toml = tmp_path / "codex-config.toml"
+            env_file = tmp_path / ".env.codex-api-univer"
+            config_toml.write_text(
+                """
+model_provider = "API_UNIVER"
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+""".lstrip(),
+                encoding="utf-8",
+            )
+            env_file.write_text(f"CODEX_CONFIG_TOML={config_toml}\n", encoding="utf-8")
+
+            self.assertEqual(env_file_model("codex", env_file), "gpt-5.5")
+
+    def test_env_file_model_reads_claude_model_from_settings_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            settings_json = tmp_path / "claude-settings.json"
+            env_file = tmp_path / ".env.claude"
+            settings_json.write_text('{"env":{"ANTHROPIC_MODEL":"DeepSeek-V4-Flash"}}\n', encoding="utf-8")
+            env_file.write_text(f"CLAUDE_SETTINGS_JSON={settings_json}\n", encoding="utf-8")
+
+            self.assertEqual(env_file_model("claude", env_file), "DeepSeek-V4-Flash")
 
     def test_run_task_fails_when_container_omits_output(self):
         with tempfile.TemporaryDirectory() as tmp:

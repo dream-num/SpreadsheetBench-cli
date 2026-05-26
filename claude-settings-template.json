@@ -1,0 +1,13 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "ark-xxxx",
+    "ANTHROPIC_BASE_URL": "https://ark.cn-beijing.volces.com/api/coding",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "DeepSeek-V4-Flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "DeepSeek-V4-Flash",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "DeepSeek-V4-Flash",
+    "ANTHROPIC_MODEL": "DeepSeek-V4-Flash",
+    "ANTHROPIC_REASONING_MODEL": "DeepSeek-V4-Flash",
+    "API_TIMEOUT_MS": "3000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  }
+}

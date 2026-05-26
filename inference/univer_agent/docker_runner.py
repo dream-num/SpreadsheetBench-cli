@@ -114,26 +114,41 @@ def parse_env_file(path: Path) -> Dict[str, str]:
     return values
 
 
-def codex_auth_mount(config: RunnerConfig) -> Optional[str]:
+def env_path_mount(
+    config: RunnerConfig,
+    env_values: Dict[str, str],
+    env_key: str,
+    container_path: str,
+) -> str:
+    source = env_values.get(env_key, "").strip()
+    if not source:
+        raise RunnerError(f"{env_key} is required in {config.env_file}")
+
+    source_path = Path(source).expanduser()
+    if not source_path.is_absolute():
+        source_path = config.env_file.parent / source_path
+    source_path = source_path.resolve()
+    if not source_path.is_file():
+        raise RunnerError(f"{env_key} file not found: {source_path}")
+
+    return f"{source_path}:{container_path}:ro"
+
+
+def agent_config_mounts(config: RunnerConfig) -> List[str]:
     if config.env_file is None:
-        return None
+        return []
 
     env_values = parse_env_file(config.env_file)
-    auth_json = env_values.get("CODEX_AUTH_JSON", "").strip()
-    if not auth_json:
-        return None
-
-    auth_path = Path(auth_json).expanduser().resolve()
-    if not auth_path.is_file():
-        raise RunnerError(f"CODEX_AUTH_JSON file not found: {auth_path}")
-
-    codex_home = env_values.get("CODEX_HOME", "/home/node/.codex").strip() or "/home/node/.codex"
-    if not codex_home.startswith("/"):
-        raise RunnerError(f"CODEX_HOME must be an absolute container path when using CODEX_AUTH_JSON: {codex_home}")
-    if codex_home == "/task" or codex_home.startswith("/task/"):
-        raise RunnerError(f"CODEX_HOME must not be under /task when using CODEX_AUTH_JSON: {codex_home}")
-
-    return f"{auth_path}:{codex_home.rstrip('/')}/auth.json:ro"
+    if config.agent == "codex":
+        return [
+            env_path_mount(config, env_values, "CODEX_AUTH_JSON", "/home/node/.codex/auth.json"),
+            env_path_mount(config, env_values, "CODEX_CONFIG_TOML", "/home/node/.codex/config.toml"),
+        ]
+    if config.agent == "claude":
+        return [
+            env_path_mount(config, env_values, "CLAUDE_SETTINGS_JSON", "/home/node/.claude/settings.json"),
+        ]
+    return []
 
 
 def docker_name_part(value: str) -> str:
@@ -184,11 +199,8 @@ def docker_command(config: RunnerConfig, workspace: DockerTaskWorkspace) -> List
         "--name",
         container_name,
     ]
-    if config.env_file is not None:
-        command.extend(["--env-file", str(config.env_file)])
-    auth_mount = codex_auth_mount(config)
-    if auth_mount:
-        command.extend(["-v", auth_mount])
+    for mount in agent_config_mounts(config):
+        command.extend(["-v", mount])
     command.extend(
         [
             "-v",

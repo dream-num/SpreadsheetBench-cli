@@ -1,0 +1,9 @@
+model_provider = "API_UNIVER"
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+disable_response_storage = true
+
+[model_providers.API_UNIVER]
+name = "API_UNIVER"
+base_url = "https://new-api.univer.ai/v1"
+requires_openai_auth = true

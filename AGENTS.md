@@ -4,7 +4,7 @@
 - 启动命令：
   `bash scripts/run_univer_agent_eval.sh --agent <agent> --task-id <task-id> --run-id <run-id>`
 - `run-id` 根据 agent、数据集、任务范围命名，并追加日期时间，如果是临时任务，添加tmp-前缀。
-- 常用参数：`--agent`、`--agent-command`、`--dataset`、`--task-id`、`--limit`、`--run-id`、`--agent-timeout`。详情见 `RUN.md`。
+- 常用参数：`--agent`、`--agent-command`、`--dataset`、`--task-id`、`--limit`、`--workers`、`--run-id`、`--agent-timeout`、`--env-file`。详情见 `RUN.md`。
 - 沙箱中运行 `codex`、`claude` 等外部 agent 时，如遇网络、认证、DNS、模型请求或依赖下载问题，按疑似沙箱限制处理，使用提权方式重跑测试命令。
 
 ## 数据集

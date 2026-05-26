@@ -105,17 +105,67 @@ def default_run_id(
     return f"{agent_label}-{model_label}-{dataset_label}-{scope_label}-{timestamp}"
 
 
+def codex_config_model(config_path: Path) -> Optional[str]:
+    try:
+        lines = config_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+
+    in_table = False
+    for raw_line in lines:
+        line = raw_line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if line.startswith("["):
+            in_table = True
+            continue
+        if in_table or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key.strip() != "model":
+            continue
+        model = value.strip()
+        if len(model) >= 2 and model[0] == model[-1] and model[0] in ("'", '"'):
+            model = model[1:-1]
+        return model.strip() or None
+    return None
+
+
+def env_file_path(env_file: Path, values: Dict[str, str], key: str) -> Path:
+    raw_path = values.get(key, "").strip()
+    if not raw_path:
+        raise RunnerError(f"{key} is required in {env_file}")
+    path = Path(raw_path).expanduser()
+    if not path.is_absolute():
+        path = env_file.parent / path
+    path = path.resolve()
+    if not path.is_file():
+        raise RunnerError(f"{key} file not found: {path}")
+    return path
+
+
+def claude_settings_model(settings_path: Path) -> Optional[str]:
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    env = settings.get("env")
+    if not isinstance(env, dict):
+        return None
+    model = env.get("ANTHROPIC_MODEL")
+    if isinstance(model, str) and model.strip():
+        return model.strip()
+    return None
+
+
 def env_file_model(agent: Optional[str], env_file: Optional[Path]) -> Optional[str]:
     if env_file is None:
         return None
-    try:
-        values = parse_env_file(env_file)
-    except RunnerError:
-        return None
+    values = parse_env_file(env_file)
     if agent == "codex":
-        return values.get("CODEX_MODEL")
+        return codex_config_model(env_file_path(env_file, values, "CODEX_CONFIG_TOML"))
     if agent == "claude":
-        return values.get("ANTHROPIC_MODEL")
+        return claude_settings_model(env_file_path(env_file, values, "CLAUDE_SETTINGS_JSON"))
     return None
 
 

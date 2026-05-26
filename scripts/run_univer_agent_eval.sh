@@ -104,10 +104,77 @@ env_file_value() {
     ' "$ENV_FILE_NAME"
 }
 
+resolve_env_path() {
+    env_path="$1"
+    if [ -z "$env_path" ]; then
+        return
+    fi
+    case "$env_path" in
+        "~/"*)
+            env_path="${HOME}/${env_path#"~/"}"
+            ;;
+        /*)
+            ;;
+        *)
+            env_path="$(dirname "$ENV_FILE_NAME")/$env_path"
+            ;;
+    esac
+    cd "$(dirname "$env_path")" && printf '%s/%s\n' "$PWD" "$(basename "$env_path")"
+}
+
+require_env_path() {
+    key="$1"
+    raw_path="$(env_file_value "$key")"
+    if [ -z "$raw_path" ]; then
+        echo "${key} is required in ${ENV_FILE_NAME}" >&2
+        exit 2
+    fi
+    resolved_path="$(resolve_env_path "$raw_path")"
+    if [ ! -f "$resolved_path" ]; then
+        echo "${key} file not found: ${resolved_path}" >&2
+        exit 2
+    fi
+    echo "$resolved_path"
+}
+
+codex_config_model() {
+    config_path="$1"
+    if [ -z "$config_path" ]; then
+        return
+    fi
+    awk '
+        /^[[:space:]]*\[/ { in_table = 1; next }
+        in_table { next }
+        /^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+        /^[[:space:]]*model[[:space:]]*=/ {
+            value = substr($0, index($0, "=") + 1)
+            sub(/#.*/, "", value)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+            gsub(/^["'\'']|["'\'']$/, "", value)
+            print value
+            exit
+        }
+    ' "$config_path"
+}
+
+claude_settings_model() {
+    settings_path="$1"
+    "$PYTHON_BIN" - "$settings_path" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as fp:
+    settings = json.load(fp)
+model = settings.get("env", {}).get("ANTHROPIC_MODEL", "")
+if model:
+    print(model)
+PY
+}
+
 if [ "$AGENT_NAME" = "codex" ]; then
-    MODEL_NAME="$(env_file_value CODEX_MODEL)"
+    MODEL_NAME="$(codex_config_model "$(require_env_path CODEX_CONFIG_TOML)")"
 elif [ "$AGENT_NAME" = "claude" ]; then
-    MODEL_NAME="$(env_file_value ANTHROPIC_MODEL)"
+    MODEL_NAME="$(claude_settings_model "$(require_env_path CLAUDE_SETTINGS_JSON)")"
 fi
 if [ -z "$MODEL_NAME" ]; then
     MODEL_NAME="${AGENT_NAME:-agent}"

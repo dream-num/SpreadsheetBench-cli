@@ -43,6 +43,6 @@ The container must write:
 /task/outputs/case_N/output.xlsx
 ```
 
-Authentication is provided at runtime with `docker run --env-file`; secrets are not baked into the image and are not copied into `/task`.
+Agent configuration is provided at runtime by read-only mounts. For Codex, mount auth and config files to `/home/node/.codex/auth.json` and `/home/node/.codex/config.toml`. For Claude, mount settings to `/home/node/.claude/settings.json`. Secrets are not baked into the image and are not copied into `/task`.
 
 The image intentionally does not include Python or workbook parsing libraries. Agents should use the installed Univer CLI tooling inside `/task`.

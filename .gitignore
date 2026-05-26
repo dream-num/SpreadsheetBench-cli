@@ -12,6 +12,7 @@ inference/log/*
 
 debug
 debug-tmp
+tmp-issue
 .venv
 .claude
 .codex
@@ -19,12 +20,6 @@ debug-tmp
 .worktree
 
 
-.env.agent
-.env.codex
-.env.codex-gpt-5.5-low
-.env.codex-gpt-5.5-medium
-.env.codex-gpt-5.5-high
-.env.codex-gpt-5.3-codex-spark-high
-.env.claude
-.env.claude-minimax
-.env.claude-deepseek-flash
+codex-auth.json
+codex-config.toml
+claude-settings.json

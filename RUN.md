@@ -32,19 +32,38 @@ docker build -t spreadsheetbench-univer-cli-agent docker/spreadsheetbench-univer
 
 ## 认证
 
-不要把 Codex/Claude 认证写进镜像，也不要复制进 task 目录。推荐使用 env 文件：
+不要把 Codex/Claude 认证写进镜像，也不要复制进 task 目录。`.env.<agent>` 只保存本地配置文件路径，真实认证放在 agent 原生配置文件中，并由 runner 只读挂载到容器固定位置。
 
-```dotenv
-OPENAI_API_KEY=...
-ANTHROPIC_API_KEY=...
+默认配置文件：
+
+- `.env.codex`：
+  ```dotenv
+  CODEX_AUTH_JSON=codex-auth.json
+  CODEX_CONFIG_TOML=codex-config.toml
+  ```
+- `.env.claude`：
+  ```dotenv
+  CLAUDE_SETTINGS_JSON=claude-settings.json
+  ```
+
+真实文件可由模板复制：
+
+```bash
+cp codex-auth-template.json codex-auth.json
+cp codex-config-template.toml codex-config.toml
+cp claude-settings-template.json claude-settings.json
 ```
 
-默认 env-file 规则：
+`codex-auth.json`、`codex-config.toml`、`claude-settings.json` 已加入 `.gitignore`。如果 `.env.<agent>` 缺少对应路径，或路径不存在，脚本会直接报错退出。
+
+如果只是本机快速验证，也可以直接修改 `.env.codex` / `.env.claude` 指向用户目录下已有配置，例如 `/Users/<you>/.codex/auth.json`、`/Users/<you>/.codex/config.toml` 或 `/Users/<you>/.claude/settings.json`。这种方式适合临时 smoke test；提交前应确认 `.env.<agent>` 是否仍应保持仓库默认相对路径。
+
+env-file 规则：
 
 - 如果命令行传了 `--env-file <path>`，使用该文件。
 - 如果没有显式传 `--env-file`，inference 脚本会自动使用该 agent 对应文件，例如 `.env.codex` 或 `.env.claude`。
 - 如果对应 `.env.<agent>` 不存在，脚本会在启动 inference 前报错退出，避免误用空环境运行。
-- runner 只把 env 文件路径传给 `docker run --env-file`，不会把 env 文件复制到 `/task`，也不会记录文件内容。
+- runner 不把 `.env.<agent>` 传给 `docker run --env-file`；它只读取里面的文件路径，并把对应文件只读挂载到容器固定路径。
 
 不同 agent 的推荐 env-file：
 
@@ -52,10 +71,12 @@ ANTHROPIC_API_KEY=...
 - `--agent claude`：默认使用 `.env.claude`，缺失时报错。
 - 自定义 `--agent-command`：按该命令需要显式传对应 env 文件。
 
-模型只从 env-file 读取，并同时作为实际调用模型、输出目录标签、评测报告标签和默认 `run-id` 的 model 段：
+挂载路径和模型解析：
 
-- Codex：读取 `CODEX_MODEL`。
-- Claude Code：读取 `ANTHROPIC_MODEL`。
+- Codex：`CODEX_AUTH_JSON` 挂载到 `/home/node/.codex/auth.json`，`CODEX_CONFIG_TOML` 挂载到 `/home/node/.codex/config.toml`；模型名从 `CODEX_CONFIG_TOML` 顶层 `model = "..."` 解析。
+- Claude Code：`CLAUDE_SETTINGS_JSON` 挂载到 `/home/node/.claude/settings.json`；模型名从 settings JSON 的 `env.ANTHROPIC_MODEL` 解析。
+
+模型名会作为输出目录标签、评测报告标签和默认 `run-id` 的 model 段。
 
 Claude 默认使用仓库根目录的 `.env.claude`，通常不需要显式传 `--env-file`：
 
@@ -69,7 +90,7 @@ Codex 默认使用仓库根目录的 `.env.codex`，通常不需要显式传 `--
 bash scripts/run_univer_agent_eval.sh --agent codex --task-id 54513
 ```
 
-`.env.codex` 会按本机 Codex 配置设置模型和代理，并通过 `CODEX_AUTH_JSON` 把本机 `~/.codex/auth.json` 只读挂载到容器内的 `CODEX_HOME/auth.json`。这样可以复用本机 ChatGPT 登录态，但不会把认证文件复制进镜像或 task workspace。容器内已经由 Docker 隔离，`.env.codex` 默认设置 `CODEX_BYPASS_SANDBOX=1`，避免 Codex CLI 在容器里再次启用 bubblewrap sandbox 导致命令无法运行。
+Codex 容器内固定使用 `--dangerously-bypass-approvals-and-sandbox`，因为外层已经由 Docker task workspace 隔离；不要在 `.env.codex` 中配置额外 Codex CLI 参数。
 
 ## 快速开始
 
@@ -187,7 +208,8 @@ Docker 只挂载当前 task 目录：
 ```bash
 docker run --rm \
   --name spreadsheetbench-cli-<run-id>-<task-id> \
-  --env-file /abs/path/.env.codex \
+  -v /abs/path/codex-auth.json:/home/node/.codex/auth.json:ro \
+  -v /abs/path/codex-config.toml:/home/node/.codex/config.toml:ro \
   -v /abs/path/.runs/univer-agent/<run-id>/<task-id>/task:/task \
   spreadsheetbench-univer-cli-agent \
   --agent codex
