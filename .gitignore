@@ -12,7 +12,6 @@ inference/log/*
 
 debug
 debug-tmp
-analyze/
 .venv
 .claude
 .codex
