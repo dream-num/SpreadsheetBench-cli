@@ -27,11 +27,14 @@
 - 逐题分析必须写出 agent 操作时的卡点：是否有命令误用、失败重试、API 探测、硬编码范围、排序/截断前后顺序风险、验证不足、耗时异常、或接近违反 `answer_position`/文件访问约束的行为。
 - 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：优先用 `openpyxl` 直接读取 output 和 golden 的 `.xlsx`，检查 `answer_position` 内的值、公式、数字格式、样式、空白区、工作表结构、排序、截断、导出结果或范围外污染；只有需要 Univer 可见状态或 CLI 行为对照时，再把 `.xlsx` 临时导入为 `.univer` 辅助检查。
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
+- 用户要求调查、分析或复核问题时，默认只读检查并向用户输出详细调查结论，不要自动写入 `wrong-report-matrix.univer` 或其它 `.univer` 文件。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
 
 ## 已知错题与 issue 状态
 
 逐题错因分析时先查根目录 `wrong-report-matrix.univer` 中对应 agent/model/题集 sheet 的 `备注` 列。已知问题、上游 issue、数据问题、历史失败形态和已修复但矩阵尚未重跑的状态都记录在该列；不要在 `AGENTS.md` 维护静态已知错题清单。
+
+只有用户明确要求“记录到矩阵”、“更新备注”、“写入 `wrong-report-matrix.univer`”或同等含义时，才允许把调查结论写入 `wrong-report-matrix.univer`。写入前应说明要写入的 sheet、单元格/范围和原因；未得到明确要求时，即使已经确认新根因，也只在对话中报告结论。
 
 需要找当前最新错题、稳定错题、偶发错题或未调查候选时，优先用 `univer inspect workbook wrong-report-matrix.univer` 确认 sheet 和 used range，再用 `univer pipe out wrong-report-matrix.univer --range '<sheet>!A1:ZZ1000' --format tsv` 或 `univer inspect range` 读取可见表格。
 
