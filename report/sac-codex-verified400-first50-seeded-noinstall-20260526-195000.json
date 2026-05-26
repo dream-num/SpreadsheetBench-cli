@@ -1,0 +1,1049 @@
+{
+  "accuracy": 0.74,
+  "correct_case_count": 37,
+  "error_case_count": 10,
+  "timeout_case_count": 3,
+  "total_case_count": 50,
+  "run": {
+    "summary_path": ".runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/summary.json",
+    "metadata": {
+      "run_id": "sac-codex-verified400-first50-seeded-noinstall-20260526-195000",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 5,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-sac",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/otime/project/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-05-26T19:48:35",
+      "cwd": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526",
+      "finished_at": "2026-05-26T20:15:27"
+    },
+    "total_task_count": 50,
+    "ok_task_count": 43,
+    "error_task_count": 7,
+    "timeout_task_count": 3,
+    "tasks": [
+      {
+        "id": "13-1",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/13-1",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/13-1/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_13-1_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:48:35",
+        "finished_at": "2026-05-26T19:51:30",
+        "duration_seconds": 175.418
+      },
+      {
+        "id": "17-35",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/17-35",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/17-35/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_17-35_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:48:35",
+        "finished_at": "2026-05-26T19:51:03",
+        "duration_seconds": 148.016
+      },
+      {
+        "id": "22-47",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/22-47",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/22-47/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_22-47_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:48:35",
+        "finished_at": "2026-05-26T19:51:28",
+        "duration_seconds": 173.17
+      },
+      {
+        "id": "23-24",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/23-24",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/23-24/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_23-24_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:48:35",
+        "finished_at": "2026-05-26T19:53:24",
+        "duration_seconds": 288.762
+      },
+      {
+        "id": "24-23",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `univer sac init /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/24-23/task/cases/case_1/sac --from /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/24-23/task/cases/case_1/input.univer`: ERROR CLI_ERROR\n\nMaximum call stack size exceeded\n\nUsage:\n  univer <command> [args]\n  univer help <command...>\n\nTry:\n  univer help\n\nTrace ID: 7a6ec8e8421e05801cc71cb6d80576f0"
+      },
+      {
+        "id": "28-7",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/28-7",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/28-7/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_28-7_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:48:38",
+        "finished_at": "2026-05-26T19:50:32",
+        "duration_seconds": 113.699
+      },
+      {
+        "id": "41-47",
+        "status": "error",
+        "error": "Docker command timed out after 300 seconds for task 41-47"
+      },
+      {
+        "id": "51-12",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/51-12",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/51-12/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_51-12_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:51:03",
+        "finished_at": "2026-05-26T19:53:59",
+        "duration_seconds": 176.288
+      },
+      {
+        "id": "60-7",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/60-7",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/60-7/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_60-7_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:51:28",
+        "finished_at": "2026-05-26T19:53:41",
+        "duration_seconds": 132.528
+      },
+      {
+        "id": "262-17",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/262-17",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/262-17/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_262-17_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:51:30",
+        "finished_at": "2026-05-26T19:53:34",
+        "duration_seconds": 123.475
+      },
+      {
+        "id": "263-1",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/263-1",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/263-1/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_263-1_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:53:24",
+        "finished_at": "2026-05-26T19:55:48",
+        "duration_seconds": 144.264
+      },
+      {
+        "id": "267-18",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/267-18",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/267-18/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_267-18_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:53:34",
+        "finished_at": "2026-05-26T19:55:19",
+        "duration_seconds": 105.035
+      },
+      {
+        "id": "267-21",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/267-21",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/267-21/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_267-21_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:53:41",
+        "finished_at": "2026-05-26T19:55:49",
+        "duration_seconds": 127.993
+      },
+      {
+        "id": "269-43",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/269-43",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/269-43/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_269-43_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:53:59",
+        "finished_at": "2026-05-26T19:55:59",
+        "duration_seconds": 120.236
+      },
+      {
+        "id": "269-44",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/269-44",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/269-44/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_269-44_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:55:19",
+        "finished_at": "2026-05-26T19:57:35",
+        "duration_seconds": 135.662
+      },
+      {
+        "id": "279-23",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/279-23",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/279-23/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_279-23_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:55:34",
+        "finished_at": "2026-05-26T19:57:45",
+        "duration_seconds": 131.072
+      },
+      {
+        "id": "280-17",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/280-17",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/280-17/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_280-17_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:55:48",
+        "finished_at": "2026-05-26T19:57:51",
+        "duration_seconds": 122.578
+      },
+      {
+        "id": "283-32",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/283-32",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/283-32/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_283-32_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:55:49",
+        "finished_at": "2026-05-26T19:58:52",
+        "duration_seconds": 183.638
+      },
+      {
+        "id": "290-1",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/290-1",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/290-1/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_290-1_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:55:59",
+        "finished_at": "2026-05-26T19:58:01",
+        "duration_seconds": 121.454
+      },
+      {
+        "id": "290-27",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/290-27",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/290-27/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_290-27_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:57:35",
+        "finished_at": "2026-05-26T19:59:46",
+        "duration_seconds": 131.816
+      },
+      {
+        "id": "297-42",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/297-42",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/297-42/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_297-42_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:57:45",
+        "finished_at": "2026-05-26T20:00:39",
+        "duration_seconds": 173.75
+      },
+      {
+        "id": "304-35",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/304-35",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/304-35/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_304-35_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:57:51",
+        "finished_at": "2026-05-26T20:00:19",
+        "duration_seconds": 148.562
+      },
+      {
+        "id": "333-29",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/333-29",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/333-29/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_333-29_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:58:01",
+        "finished_at": "2026-05-26T20:01:39",
+        "duration_seconds": 218.521
+      },
+      {
+        "id": "341-40",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/341-40",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/341-40/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_341-40_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:58:52",
+        "finished_at": "2026-05-26T20:01:18",
+        "duration_seconds": 145.62
+      },
+      {
+        "id": "384-4",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/384-4",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/384-4/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_384-4_output.xlsx"
+        ],
+        "started_at": "2026-05-26T19:59:46",
+        "finished_at": "2026-05-26T20:01:49",
+        "duration_seconds": 122.496
+      },
+      {
+        "id": "408-5",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/408-5",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/408-5/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_408-5_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:00:19",
+        "finished_at": "2026-05-26T20:02:47",
+        "duration_seconds": 147.775
+      },
+      {
+        "id": "433-47",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/433-47",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/433-47/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_433-47_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:00:39",
+        "finished_at": "2026-05-26T20:03:05",
+        "duration_seconds": 145.527
+      },
+      {
+        "id": "455-35",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `univer sac init /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/455-35/task/cases/case_1/sac --from /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/455-35/task/cases/case_1/input.univer`: ERROR SAC_MATERIALIZATION_GAP\n\nFacade Migration Pack materialization has unsupported capability feature.filters-sort.\n\nUsage:\n  univer sac init <workspace>\n  univer sac migration create <slug> --workspace <workspace>\n  univer sac apply <workspace> [--target <workbook.univer>] [--no-commit]\n  univer sac verify <workspace>\n  univer sac rebuild <workspace> --from <workbook.univer> [--force]\n\nTry:\n  univer sac init ./model\n  univer sac apply ./model\n\nTrace ID: 9e0c029f0401f6888d6c773a85e53134"
+      },
+      {
+        "id": "469-9",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/469-9",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/469-9/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_469-9_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:01:21",
+        "finished_at": "2026-05-26T20:03:10",
+        "duration_seconds": 108.848
+      },
+      {
+        "id": "472-15",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/472-15",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/472-15/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_472-15_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:01:39",
+        "finished_at": "2026-05-26T20:03:19",
+        "duration_seconds": 99.734
+      },
+      {
+        "id": "477-45",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/477-45",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/477-45/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_477-45_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:01:49",
+        "finished_at": "2026-05-26T20:04:16",
+        "duration_seconds": 147.147
+      },
+      {
+        "id": "493-18",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `univer sac init /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/493-18/task/cases/case_1/sac --from /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/493-18/task/cases/case_1/input.univer`: ERROR SAC_MATERIALIZATION_GAP\n\nFacade Migration Pack materialization has unsupported capability feature.filters-sort.\n\nUsage:\n  univer sac init <workspace>\n  univer sac migration create <slug> --workspace <workspace>\n  univer sac apply <workspace> [--target <workbook.univer>] [--no-commit]\n  univer sac verify <workspace>\n  univer sac rebuild <workspace> --from <workbook.univer> [--force]\n\nTry:\n  univer sac init ./model\n  univer sac apply ./model\n\nTrace ID: 95640bfd3fb396f8b72a71ac3a451b2e"
+      },
+      {
+        "id": "547-18",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/547-18",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/547-18/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_547-18_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:02:48",
+        "finished_at": "2026-05-26T20:04:55",
+        "duration_seconds": 127.226
+      },
+      {
+        "id": "61-4",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/61-4",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/61-4/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_61-4_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:03:05",
+        "finished_at": "2026-05-26T20:06:15",
+        "duration_seconds": 190.412
+      },
+      {
+        "id": "66-24",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/66-24",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/66-24/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_66-24_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:03:10",
+        "finished_at": "2026-05-26T20:07:02",
+        "duration_seconds": 232.924
+      },
+      {
+        "id": "73-45",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `univer sac init /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/73-45/task/cases/case_1/sac --from /Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/73-45/task/cases/case_1/input.univer`: ERROR SAC_MATERIALIZATION_GAP\n\nFacade Migration Pack materialization has unsupported capability feature.filters-sort.\n\nUsage:\n  univer sac init <workspace>\n  univer sac migration create <slug> --workspace <workspace>\n  univer sac apply <workspace> [--target <workbook.univer>] [--no-commit]\n  univer sac verify <workspace>\n  univer sac rebuild <workspace> --from <workbook.univer> [--force]\n\nTry:\n  univer sac init ./model\n  univer sac apply ./model\n\nTrace ID: 476a4bd53f81061b8bb36eb4cba73fbf"
+      },
+      {
+        "id": "79-7",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/79-7",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/79-7/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_79-7_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:03:21",
+        "finished_at": "2026-05-26T20:05:05",
+        "duration_seconds": 103.7
+      },
+      {
+        "id": "80-42",
+        "status": "error",
+        "error": "Docker command timed out after 300 seconds for task 80-42"
+      },
+      {
+        "id": "82-30",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/82-30",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/82-30/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_82-30_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:04:55",
+        "finished_at": "2026-05-26T20:08:02",
+        "duration_seconds": 186.29
+      },
+      {
+        "id": "82-38",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/82-38",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/82-38/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_82-38_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:05:05",
+        "finished_at": "2026-05-26T20:07:22",
+        "duration_seconds": 137.304
+      },
+      {
+        "id": "84-40",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/84-40",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/84-40/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_84-40_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:06:15",
+        "finished_at": "2026-05-26T20:08:40",
+        "duration_seconds": 144.89
+      },
+      {
+        "id": "91-34",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/91-34",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/91-34/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_91-34_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:07:02",
+        "finished_at": "2026-05-26T20:09:10",
+        "duration_seconds": 127.411
+      },
+      {
+        "id": "97-36",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/97-36",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/97-36/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_97-36_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:07:22",
+        "finished_at": "2026-05-26T20:08:31",
+        "duration_seconds": 68.964
+      },
+      {
+        "id": "105-24",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/105-24",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/105-24/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_105-24_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:08:02",
+        "finished_at": "2026-05-26T20:10:35",
+        "duration_seconds": 152.975
+      },
+      {
+        "id": "109-21",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/109-21",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/109-21/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_109-21_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:08:31",
+        "finished_at": "2026-05-26T20:10:25",
+        "duration_seconds": 114.452
+      },
+      {
+        "id": "118-50",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/118-50",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/118-50/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_118-50_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:08:40",
+        "finished_at": "2026-05-26T20:11:45",
+        "duration_seconds": 184.468
+      },
+      {
+        "id": "130-9",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/130-9",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/130-9/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_130-9_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:09:10",
+        "finished_at": "2026-05-26T20:12:28",
+        "duration_seconds": 198.561
+      },
+      {
+        "id": "142-19",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/142-19",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/142-19/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_142-19_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:09:20",
+        "finished_at": "2026-05-26T20:11:23",
+        "duration_seconds": 122.905
+      },
+      {
+        "id": "146-49",
+        "status": "error",
+        "error": "Docker command timed out after 300 seconds for task 146-49"
+      },
+      {
+        "id": "147-48",
+        "status": "ok",
+        "workspace": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/147-48",
+        "task_dir": "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/.runs/univer-agent/sac-codex-verified400-first50-seeded-noinstall-20260526-195000/147-48/task",
+        "outputs": [
+          "/Users/otime/project/SpreadsheetBench-cli/.worktree/sac-univer-cli-runner-20260526/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_147-48_output.xlsx"
+        ],
+        "started_at": "2026-05-26T20:10:35",
+        "finished_at": "2026-05-26T20:12:32",
+        "duration_seconds": 117.092
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_sac-codex-verified400-first50-seeded-noinstall-20260526-195000.json",
+    "accuracy": 0.74,
+    "correct_case_count": 37,
+    "error_case_count": 10,
+    "timeout_case_count": 3,
+    "total_case_count": 50,
+    "results": [
+      {
+        "id": "13-1",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "17-35",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "22-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "23-24",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "24-23",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "28-7",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "41-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "51-12",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "60-7",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "262-17",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "263-1",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "267-18",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "267-21",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "269-43",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "269-44",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "279-23",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "280-17",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "283-32",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "290-1",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "290-27",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "297-42",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "304-35",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "333-29",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "341-40",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "384-4",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "408-5",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "433-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "455-35",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "469-9",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "472-15",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "477-45",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "493-18",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "547-18",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "61-4",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "66-24",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "73-45",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "79-7",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "80-42",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "82-30",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "82-38",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "84-40",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "91-34",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "97-36",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "105-24",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "109-21",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "118-50",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "130-9",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "142-19",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "146-49",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "147-48",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      }
+    ]
+  }
+}

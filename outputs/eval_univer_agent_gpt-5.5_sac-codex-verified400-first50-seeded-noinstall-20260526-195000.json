@@ -1,0 +1,452 @@
+[
+    {
+        "id": "13-1",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "17-35",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "22-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "23-24",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "24-23",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "28-7",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "41-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "51-12",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "60-7",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "262-17",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "263-1",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "267-18",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "267-21",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "269-43",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "269-44",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "279-23",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "280-17",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "283-32",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "290-1",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "290-27",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "297-42",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "304-35",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "333-29",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "341-40",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "384-4",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "408-5",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "433-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "455-35",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "469-9",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "472-15",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "477-45",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "493-18",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "547-18",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "61-4",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "66-24",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "73-45",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "79-7",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "80-42",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "82-30",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "82-38",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "84-40",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "91-34",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "97-36",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "105-24",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "109-21",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "118-50",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "130-9",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "142-19",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "146-49",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "147-48",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    }
+]

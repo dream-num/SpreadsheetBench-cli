@@ -28,6 +28,24 @@ fi
 
 mkdir -p /task/logs /task/work
 
+seed_sac_node_modules() {
+    local template="/home/node/.cache/spreadsheetbench-sac-node_modules"
+    if [ ! -d "$template" ]; then
+        return
+    fi
+
+    local workspace
+    for workspace in /task/cases/case_*/sac; do
+        if [ ! -d "$workspace" ] || [ -d "$workspace/node_modules" ]; then
+            continue
+        fi
+        mkdir -p "$workspace/node_modules"
+        cp -a "$template"/. "$workspace/node_modules"/
+    done
+}
+
+seed_sac_node_modules
+
 if [ -n "$agent_command" ]; then
     export SPREADSHEETBENCH_PROMPT_FILE=/task/prompt.md
     export SPREADSHEETBENCH_TASK_DIR=/task

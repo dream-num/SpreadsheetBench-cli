@@ -15,6 +15,7 @@ from .config import RunnerConfig, RunnerError
 from .paths import output_xlsx_path, safe_task_dir_name, task_id_text, test_case_input_path
 from .prompts import build_agent_prompt, build_spreadsheet_content
 
+
 @dataclass
 class DockerTaskWorkspace:
     task_id: str
@@ -46,6 +47,67 @@ def import_xlsx_to_univer(input_path: Path, output_path: Path) -> None:
         raise RunnerError(f"Pre-import did not create workbook: {output_path}")
 
 
+def run_workspace_setup_command(args: List[str], *, cwd: Optional[Path] = None) -> None:
+    result = subprocess.run(
+        args,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        command = " ".join(shlex.quote(str(part)) for part in args)
+        location = f" in {cwd}" if cwd else ""
+        if detail:
+            raise RunnerError(f"Failed to prepare SaC workspace with `{command}`{location}: {detail}")
+        raise RunnerError(f"Failed to prepare SaC workspace with `{command}`{location}: exit {result.returncode}")
+
+
+def write_generated_sac_config(workspace_path: Path) -> None:
+    (workspace_path / "sac.config.ts").write_text(
+        'export default {\n'
+        '  source: {\n'
+        '    migrationsDir: "./migrations"\n'
+        '  },\n'
+        '  artifacts: {\n'
+        '    mode: "generated",\n'
+        '    defaultWorkbook: "./artifacts/sac.univer"\n'
+        '  }\n'
+        '};\n',
+        encoding="utf-8",
+    )
+
+
+def task_container_path(container_task_dir: Path, path: Path) -> str:
+    return "/task/" + path.relative_to(container_task_dir).as_posix()
+
+
+def prepare_sac_workspace(
+    config: RunnerConfig,
+    container_task_dir: Path,
+    input_univer_path: Path,
+    workspace_path: Path,
+) -> None:
+    input_container_path = task_container_path(container_task_dir, input_univer_path)
+    workspace_container_path = task_container_path(container_task_dir, workspace_path)
+    script = f"univer sac init {shlex.quote(workspace_container_path)} --from {shlex.quote(input_container_path)}"
+    run_workspace_setup_command(
+        [
+            config.docker_bin,
+            "run",
+            "--rm",
+            "--entrypoint",
+            "sh",
+            "-v",
+            f"{container_task_dir}:/task",
+            config.docker_image,
+            "-lc",
+            script,
+        ]
+    )
+    write_generated_sac_config(workspace_path)
+
+
 def prepare_docker_task_workspace(
     config: RunnerConfig,
     task: Dict,
@@ -75,7 +137,9 @@ def prepare_docker_task_workspace(
         output_dir.mkdir(parents=True, exist_ok=True)
         copied_input = case_dir / "input.xlsx"
         shutil.copy2(source_input, copied_input)
-        import_xlsx_to_univer(copied_input, case_dir / "input.univer")
+        input_univer = case_dir / "input.univer"
+        import_xlsx_to_univer(copied_input, input_univer)
+        prepare_sac_workspace(config, container_task_dir, input_univer, case_dir / "sac")
 
     prompt_path = container_task_dir / "prompt.md"
     spreadsheet_content = build_spreadsheet_content(first_input) if first_input else ""

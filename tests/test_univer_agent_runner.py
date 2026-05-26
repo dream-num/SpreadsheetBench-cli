@@ -104,6 +104,14 @@ class UniverAgentRunnerTest(unittest.TestCase):
     def fake_import_xlsx_to_univer(self, input_path, output_path):
         output_path.write_text(f"imported {input_path.name}", encoding="utf-8")
 
+    def fake_prepare_sac_workspace(self, config, container_task_dir, input_univer_path, workspace_path):
+        workspace_path.mkdir(parents=True)
+        (workspace_path / "migrations").mkdir()
+        (workspace_path / "sac.config.ts").write_text(
+            'export default { artifacts: { mode: "generated", defaultWorkbook: "./artifacts/sac.univer" } };\n',
+            encoding="utf-8",
+        )
+
     def test_parse_option_defaults_to_five_workers(self):
         with patch.object(sys, "argv", ["prog"]):
             opt = parse_option(Path.cwd())
@@ -136,7 +144,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         ):
             opt = parse_option(Path.cwd())
 
-        self.assertEqual(opt.run_id, "codex-verified400-first50-20260521-143000")
+        self.assertEqual(opt.run_id, "codex-codex-verified400-first50-20260521-143000")
 
     def test_codex_does_not_stream_agent_output_by_default(self):
         self.assertFalse(resolve_stream_agent_output("codex", False))
@@ -335,6 +343,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ):
                 workspace = prepare_docker_task_workspace(config, task, [1, 2])
 
@@ -343,6 +354,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertTrue((task_root / "cases" / "case_2" / "input.xlsx").is_file())
             self.assertTrue((task_root / "cases" / "case_1" / "input.univer").exists())
             self.assertTrue((task_root / "cases" / "case_2" / "input.univer").exists())
+            self.assertTrue((task_root / "cases" / "case_1" / "sac" / "sac.config.ts").is_file())
+            self.assertTrue((task_root / "cases" / "case_2" / "sac" / "sac.config.ts").is_file())
             self.assertTrue((task_root / "prompt.md").is_file())
             prompt_text = (task_root / "prompt.md").read_text(encoding="utf-8")
             self.assertIn("You are a spreadsheet expert helping a user complete a workbook editing request", prompt_text)
@@ -350,8 +363,14 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertNotIn("SpreadsheetBench", prompt_text)
             self.assertNotIn("benchmark", prompt_text.lower())
             self.assertNotIn("host checks", prompt_text)
-            self.assertIn("/task/cases/case_1/input.univer: pre-imported workbook", prompt_text)
-            self.assertEqual(prompt_text.count("/task/cases/case_1/input.univer"), 1)
+            self.assertNotIn("pre-imported workbook", prompt_text)
+            self.assertNotIn("xlsx` inputs have already been imported to `.univer", prompt_text)
+            self.assertIn("/task/cases/case_1/sac: prepared SaC workspace", prompt_text)
+            self.assertIn("/task/cases/case_1/sac/artifacts/sac.univer", prompt_text)
+            self.assertIn("Do not run `univer sac init --from` again", prompt_text)
+            self.assertIn("preseeded Linux-compatible `node_modules`", prompt_text)
+            self.assertIn("Do not run `pnpm install` during normal solving", prompt_text)
+            self.assertIn("CI=true pnpm install --prefer-offline", prompt_text)
             self.assertTrue((task_root / "outputs" / "case_1").is_dir())
             self.assertTrue((task_root / "outputs" / "case_2").is_dir())
             self.assertTrue((task_root / "logs").is_dir())
@@ -359,6 +378,67 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertFalse((task_root / "cases" / "case_1" / "1_task-1_answer.xlsx").exists())
             self.assertFalse((task_root / "workbook_context.md").exists())
             self.assertEqual(test_case_input_path(dataset_path, task, 1).name, "1_task-1_input.xlsx")
+
+    def test_prepare_sac_workspace_initializes_generated_workspace_in_container(self):
+        from inference.univer_agent.docker_runner import prepare_sac_workspace
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            config = self.make_config(tmp_path, tmp_path / "data")
+            container_task_dir = tmp_path / "run" / "task"
+            input_univer = container_task_dir / "cases" / "case_1" / "input.univer"
+            workspace = container_task_dir / "cases" / "case_1" / "sac"
+            input_univer.parent.mkdir(parents=True)
+            input_univer.write_text("imported", encoding="utf-8")
+
+            calls = []
+
+            def fake_run(args, cwd=None, capture_output=False, text=False):
+                calls.append((args, cwd, capture_output, text))
+                if args[:3] == ["docker", "run", "--rm"]:
+                    workspace.mkdir(parents=True)
+                    (workspace / "sac.config.ts").write_text(
+                        'export default {\n'
+                        '  source: { migrationsDir: "./migrations" },\n'
+                        '  artifacts: { mode: "adopted", defaultWorkbook: "../input.univer" }\n'
+                        '};\n',
+                        encoding="utf-8",
+                    )
+                return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+            with patch("inference.univer_agent.docker_runner.subprocess.run", side_effect=fake_run):
+                prepare_sac_workspace(config, container_task_dir, input_univer, workspace)
+
+            self.assertEqual(len(calls), 1)
+            command = calls[0][0]
+            self.assertEqual(command[:3], ["docker", "run", "--rm"])
+            self.assertIn("--entrypoint", command)
+            self.assertIn(config.docker_image, command)
+            self.assertIn("univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer", command)
+            self.assertNotIn("univer config set", command)
+            self.assertNotIn(["pnpm", "install"], [call[0] for call in calls])
+            config_text = (workspace / "sac.config.ts").read_text(encoding="utf-8")
+            self.assertIn('mode: "generated"', config_text)
+            self.assertIn('defaultWorkbook: "./artifacts/sac.univer"', config_text)
+
+    def test_agent_docker_images_preheat_sac_dependency_cache(self):
+        dockerfile = Path("docker/spreadsheetbench-univer-cli-agent/Dockerfile").read_text(encoding="utf-8")
+        local_builder = Path("scripts/build_agent_docker_from_local_univer_cli.sh").read_text(encoding="utf-8")
+
+        for content in [dockerfile, local_builder]:
+            self.assertIn("pnpm", content)
+            self.assertIn("univer sac init", content)
+            self.assertIn("pnpm install --prefer-offline", content)
+            self.assertIn("sac-cache.univer", content)
+            self.assertIn("spreadsheetbench-sac-node_modules", content)
+
+    def test_agent_entrypoint_seeds_sac_node_modules_before_agent_runs(self):
+        run_task_script = Path("docker/spreadsheetbench-univer-cli-agent/run-task.sh").read_text(encoding="utf-8")
+
+        self.assertIn("seed_sac_node_modules", run_task_script)
+        self.assertIn("/home/node/.cache/spreadsheetbench-sac-node_modules", run_task_script)
+        self.assertIn("/task/cases/case_*/sac", run_task_script)
+        self.assertIn("cp -a", run_task_script)
 
     def test_run_task_invokes_docker_with_task_mount_and_env_file_then_collects_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -389,6 +469,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
                 result = run_task(config, task, cases=[1, 2])
 
@@ -427,6 +510,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ):
                 workspace = prepare_docker_task_workspace(config, task, [1])
 
@@ -449,6 +535,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ):
                 workspace = prepare_docker_task_workspace(config, task, [1])
 
@@ -486,6 +575,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
                 run_task(config, task, cases=[1])
 
@@ -510,6 +602,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ):
                 with self.assertRaisesRegex(Exception, "CODEX_CONFIG_TOML file not found"):
                     run_task(config, task, cases=[1])
@@ -536,6 +631,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
                 run_task(config, task, cases=[1])
 
@@ -580,6 +678,9 @@ model_reasoning_effort = "medium"
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
             ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
+            ), patch(
                 "inference.univer_agent.docker_runner.subprocess.Popen",
                 return_value=self.make_fake_process(),
             ):
@@ -594,6 +695,9 @@ model_reasoning_effort = "medium"
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ):
                 workspace = prepare_docker_task_workspace(config, task, [1])
 
@@ -637,6 +741,9 @@ model_reasoning_effort = "medium"
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
             ):
                 workspace = prepare_docker_task_workspace(config, task, [1])
             process_done = threading.Event()
@@ -716,6 +823,11 @@ model_reasoning_effort = "medium"
             with patch(
                 "inference.univer_agent.docker_runner.import_xlsx_to_univer",
                 side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
+            ), patch(
+                "inference.univer_agent.docker_runner.stop_docker_container",
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
                 with self.assertRaisesRegex(RuntimeError, "docker failed"):
                     run_task(config, task, cases=[1])

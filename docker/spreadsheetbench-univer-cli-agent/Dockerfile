@@ -7,6 +7,7 @@ RUN apk add --no-cache \
 
 RUN npm install -g \
         univer-cli@latest \
+        pnpm \
         @openai/codex \
         @anthropic-ai/claude-code
 
@@ -19,8 +20,15 @@ RUN mkdir -p /home/node/.codex/skills /home/node/.claude/skills \
     && npx -y skills add dream-num/skills --global --yes --agent codex claude-code
 
 RUN tmp="$(mktemp -d)" \
+    && mkdir -p /home/node/.cache \
     && univer new "$tmp/warmup.univer" >/dev/null \
     && univer inspect workbook "$tmp/warmup.univer" >/dev/null \
+    && univer config set experimental.sac true >/dev/null \
+    && univer new "$tmp/sac-cache.univer" >/dev/null \
+    && univer sac init "$tmp/sac-cache" --from "$tmp/sac-cache.univer" >/dev/null \
+    && cd "$tmp/sac-cache" \
+    && pnpm install --prefer-offline >/dev/null \
+    && cp -a "$tmp/sac-cache/node_modules" /home/node/.cache/spreadsheetbench-sac-node_modules \
     && univer view stop >/dev/null \
     && univer daemon stop >/dev/null \
     && rm -rf "$tmp"

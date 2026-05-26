@@ -13,8 +13,8 @@ The user provided one or more workbook cases. For each case, edit the workbook a
 
 The request contains these types of information:
 - instruction: The user's workbook editing request.
-- spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
-- spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
+- spreadsheet_path: The path of the prepared SaC workspace and managed artifact you need to manipulate.
+- spreadsheet_content: The first few rows of the content of the first input spreadsheet file. Use this only as a quick preview, not as the complete data source.
 - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
 - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
 - output_path: You need to generate modified spreadsheet files at these paths.
@@ -43,13 +43,13 @@ Rules:
 - Load the `univer-cli` skill before inspecting or editing any workbook.
 - Only use files under /task.
 - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
-- The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
-- Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from a SaC-managed `.univer` workbook artifact.
-- You MUST use the experimental Spreadsheet as Code workflow for workbook mutations. First run `univer config set experimental.sac true`, then read `univer help sac workflow`, `univer help sac authoring`, and any relevant `univer help run <topic>` before authoring migrations.
-- For each case, create a SaC workspace under `/task/work/sac-case_N`: run `univer sac init /task/work/sac-case_N --from /task/cases/case_N/input.univer`, run `pnpm install` inside that workspace, create one focused migration with `univer sac migration create "<short task title>" --workspace /task/work/sac-case_N`, edit the generated migration source to perform the requested workbook change, then run `univer sac apply /task/work/sac-case_N`. Verify the SaC-managed workbook artifact with workbook-visible reads, then export that artifact to the required output path.
+- The `.xlsx` inputs have already been converted by the runner into prepared SaC workspaces. Treat the listed `/task/cases/case_N/sac` paths as the only source workspaces for solving.
+- Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. Do not treat `/task/cases/case_N/input.univer` as the solving input source; it is only a runner intermediate used to initialize the SaC workspace.
+- You MUST use the experimental Spreadsheet as Code workflow for workbook mutations. The container image already enables experimental SaC; do not run `univer config set experimental.sac true` during task solving. Read `univer help sac workflow`, `univer help sac authoring`, `univer help sac apply-ledger`, and any relevant `univer help run <topic>` before authoring migrations.
+- Do not run `univer sac init --from` again. For each case, use the existing SaC workspace under `/task/cases/case_N/sac`; the container entrypoint has already preseeded Linux-compatible `node_modules` for that workspace. Do not run `pnpm install` during normal solving. Only if a SaC command fails because dependencies are missing or invalid, run `CI=true pnpm install --prefer-offline` inside the workspace, then retry the same SaC command. Inspect the workspace's `materialize-current` migration source when you need workbook contents, create one focused migration with `univer sac migration create "<short task title>" --workspace /task/cases/case_N/sac`, edit the generated migration source to perform the requested workbook change, then run `univer sac apply /task/cases/case_N/sac`. Verify the SaC-managed artifact at `/task/cases/case_N/sac/artifacts/sac.univer` with workbook-visible reads, then export that artifact to the required output path.
 - Do not use direct `univer run`, `pipe in`, manual package edits, or any other non-SaC path to mutate the final workbook. `univer run` is allowed only for read-only verification scripts after a successful `univer sac apply`.
-- If an adopted workspace has `artifacts.mode: "adopted"` but `univer sac apply` fails with `SAC_ARTIFACT_PATH_INVALID` requiring `artifacts/<workspace>.univer`, do not fall back to direct workbook edits. Keep the same SaC migration source and make the workbook result a generated SaC artifact instead: set the workspace config to generated mode with `artifacts.defaultWorkbook` exactly `./artifacts/<workspace-directory-name>.univer`, rerun `univer sac apply`, verify that generated artifact, and export from it. For `/task/work/sac-case_N`, the generated artifact path must be `/task/work/sac-case_N/artifacts/sac-case_N.univer`.
-- If SaC cannot produce a workbook artifact after those SaC-only recovery steps, fail the task rather than creating `output.xlsx` through direct workbook mutation.
+- If `univer sac apply` fails, read the error and the relevant SaC help, then fix the migration source or workspace configuration and retry. Do not fall back to direct workbook edits.
+- If SaC cannot produce a workbook artifact, fail the task rather than creating `output.xlsx` through direct workbook mutation.
 - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
 - Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
 - If the instruction involves inserting or deleting rows or columns, adding section/header rows, moving a table, transposing data, or otherwise changing worksheet structure, first reason about the final workbook layout before interpreting `answer_position`. Treat `answer_position` as the range to verify and fill in the final workbook state, not necessarily as fixed coordinates in the original workbook. Re-evaluate whether headers, date rows, source ranges, or target ranges shift after the structural operation. Only write outside `answer_position` when the instruction explicitly requires a structural change; otherwise keep final value edits within `answer_position`.
@@ -127,7 +127,12 @@ def build_agent_prompt(
 ) -> str:
     case_list = list(cases or [1])
     case_lines = "\n".join(
-        f"- /task/cases/case_{case_index}/input.univer: pre-imported workbook for case {case_index}."
+        "\n".join(
+            [
+                f"- /task/cases/case_{case_index}/sac: prepared SaC workspace for case {case_index}.",
+                f"  Managed artifact: /task/cases/case_{case_index}/sac/artifacts/sac.univer",
+            ]
+        )
         for case_index in case_list
     )
     output_lines = "\n".join(
