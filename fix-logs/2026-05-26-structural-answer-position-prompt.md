@@ -42,3 +42,21 @@ Added a general prompt rule for structural edits:
 - This was a targeted single-task validation, not a full-dataset run.
 - The rule allows structural writes outside `answer_position` only when explicitly required, but future ambiguous cases may still need per-task judgment.
 - Some datasets have bad or incomplete `answer_position` annotations; this prompt reduces one failure mode but does not repair dataset metadata.
+
+## Follow-up Stability Runs
+
+After the first passing experiment, two additional sequential reruns were executed with the same dataset, agent, environment, and task:
+
+- `tmp-codex-gpt-5-5-verified400-task42216-structural-answer-position-prompt-seq-rerun2-20260526-164537`
+  - Status: `ok`
+  - Duration: `160.580s`
+  - Evaluation: `test_case_results=[1]`
+  - Openpyxl value diff in `B20:B339`: `0`
+- `tmp-codex-gpt-5-5-verified400-task42216-structural-answer-position-prompt-seq-rerun3-20260526-164832`
+  - Status: `ok`
+  - Duration: `165.197s`
+  - Evaluation: `test_case_results=[0]`
+  - Openpyxl value diff in `B20:B339`: `3`
+  - Remaining differences: `B212`, `B267`, and `B307`; all are `NA` handling differences where output is blank and golden is text `NA`.
+
+Conclusion from the follow-up runs: the structural/date-start failure mode appears improved, but the task is not fully stable because the prompt still permits different interpretations of `NA` when the user text is contradictory. A separate, general prompt improvement may be needed for resolving contradictory missing-value instructions, for example preferring the more specific later note or verifying `NA` examples explicitly.
