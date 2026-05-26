@@ -31,32 +31,11 @@
 
 ## 已知错题与 issue 状态
 
-逐题错因分析时先查本节。已知问题不要重复归因给 agent；如果新 run 中同一 task 出现不同失败形态，需要明确说明“不同于已知问题”的新证据。
+逐题错因分析时先查根目录 `wrong-report-matrix.univer` 中对应 agent/model/题集 sheet 的 `备注` 列。已知问题、上游 issue、数据问题、历史失败形态和已修复但矩阵尚未重跑的状态都记录在该列；不要在 `AGENTS.md` 维护静态已知错题清单。
 
-### 已知题目
+需要找当前最新错题、稳定错题、偶发错题或未调查候选时，优先用 `univer inspect workbook wrong-report-matrix.univer` 确认 sheet 和 used range，再用 `univer pipe out wrong-report-matrix.univer --range '<sheet>!A1:ZZ1000' --format tsv` 或 `univer inspect range` 读取可见表格。
 
-| 数据集 | task-id | 当前状态 | issue 状态 | 分析处理 |
-| --- | --- | --- | --- | --- |
-| `spreadsheetbench_verified_400` | `283-32` | 题目 `answer_position` 使用整列范围 `A:G`，当前评测程序无法解析；agent 输出值与 golden 一致。 | 本地记录：`issue/283-32-answer-position-column-range-eval-gap.md`；不是 `univer-cli` 上游问题，未报上游 issue。 | 逐题错因分析时跳过，不归因给 agent 或 `univer-cli`。 |
-| `spreadsheetbench_verified_400` | `262-17` | 已知 `univer-cli` / 导出相关问题。早期 drawing export crash 在新版已修；后续仍有 data validation `type=""` 导出兼容问题。 | 本地记录：`issue/262-17-export-drawing-crash-date-fallback.md`、`issue/262-17-export-invalid-data-validation-empty-type.md`；已给 `univer-cli` 仓库报过 bug。 | 作为已知工具链问题处理；除非出现新失败形态，否则不要重复归因给 agent。 |
-| `spreadsheetbench_verified_400` | `42930` | 数据文件名不匹配：golden 文件为 `1_43930_golden.xlsx`，task id 为 `42930`，导致评测发现不到有效 case。 | 暂无上游 issue；属于数据/题目文件问题。 | 汇总统计时单独列出，不归因给 agent 或 `univer-cli`。 |
-| `spreadsheetbench_verified_400` | `477-45` | 题目要求和 workbook/golden 实际输出需要 `G:J` 四列，但 `answer_position` 只有 `G1:I1000` 三列；严格遵守 `answer_position` 会压缩语义列并失败。 | 本地记录：`issue/477-45-answer-position-conflicts-with-existing-output-structure.md`；属于数据/题目范围标注冲突，未报上游 `univer-cli`。 | 不归因给 cellData / 值类型提示词；逐题分析时说明是 `answer_position` 与现有输出结构冲突。 |
-| `spreadsheetbench_verified_400` | `55965` | 历史失败形态是比分文本如 `"2-2"` 被裸写入后在导出链路中变成日期；已通过 cellData 值类型 prompt 修复并在后续全量 run 中验证。 | 修复记录：`fix-logs/2026-05-25-cell-data-value-type-prompt.md`。 | 如果新 run 中再次失败或超时，不要重复归因给旧的比分文本值类型问题；按新失败形态重新查日志和 output/golden。 |
-
-### 已报上游通用问题
-
-| GitHub issue | 问题 | 关联 SpreadsheetBench 题目 | 本地记录 |
-| --- | --- | --- | --- |
-| https://github.com/dream-num/univer-cli/issues/296 | `FILTER` 动态数组公式导出后，Excel 修复并删除公式，spill 缓存值丢失。 | `220-7665`, `323-54085`, `340-56378`, `387-58499`；相关现象：`328-54667`, `399-59884`。`130-33722` 已在 2026-05-25 当前镜像单题重跑通过，不再按该 issue 归类。 | `issue/296-filter-dynamic-array-export-excel-repair.md` |
-| https://github.com/dream-num/univer-cli/issues/297 | `import/export` roundtrip 后 `styles.xml` 出现空 `<fill/>`，导致 `openpyxl` 无法读取导出 xlsx。 | `193-51090`, `215-3911`, `258-35742`, `315-52541`, `332-55060`, `384-57989` 等。 | `issue/297-empty-fill-openpyxl-roundtrip.md`；复现包在 `debug/univer-empty-fill-openpyxl-repro.zip`。 |
-| https://github.com/dream-num/univer-cli/issues/320 | `import/export` roundtrip 后 worksheet `sheetData` 丢失所有 cell 节点，导出文件工作表内容为空。 | `41978`。 | `issue/41978-empty-sheetdata-export-roundtrip.md`；本地复现包在 `debug/41978-empty-sheetdata-export-repro/`。 |
-| https://github.com/dream-num/univer-cli/issues/324 | `import` 后公式单元格 `Sheet1!C3` 计算值错误；原始文件在 Excel/WPS 中显示 `16/01/2009`，导入 `.univer` 后同一公式单元格值为空。 | `33157`。 | `issue/33157-import-formula-c3-calculation-wrong.md`；复现包在 `debug/33157-import-formula-cache-date-loss.zip`。 |
-
-### 未调查 / 未记录错题查询
-
-- 不再在本文件维护“最新 Codex 未调查 / 未记录错题”的静态清单；该信息容易过期。
-- 需要找当前最新错题、稳定错题、偶发错题或未调查候选时，直接查看根目录 `wrong-report-matrix.univer`。优先用 `univer inspect workbook wrong-report-matrix.univer` 确认 sheet 和 used range，再用 `univer pipe out wrong-report-matrix.univer --range '<sheet>!A1:ZZ1000' --format tsv` 或 `univer inspect range` 读取可见表格。
-- 判断“未调查 / 未记录”时，以 `.univer` 中对应 agent/model/题集 sheet 的最新报告列为准：该列为 `FAIL`，且不属于上方“已知题目”或“已报上游通用问题”的 task，才作为新的逐题分析候选。不要把候选 task 列表复制回 `AGENTS.md`；后续新增报告只更新 `.univer`。
+判断“未调查 / 未记录”时，以 `.univer` 中对应 sheet 的最新报告列为准：该列为 `FAIL`，且 `备注` 列没有已知问题或 issue 归因的 task，才作为新的逐题分析候选。已知问题不要重复归因给 agent；如果新 run 中同一 task 出现不同失败形态，需要明确说明“不同于备注列已知问题”的新证据。
 
 ## 修复与实验原则
 
