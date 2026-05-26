@@ -98,6 +98,7 @@ COPY univer-cli-*.tgz /tmp/univer-cli.tgz
 
 RUN npm install -g \
         /tmp/univer-cli.tgz \
+        pnpm \
         @openai/codex \
         @anthropic-ai/claude-code \
     && rm -f /tmp/univer-cli.tgz

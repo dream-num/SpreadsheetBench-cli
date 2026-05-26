@@ -22,6 +22,14 @@ bash scripts/build_agent_docker_from_local_univer_cli.sh \
   --tag spreadsheetbench-univer-cli-agent
 ```
 
+For SaC experiments, use a separate tag:
+
+```bash
+bash scripts/build_agent_docker_from_local_univer_cli.sh \
+  --repo /Users/otime/project/univer-cli \
+  --tag spreadsheetbench-univer-cli-agent-sac
+```
+
 This local build script runs `pnpm build` in the checkout, packs `apps/cli/dist`,
 installs that tarball into the solver image, then runs the same CLI warmup and
 stops both `univer view` and `univer daemon` before the image layer is finalized.

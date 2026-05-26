@@ -15,9 +15,6 @@ from .config import RunnerConfig, RunnerError
 from .paths import output_xlsx_path, safe_task_dir_name, task_id_text, test_case_input_path
 from .prompts import build_agent_prompt, build_spreadsheet_content
 
-DOCKER_IMAGE_NAME = "spreadsheetbench-univer-cli-agent"
-
-
 @dataclass
 class DockerTaskWorkspace:
     task_id: str
@@ -205,7 +202,7 @@ def docker_command(config: RunnerConfig, workspace: DockerTaskWorkspace) -> List
         [
             "-v",
             f"{workspace.container_task_dir}:/task",
-            DOCKER_IMAGE_NAME,
+            config.docker_image,
             "--agent",
             config.agent,
         ]

@@ -28,6 +28,14 @@ bash scripts/build_agent_docker.sh
 docker build -t spreadsheetbench-univer-cli-agent docker/spreadsheetbench-univer-cli-agent
 ```
 
+使用本地最新版 `univer-cli` 构建 SaC 实验镜像时，使用独立镜像名：
+
+```bash
+bash scripts/build_agent_docker_from_local_univer_cli.sh \
+  --repo /Users/otime/project/univer-cli \
+  --tag spreadsheetbench-univer-cli-agent-sac
+```
+
 镜像内包含 Node/npm、bash、`univer-cli@latest`、Codex、Claude 和官方 `univer-cli` skill。基础系统包只保留脚本执行、拉取 npm/skill 所需的 bash、证书和 git。
 
 ## 认证
@@ -177,6 +185,19 @@ bash scripts/run_univer_agent_eval.sh --agent codex --limit 10 --workers 3
 ```bash
 bash scripts/run_univer_agent_eval.sh --agent codex --docker-bin docker --task-id 54513
 ```
+
+指定解题镜像：
+
+```bash
+bash scripts/run_univer_agent_eval.sh \
+  --agent codex \
+  --docker-image spreadsheetbench-univer-cli-agent-sac \
+  --run-id sac-codex-gpt-5-5-verified400-task54513-$(date +%Y%m%d-%H%M%S) \
+  --task-id 54513
+```
+
+SaC 实验 run-id 统一使用 `sac-` 前缀；如果不显式传 `--run-id`，默认
+run-id 仍按普通评测规则生成。
 
 最终输出会写到：
 

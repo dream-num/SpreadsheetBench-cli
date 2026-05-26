@@ -62,6 +62,7 @@ def discover_common_cases(dataset_path: Path, tasks: List[Dict]) -> List[int]:
 
 
 DEFAULT_DATASET = "spreadsheetbench_verified_400"
+DEFAULT_DOCKER_IMAGE = "spreadsheetbench-univer-cli-agent"
 
 
 def run_id_safe_label(value: str) -> str:
@@ -194,6 +195,7 @@ def parse_option(project_root: Path) -> argparse.Namespace:
         help="tee agent stdout/stderr to the terminal while writing agent log files",
     )
     parser.add_argument("--docker-bin", default="docker")
+    parser.add_argument("--docker-image", default=os.environ.get("DOCKER_IMAGE", DEFAULT_DOCKER_IMAGE))
     parser.add_argument("--env-file", type=Path, default=None)
     parser.add_argument("--task-id", action="append", help="task id to run; may be repeated")
     parser.add_argument("--limit", type=int, default=None)
@@ -354,6 +356,7 @@ def main(project_root: Optional[Path] = None) -> int:
         agent_timeout=opt.agent_timeout,
         stream_agent_output=stream_agent_output,
         docker_bin=opt.docker_bin,
+        docker_image=opt.docker_image,
         env_file=opt.env_file,
     )
     reset_run_dir(config)
@@ -376,7 +379,7 @@ def main(project_root: Optional[Path] = None) -> int:
         "stream_agent_output": config.stream_agent_output,
         "workers": opt.workers,
         "docker_bin": config.docker_bin,
-        "docker_image": "spreadsheetbench-univer-cli-agent",
+        "docker_image": config.docker_image,
         "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
         "env_file": str(config.env_file) if config.env_file else None,
         "started_at": datetime.datetime.now().isoformat(timespec="seconds"),

@@ -19,6 +19,7 @@ class RunnerConfig:
     agent_timeout: int = 300
     stream_agent_output: bool = False
     docker_bin: str = "docker"
+    docker_image: str = "spreadsheetbench-univer-cli-agent"
     env_file: Optional[Path] = None
 
     def __post_init__(self):

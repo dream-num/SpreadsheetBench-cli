@@ -111,9 +111,15 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertEqual(opt.workers, 5)
         self.assertEqual(opt.agent_timeout, 300)
         self.assertEqual(opt.dataset, "spreadsheetbench_verified_400")
-        self.assertFalse(hasattr(opt, "docker_image"))
+        self.assertEqual(opt.docker_image, "spreadsheetbench-univer-cli-agent")
         self.assertEqual(opt.docker_bin, "docker")
         self.assertIsNone(opt.env_file)
+
+    def test_parse_option_accepts_custom_docker_image(self):
+        with patch.object(sys, "argv", ["prog", "--docker-image", "spreadsheetbench-univer-cli-agent-sac"]):
+            opt = parse_option(Path.cwd())
+
+        self.assertEqual(opt.docker_image, "spreadsheetbench-univer-cli-agent-sac")
 
     def test_parse_option_generates_run_id_from_agent_dataset_and_limit(self):
         fake_now = datetime.datetime(2026, 5, 21, 14, 30, 0)
@@ -431,7 +437,29 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertEqual(args[args.index("--name") + 1], "spreadsheetbench-cli-claude-smoke-20260521-1930-cf-8830")
             self.assertIn("spreadsheetbench-univer-cli-agent", args)
 
-    def test_run_task_mounts_codex_files_from_env_file_read_only(self):
+    def test_docker_command_uses_configured_docker_image(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
+            config = self.make_config(
+                tmp_path,
+                dataset_path,
+                docker_image="spreadsheetbench-univer-cli-agent-sac",
+            )
+            with patch(
+                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
+                side_effect=self.fake_import_xlsx_to_univer,
+            ):
+                workspace = prepare_docker_task_workspace(config, task, [1])
+
+            from inference.univer_agent.docker_runner import docker_command
+
+            args = docker_command(config, workspace)
+
+            self.assertIn("spreadsheetbench-univer-cli-agent-sac", args)
+            self.assertNotIn("spreadsheetbench-univer-cli-agent", args)
+
+    def test_run_task_mounts_codex_auth_json_from_env_file_read_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
