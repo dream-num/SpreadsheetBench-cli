@@ -23,6 +23,7 @@
   2. 查 `task/logs/docker.output.txt`、`docker.stderr.txt`、`docker.timing.json`。
   3. 对比 output 与 golden 在 `answer_position` 内的差异；必要时同时检查值、公式、数字格式、样式、空白行和工作表结构。
   4. 判断失败类型：理解错误、范围/边界错误、值类型或格式错误、工具链错误、超时/网络问题。
+- 当前 `evaluation/evaluation.py` 的正式判分逻辑使用 `openpyxl.load_workbook(..., data_only=True)` 读取 output 和 golden，然后只比较 `answer_position` 内的 `cell.value`；公式文本、样式、填充色和字体色默认不参与判分（颜色比较代码是注释状态）。分析错题时必须先按这个逻辑复现评测结果；如果 output 与 golden 的 `data_only=True` 值一致但评测仍 FAIL，应优先检查 `answer_position` 解析、sheet 名、不可见字符（例如 NBSP `\u00A0`）、范围格式、文件路径和 openpyxl 读取异常，不要仅因公式或样式差异就归因为 agent 输出错误。
 - 逐题详细分析时，每次只分析一道题，并明确区分问题归因：agent 自身题意理解/推理/验证问题，`univer-cli` 命令或 API 问题，skill 指引问题，prompt/runner/评测流程问题，或数据/题目歧义等其它问题。
 - 逐题分析必须写出 agent 操作时的卡点：是否有命令误用、失败重试、API 探测、硬编码范围、排序/截断前后顺序风险、验证不足、耗时异常、或接近违反 `answer_position`/文件访问约束的行为。
 - 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：优先用 `openpyxl` 直接读取 output 和 golden 的 `.xlsx`，检查 `answer_position` 内的值、公式、数字格式、样式、空白区、工作表结构、排序、截断、导出结果或范围外污染；只有需要 Univer 可见状态或 CLI 行为对照时，再把 `.xlsx` 临时导入为 `.univer` 辅助检查。
