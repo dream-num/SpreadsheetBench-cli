@@ -50,6 +50,7 @@
 | https://github.com/dream-num/univer-cli/issues/296 | `FILTER` 动态数组公式导出后，Excel 修复并删除公式，spill 缓存值丢失。 | `220-7665`, `323-54085`, `340-56378`, `387-58499`；相关现象：`328-54667`, `399-59884`。`130-33722` 已在 2026-05-25 当前镜像单题重跑通过，不再按该 issue 归类。 | `issue/296-filter-dynamic-array-export-excel-repair.md` |
 | https://github.com/dream-num/univer-cli/issues/297 | `import/export` roundtrip 后 `styles.xml` 出现空 `<fill/>`，导致 `openpyxl` 无法读取导出 xlsx。 | `193-51090`, `215-3911`, `258-35742`, `315-52541`, `332-55060`, `384-57989` 等。 | `issue/297-empty-fill-openpyxl-roundtrip.md`；复现包在 `debug/univer-empty-fill-openpyxl-repro.zip`。 |
 | https://github.com/dream-num/univer-cli/issues/320 | `import/export` roundtrip 后 worksheet `sheetData` 丢失所有 cell 节点，导出文件工作表内容为空。 | `41978`。 | `issue/41978-empty-sheetdata-export-roundtrip.md`；本地复现包在 `debug/41978-empty-sheetdata-export-repro/`。 |
+| https://github.com/dream-num/univer-cli/issues/324 | `import` 后公式单元格 `Sheet1!C3` 计算值错误；原始文件在 Excel/WPS 中显示 `16/01/2009`，导入 `.univer` 后同一公式单元格值为空。 | `33157`。 | `issue/33157-import-formula-c3-calculation-wrong.md`；复现包在 `debug/33157-import-formula-cache-date-loss.zip`。 |
 
 ### 未调查 / 未记录错题查询
 
