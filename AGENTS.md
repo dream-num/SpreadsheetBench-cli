@@ -18,6 +18,7 @@
 - 先看 `.runs/univer-agent/<run-id>/summary.json`：确认任务数、`ok/error/timeout`、耗时最高的任务。
 - 再看 `report/<run-id>.json` 和 `outputs/eval_*<run-id>.json`：统计准确率、失败 case、超时 case。
 - 根目录 `wrong-report-matrix.univer` 用来累计记录不同报告中的错题稳定性；以后只更新这个 `.univer` 文件，不保留配套 `.xlsx`。每个 sheet 按 `<agent>-<model>-<题集>` 命名，例如 `codex-gpt-5.5-verified400`；第 1 行是表头，第 2 行固定为错题数统计行：`A2` 写 `错题数`，各报告列使用 `COUNTIF(<报告列>3:<报告列>1000,"FAIL")` 统计该列失败数；task 数据从第 3 行开始。行只保留至少在该 sheet 任一报告中失败过一次的 task；基础列固定为 `task_id`、`备注`，后面每个报告一列。报告列名使用简短 run-id：在不丢失辨识度的前提下去掉已由 sheet 名表达的 agent/model/题集公共前缀，例如 `codex-gpt-5-5-verified400-all-20260525-153934` 在 `codex-gpt-5.5-verified400` sheet 中记为 `20260525-153934`。报告列按时间从左到右追加。通过的单元格留空，失败、超时、缺评测项或空 `test_case_results` 写 `FAIL`。新增全量报告后，应根据 `outputs/eval_*<run-id>.json` 在对应 agent/model/题集 sheet 末尾追加一列，并在第 2 行补充该报告列的 `COUNTIF` 公式；如果出现新的错题，需要在该 sheet 第 3 行及之后追加新行。不要添加题目序号列、`classification` 列或 summary sheet；稳定过、稳定错、偶发错通过横向查看空白/`FAIL` 判断。
+- 用户说“错题表上所有错题”或“错题表所有错题”时，指对应 sheet 第 3 行以后所有有 `task_id` 的历史失败 task，也就是任一报告列曾经出现过 `FAIL` 的行；这不是最新报告仍失败的数量。用户说“错题表最新错题”或“当前最新错题”时，指对应 sheet 最右侧最新报告列为 `FAIL` 的 task，数量以该列第 2 行 `COUNTIF` 统计为准。用户说“错题表未调查题目”或“未调查候选”时，指“错题表上所有错题”中 `备注` 列为空的 task，不要求最新报告列仍为 `FAIL`；已有备注的问题不要重复算未调查，如果新 run 出现不同失败形态，需要明确说明和备注列已知问题的差异。
 - 对失败或超时 case，按以下顺序定位原因：
   1. 读该 case 的 `task/prompt.md`，确认 `answer_position` 和任务要求。
   2. 查 `task/logs/docker.output.txt`、`docker.stderr.txt`、`docker.timing.json`。
@@ -39,7 +40,7 @@
 
 需要找当前最新错题、稳定错题、偶发错题或未调查候选时，优先用 `univer inspect workbook wrong-report-matrix.univer` 确认 sheet 和 used range，再用 `univer pipe out wrong-report-matrix.univer --range '<sheet>!A1:ZZ1000' --format tsv` 或 `univer inspect range` 读取可见表格。
 
-判断“未调查 / 未记录”时，以 `.univer` 中对应 sheet 的最新报告列为准：该列为 `FAIL`，且 `备注` 列没有已知问题或 issue 归因的 task，才作为新的逐题分析候选。已知问题不要重复归因给 agent；如果新 run 中同一 task 出现不同失败形态，需要明确说明“不同于备注列已知问题”的新证据。
+判断“未调查 / 未记录”时，以 `.univer` 中对应 sheet 的历史失败 task 行为准：第 3 行以后有 `task_id`，且 `备注` 列为空的 task，才作为新的逐题分析候选；不要求最新报告列仍为 `FAIL`。已有备注的问题不要重复归因给 agent；如果新 run 中同一 task 出现不同失败形态，需要明确说明“不同于备注列已知问题”的新证据。
 
 ## 修复与实验原则
 

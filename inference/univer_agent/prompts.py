@@ -100,7 +100,8 @@ Rules:
   9. If `p` rich text exists, it controls the displayed content even when `v` is also set. Use the rich text builder APIs for rich text tasks and verify `p` with `getCellDatas()`.
   10. Do not hand-author `si` formula ids. Preserve `si` only when deep-cloning existing formula cells with `getCellDatas()`; for new formulas use `f` or `setFormula()`.
   11. Hard requirement for row copy/extract/move tasks: if the instruction says to copy, extract, move, maintain formatting, preserve formatting, keep date formatting, or keep number formatting, do NOT use `getValues()`/`getDisplayValues()` -> `setValues()` for the copied cells. Use `getCellDatas()` with a deep clone, or explicitly write complete `ICellData` models for dates/numbers/formulas/formats. Verify at least one copied date/number/formula cell by raw value and type/model, not just by display text.
-  12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
+  12. `setValues()` merges object cell data into existing cells. Passing `{{}}` or style-only objects such as `{{ s: ... }}` does not clear old values, formulas, rich text, or custom data. When replacing a range, call `clearContent()` first, then write the new rectangular values with `setValues()`. To clear individual cells through `setValues()`, use explicit null content fields such as `{{ v: null, f: null, p: null, si: null, custom: null }}`.
+  13. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
 - Create the required `output.xlsx` for every case. These files are the final deliverables.
 - Keep temporary scripts and intermediates under `/task/work/`.
 - Solve every case independently. Keep unrelated cells unchanged, but do not let `answer_position` suppress explicit instruction requirements.
