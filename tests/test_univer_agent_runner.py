@@ -19,7 +19,7 @@ from inference.univer_agent import RunnerConfig, output_xlsx_path, run_task, tes
 from inference.univer_agent import cli
 from inference.univer_agent.agents import resolve_stream_agent_output
 from inference.univer_agent.cli import env_file_model, parse_option, reset_run_dir
-from inference.univer_agent.docker_runner import prepare_docker_task_workspace, run_task_container
+from inference.univer_agent.docker_runner import import_xlsx_to_univer, prepare_docker_task_workspace, run_task_container
 
 
 def load_report_module():
@@ -101,8 +101,35 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         return FakeProcess()
 
-    def fake_import_xlsx_to_univer(self, input_path, output_path):
+    def fake_import_xlsx_to_univer(self, _config, input_path, output_path):
         output_path.write_text(f"imported {input_path.name}", encoding="utf-8")
+
+    def test_pre_import_uses_solver_docker_image_univer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path = tmp_path / "data"
+            config = self.make_config(tmp_path, dataset_path, docker_bin="docker-test")
+            input_path = tmp_path / "case" / "input.xlsx"
+            output_path = tmp_path / "case" / "input.univer"
+            input_path.parent.mkdir()
+            input_path.write_bytes(b"xlsx")
+            captured_args = {}
+
+            def fake_run(args, capture_output, text):
+                captured_args["args"] = args
+                output_path.write_text("imported", encoding="utf-8")
+                return subprocess.CompletedProcess(args, 0, "", "")
+
+            with patch("inference.univer_agent.docker_runner.subprocess.run", side_effect=fake_run):
+                import_xlsx_to_univer(config, input_path, output_path)
+
+            args = captured_args["args"]
+            self.assertEqual(args[0], "docker-test")
+            self.assertIn("--entrypoint", args)
+            self.assertEqual(args[args.index("--entrypoint") + 1], "univer")
+            self.assertIn("spreadsheetbench-univer-cli-agent", args)
+            self.assertEqual(args[-3:], ["import", "/work/input.xlsx", "/work/input.univer"])
+            self.assertNotEqual(args[0], "univer")
 
     def test_parse_option_defaults_to_five_workers(self):
         with patch.object(sys, "argv", ["prog"]):

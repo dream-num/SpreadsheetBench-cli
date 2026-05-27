@@ -34,9 +34,23 @@ def remove_existing_path(path: Path) -> None:
         path.unlink()
 
 
-def import_xlsx_to_univer(input_path: Path, output_path: Path) -> None:
+def import_xlsx_to_univer(config: RunnerConfig, input_path: Path, output_path: Path) -> None:
+    if input_path.parent != output_path.parent:
+        raise RunnerError("Pre-import input and output must be in the same task case directory")
     result = subprocess.run(
-        ["univer", "import", str(input_path), str(output_path)],
+        [
+            config.docker_bin,
+            "run",
+            "--rm",
+            "-v",
+            f"{input_path.parent}:/work",
+            "--entrypoint",
+            "univer",
+            DOCKER_IMAGE_NAME,
+            "import",
+            f"/work/{input_path.name}",
+            f"/work/{output_path.name}",
+        ],
         capture_output=True,
         text=True,
     )
@@ -75,7 +89,7 @@ def prepare_docker_task_workspace(
         output_dir.mkdir(parents=True, exist_ok=True)
         copied_input = case_dir / "input.xlsx"
         shutil.copy2(source_input, copied_input)
-        import_xlsx_to_univer(copied_input, case_dir / "input.univer")
+        import_xlsx_to_univer(config, copied_input, case_dir / "input.univer")
 
     prompt_path = container_task_dir / "prompt.md"
     prompt_path.write_text(

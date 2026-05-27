@@ -6,7 +6,7 @@
 host runner -> /task workspace -> Docker solver -> outputs/case_N/output.xlsx -> evaluation/report
 ```
 
-host runner 只负责准备 `/task`、把 `input.xlsx` 预导入为 `input.univer`、收集输出和执行评测；解题、修改 workbook、导出 `output.xlsx` 都在 Docker solver 内完成。为对标 main 分支的 SpreadsheetBench prompt 口径，host runner 会从 case 1 input workbook 读取前几行生成 `spreadsheet_content`，并把 dataset 中的 `answer_position` 放进 prompt。`solution.js` 或其他临时脚本只属于容器内部实现细节，外部 runner 不关心。
+host runner 只负责准备 `/task`、通过 Docker solver image 内的 `univer import` 把 `input.xlsx` 预导入为 `input.univer`、收集输出和执行评测；解题、修改 workbook、导出 `output.xlsx` 都在 Docker solver 内完成。为对标 main 分支的 SpreadsheetBench prompt 口径，host runner 会从 case 1 input workbook 读取前几行生成 `spreadsheet_content`，并把 dataset 中的 `answer_position` 放进 prompt。`solution.js` 或其他临时脚本只属于容器内部实现细节，外部 runner 不关心。
 
 ## 构建解题镜像
 
@@ -186,7 +186,7 @@ data/<dataset>/outputs/univer_agent_<model>/
 
 ## Task Workspace
 
-host runner 为每个 task 创建独立目录：
+host runner 为每个 task 创建独立目录，并用 solver Docker image 预导入每个 case 的 `input.univer`：
 
 ```text
 .runs/univer-agent/<run-id>/<task-id>/task/
