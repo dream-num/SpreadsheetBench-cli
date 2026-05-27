@@ -361,7 +361,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("You are a spreadsheet expert helping a user complete a workbook editing request", prompt_text)
             self.assertIn("Request id: task-1", prompt_text)
             self.assertNotIn("SpreadsheetBench", prompt_text)
-            self.assertNotIn("benchmark", prompt_text.lower())
+            self.assertIn("Benchmark evaluation contract:", prompt_text)
+            self.assertNotIn("golden", prompt_text.lower())
+            self.assertNotIn("answer.xlsx", prompt_text)
             self.assertNotIn("host checks", prompt_text)
             self.assertNotIn("pre-imported workbook", prompt_text)
             self.assertNotIn("xlsx` inputs have already been imported to `.univer", prompt_text)
@@ -433,6 +435,26 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "Do not preserve cells immediately before answer_position as headers or examples unless the instruction explicitly says to keep them",
             prompt,
         )
+
+    def test_agent_prompt_includes_benchmark_evaluator_contract(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "task-1",
+            "instruction": "Fill the requested output range.",
+            "instruction_type": "Cell-Level Manipulation",
+            "answer_position": "'Output'!A2:G15",
+        }
+
+        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Output\n")
+
+        self.assertIn("Benchmark evaluation contract:", prompt)
+        self.assertIn("answer_position` is the final evaluator inspection window", prompt)
+        self.assertIn("classify nearby workbook ranges by role before editing", prompt)
+        self.assertIn("openpyxl `data_only=True`", prompt)
+        self.assertIn("blank-versus-zero values", prompt)
+        self.assertIn("spreadsheet_content` is only a first-rows preview", prompt)
+        self.assertIn("verify representative first, middle, and last cells", prompt)
 
     def test_agent_prompt_preserves_final_source_order_for_grouped_extraction_after_sorting(self):
         from inference.univer_agent.prompts import build_agent_prompt
@@ -514,6 +536,15 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("pnpm install --prefer-offline", content)
             self.assertIn("sac-cache.univer", content)
             self.assertIn("spreadsheetbench-sac-node_modules", content)
+
+    def test_local_univer_cli_builder_can_bake_local_skills_repo(self):
+        local_builder = Path("scripts/build_agent_docker_from_local_univer_cli.sh").read_text(encoding="utf-8")
+
+        self.assertIn("--skills-repo", local_builder)
+        self.assertIn("../skills", local_builder)
+        self.assertIn("local-skills/skills", local_builder)
+        self.assertIn("/home/node/.codex/skills/", local_builder)
+        self.assertIn("/home/node/.claude/skills/", local_builder)
 
     def test_agent_entrypoint_seeds_sac_node_modules_before_agent_runs(self):
         run_task_script = Path("docker/spreadsheetbench-univer-cli-agent/run-task.sh").read_text(encoding="utf-8")

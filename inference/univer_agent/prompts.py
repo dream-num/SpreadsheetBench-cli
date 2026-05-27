@@ -39,6 +39,12 @@ Request id: {task_id}
 ### output_path
 {output_lines}
 
+Benchmark evaluation contract:
+- `answer_position` is the final evaluator inspection window. Treat it as the primary target/check range, but still classify nearby workbook ranges by role before editing: source data, target output, example/demo result, helper/control input, lookup/reference table, existing output, or preserve-only area.
+- The evaluator compares stored cell values from the final `.xlsx` with openpyxl `data_only=True`. A numeric value plus number format is not the same as a required text value; exact text, casing, whitespace, abbreviations, blank-versus-zero values, and text-versus-number values matter when they are workbook-visible.
+- `spreadsheet_content` is only a first-rows preview. Inspect the prepared SaC workspace and workbook-visible evidence before deciding source ranges, target ranges, formulas, and boundary cases.
+- For large `answer_position` ranges, verify representative first, middle, and last cells plus boundary rows, blank-versus-zero cases, exact text, and any helper/example ranges that should remain unchanged.
+
 Rules:
 - Load the `univer-spreadsheet-tdd` skill before inspecting or editing any workbook.
 - Only use files under /task.
