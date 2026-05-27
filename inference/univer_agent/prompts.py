@@ -1,7 +1,4 @@
-from pathlib import Path
 from typing import Dict, Iterable, Optional
-
-from openpyxl import load_workbook
 
 from .paths import task_id_text
 
@@ -14,7 +11,6 @@ The user provided one or more workbook cases. For each case, edit the workbook a
 The request contains these types of information:
 - instruction: The user's workbook editing request.
 - spreadsheet_path: The path of the pre-imported workbook files you need to manipulate.
-- spreadsheet_content: The first few rows of the content of the first input spreadsheet file.
 - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
 - answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
 - output_path: You need to generate modified spreadsheet files at these paths.
@@ -26,9 +22,6 @@ Request id: {task_id}
 
 ### spreadsheet_path
 {case_lines}
-
-### spreadsheet_content
-{spreadsheet_content}
 
 ### instruction_type
 {instruction_type}
@@ -102,27 +95,9 @@ Rules:
 """
 
 
-def build_spreadsheet_content(input_file: Path, max_rows: int = 5) -> str:
-    workbook = load_workbook(input_file, data_only=False, read_only=True)
-    sections = []
-    for sheet in workbook.worksheets:
-        rows = []
-        for row in sheet.iter_rows(max_row=max_rows, values_only=True):
-            rows.append("\t".join("" if value is None else str(value) for value in row))
-        sections.append(
-            "Sheet Name: " + sheet.title + "\n"
-            + "\n".join(rows)
-            + "\n"
-            + "-" * 50
-        )
-    workbook.close()
-    return "\n".join(sections)
-
-
 def build_agent_prompt(
     task: Dict,
     cases: Optional[Iterable[int]] = None,
-    spreadsheet_content: str = "",
 ) -> str:
     case_list = list(cases or [1])
     case_lines = "\n".join(
@@ -138,7 +113,6 @@ def build_agent_prompt(
         instruction=task.get("instruction", ""),
         instruction_type=task.get("instruction_type", ""),
         answer_position=task.get("answer_position", ""),
-        spreadsheet_content=spreadsheet_content,
         case_lines=case_lines,
         output_lines=output_lines,
     )

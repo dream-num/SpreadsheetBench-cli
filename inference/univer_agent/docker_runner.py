@@ -13,7 +13,7 @@ from typing import Dict, Iterable, List, Optional
 
 from .config import RunnerConfig, RunnerError
 from .paths import output_xlsx_path, safe_task_dir_name, task_id_text, test_case_input_path
-from .prompts import build_agent_prompt, build_spreadsheet_content
+from .prompts import build_agent_prompt
 
 DOCKER_IMAGE_NAME = "spreadsheetbench-univer-cli-agent"
 
@@ -65,13 +65,10 @@ def prepare_docker_task_workspace(
     (container_task_dir / "logs").mkdir(parents=True, exist_ok=True)
     (container_task_dir / "work").mkdir(parents=True, exist_ok=True)
 
-    first_input: Optional[Path] = None
     for case_index in case_list:
         source_input = test_case_input_path(config.dataset_path, task, case_index)
         if not source_input.is_file():
             raise RunnerError(f"Input file not found: {source_input}")
-        if first_input is None:
-            first_input = source_input
         case_dir = container_task_dir / "cases" / f"case_{case_index}"
         output_dir = container_task_dir / "outputs" / f"case_{case_index}"
         case_dir.mkdir(parents=True, exist_ok=True)
@@ -81,9 +78,8 @@ def prepare_docker_task_workspace(
         import_xlsx_to_univer(copied_input, case_dir / "input.univer")
 
     prompt_path = container_task_dir / "prompt.md"
-    spreadsheet_content = build_spreadsheet_content(first_input) if first_input else ""
     prompt_path.write_text(
-        build_agent_prompt(task, case_list, spreadsheet_content=spreadsheet_content),
+        build_agent_prompt(task, case_list),
         encoding="utf-8",
     )
 
