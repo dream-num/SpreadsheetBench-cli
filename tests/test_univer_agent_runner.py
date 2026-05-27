@@ -379,6 +379,89 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertFalse((task_root / "workbook_context.md").exists())
             self.assertEqual(test_case_input_path(dataset_path, task, 1).name, "1_task-1_input.xlsx")
 
+    def test_agent_prompt_requires_spreadsheet_tdd_skill_and_verify_gate(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "task-1",
+            "instruction": "Fill B2.",
+            "instruction_type": "Cell-Level Manipulation",
+            "answer_position": "Sheet1!B2",
+        }
+
+        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\nA\n")
+
+        self.assertIn("skill: univer-spreadsheet-tdd", prompt)
+        self.assertNotIn("skill: univer-cli", prompt)
+        self.assertIn("assertions.ts", prompt)
+        self.assertIn("univer sac verify <workspace> --json", prompt)
+        self.assertIn("status `passed`", prompt)
+        self.assertIn("Follow the `univer-spreadsheet-tdd` operating contract", prompt)
+        self.assertIn("derive `assertions.ts` from the instruction and workbook evidence", prompt)
+        self.assertIn("cover explicit workbook-visible effects and boundaries", prompt)
+        self.assertIn("non-skipped `univer sac verify <workspace> --json` report", prompt)
+
+    def test_agent_prompt_does_not_let_answer_position_override_explicit_instruction(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "118-50",
+            "instruction": (
+                "Sort the names in column A in alphabetical order. "
+                "Paste matched word pairs at columns C and D. "
+                "Do not add any extra headings or formatting to Sheet1."
+            ),
+            "instruction_type": "Sheet-Level Manipulation",
+            "answer_position": "'Sheet1'!C2:D5000",
+        }
+
+        prompt = build_agent_prompt(
+            task,
+            [1],
+            spreadsheet_content="Sheet Name: Sheet1\nAROINTED\t\tEARTHPEA\tHEARTPEA\n",
+        )
+
+        self.assertIn(
+            "answer_position` as an inspection/fill window, not an override of explicit instruction requirements",
+            prompt,
+        )
+        self.assertIn(
+            "sort column A even if answer_position only names C:D",
+            prompt,
+        )
+        self.assertIn(
+            "Do not preserve cells immediately before answer_position as headers or examples unless the instruction explicitly says to keep them",
+            prompt,
+        )
+
+    def test_agent_prompt_preserves_final_source_order_for_grouped_extraction_after_sorting(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "task-1",
+            "instruction": (
+                "Sort the names in column A in alphabetical order. "
+                "Group matching results by suffix and paste transformed words in column C with originals in column D."
+            ),
+            "instruction_type": "Sheet-Level Manipulation",
+            "answer_position": "'Sheet1'!C:D",
+        }
+
+        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\n")
+
+        self.assertIn(
+            "When an instruction combines sorting a source range with grouped or filtered extraction",
+            prompt,
+        )
+        self.assertIn(
+            "derive each group's output order from the final sorted source order unless the instruction names a separate intra-group sort key",
+            prompt,
+        )
+        self.assertIn(
+            "Do not independently sort computed output values such as transformed words unless explicitly requested",
+            prompt,
+        )
+
     def test_prepare_sac_workspace_initializes_generated_workspace_in_container(self):
         from inference.univer_agent.docker_runner import prepare_sac_workspace
 

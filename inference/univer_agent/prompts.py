@@ -7,7 +7,7 @@ from .paths import task_id_text
 
 
 AGENT_PROMPT_TEMPLATE = """You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
-Before any workbook command, load the official `univer-cli` skill with the Skill tool: `skill: univer-cli`, then use the installed `univer` CLI.
+Before any workbook command, load the official `univer-spreadsheet-tdd` skill with the Skill tool: `skill: univer-spreadsheet-tdd`, then use the installed `univer` CLI.
 
 The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
 
@@ -16,7 +16,7 @@ The request contains these types of information:
 - spreadsheet_path: The path of the prepared SaC workspace and managed artifact you need to manipulate.
 - spreadsheet_content: The first few rows of the content of the first input spreadsheet file. Use this only as a quick preview, not as the complete data source.
 - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
-- answer_position: The position that needs to be modified or filled. For Cell-Level Manipulation questions, this field is the cell position; for Sheet-Level Manipulation, it is the maximum range of cells you need to modify. Only modify or fill values within the range specified by answer_position.
+- answer_position: An inspection/fill window for the expected answer. Use it to locate the expected output area, but do not let it override explicit workbook-visible requirements in the instruction.
 - output_path: You need to generate modified spreadsheet files at these paths.
 
 Request id: {task_id}
@@ -40,20 +40,25 @@ Request id: {task_id}
 {output_lines}
 
 Rules:
-- Load the `univer-cli` skill before inspecting or editing any workbook.
+- Load the `univer-spreadsheet-tdd` skill before inspecting or editing any workbook.
 - Only use files under /task.
-- You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
+- You must use only the installed `univer` CLI and public `univer-spreadsheet-tdd` skill workflow for workbook reads, edits, verification, and export.
 - The `.xlsx` inputs have already been converted by the runner into prepared SaC workspaces. Treat the listed `/task/cases/case_N/sac` paths as the only source workspaces for solving.
 - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. Do not treat `/task/cases/case_N/input.univer` as the solving input source; it is only a runner intermediate used to initialize the SaC workspace.
 - You MUST use the experimental Spreadsheet as Code workflow for workbook mutations. The container image already enables experimental SaC; do not run `univer config set experimental.sac true` during task solving. Read `univer help sac workflow`, `univer help sac authoring`, `univer help sac apply-ledger`, and any relevant `univer help run <topic>` before authoring migrations.
-- Do not run `univer sac init --from` again. For each case, use the existing SaC workspace under `/task/cases/case_N/sac`; the container entrypoint has already preseeded Linux-compatible `node_modules` for that workspace. Do not run `pnpm install` during normal solving. Only if a SaC command fails because dependencies are missing or invalid, run `CI=true pnpm install --prefer-offline` inside the workspace, then retry the same SaC command. Inspect the workspace's `materialize-current` migration source when you need workbook contents, create one focused migration with `univer sac migration create "<short task title>" --workspace /task/cases/case_N/sac`, edit the generated migration source to perform the requested workbook change, then run `univer sac apply /task/cases/case_N/sac`. Verify the SaC-managed artifact at `/task/cases/case_N/sac/artifacts/sac.univer` with workbook-visible reads, then export that artifact to the required output path.
+- Do not run `univer sac init --from` again. For each case, use the existing SaC workspace under `/task/cases/case_N/sac`; the container entrypoint has already preseeded Linux-compatible `node_modules` for that workspace. Do not run `pnpm install` during normal solving. Only if a SaC command fails because dependencies are missing or invalid, run `CI=true pnpm install --prefer-offline` inside the workspace, then retry the same SaC command.
+- Follow the `univer-spreadsheet-tdd` operating contract: treat `migrations/` as source, create focused migrations for non-trivial changes, derive `assertions.ts` from the instruction and workbook evidence, cover explicit workbook-visible effects and boundaries, and require a non-skipped `univer sac verify <workspace> --json` report with passed assertions before export.
+- If a workbook-visible requirement cannot be expressed with the documented SaC assertion helpers, keep supported assertions in `assertions.ts`, then add a read-only `univer run` probe after passed verify and record the evidence before export.
+- Export the SaC-managed artifact only after verification status `passed`. For a truly no-op task where no mutation is required, write the reason to `/task/work/verification-notes.md`, verify the artifact with read-only workbook-visible checks, then export.
+- Treat `answer_position` as an inspection/fill window, not an override of explicit instruction requirements. When the instruction explicitly asks for workbook-visible changes outside that window, perform and verify them; for example, sort column A even if answer_position only names C:D, or update helper/source columns when the instruction expressly requires it.
+- Use `answer_position` to constrain ambiguous output placement and avoid unrelated edits, but derive the final output start from the instruction, baseline workbook evidence, and final layout. Do not preserve cells immediately before answer_position as headers or examples unless the instruction explicitly says to keep them.
 - Do not use direct `univer run`, `pipe in`, manual package edits, or any other non-SaC path to mutate the final workbook. `univer run` is allowed only for read-only verification scripts after a successful `univer sac apply`.
 - If `univer sac apply` fails, read the error and the relevant SaC help, then fix the migration source or workspace configuration and retry. Do not fall back to direct workbook edits.
 - If SaC cannot produce a workbook artifact, fail the task rather than creating `output.xlsx` through direct workbook mutation.
 - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
-- Carefully read the full instruction before editing. Complete only the requested workbook effect, only modify cells inside `answer_position`, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
+- Carefully read the full instruction before editing. Complete only the requested workbook effect, prefer keeping value edits inside `answer_position` when the instruction is ambiguous, and do not add extra calculations, helper outputs, summaries, columns, rows, sheets, formatting, formulas, or cleanup unless the instruction explicitly asks for them or they are strictly required to produce the requested result.
 - If the instruction involves inserting or deleting rows or columns, adding section/header rows, moving a table, transposing data, or otherwise changing worksheet structure, first reason about the final workbook layout before interpreting `answer_position`. Treat `answer_position` as the range to verify and fill in the final workbook state, not necessarily as fixed coordinates in the original workbook. Re-evaluate whether headers, date rows, source ranges, or target ranges shift after the structural operation. Only write outside `answer_position` when the instruction explicitly requires a structural change; otherwise keep final value edits within `answer_position`.
-- For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. Keep the plan concise, then execute it.
+- For complex tasks involving sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, first write a short implementation plan for yourself before editing. The plan must identify the source range, target range, row/column mapping, ordering or matching rules, formulas or value types to preserve, and verification checks. When an instruction combines sorting a source range with grouped or filtered extraction, sort the source range first in the final-layout model, then derive each group's output order from the final sorted source order unless the instruction names a separate intra-group sort key. Do not independently sort computed output values such as transformed words unless explicitly requested. Keep the plan concise, then execute it.
 - For tasks involving structural changes or data reshaping, verify at least three mappings after the final layout is determined: the first target cell, one middle target cell, and the last target cell. For each mapping, confirm the source coordinate, final target coordinate, and semantic key such as date, header, category, or identifier.
 - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
 - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
@@ -98,7 +103,7 @@ Rules:
   12. To clear cells, use `clearContent()` for contents only or `clear()` for contents plus formatting. Do not use `setValue(null)`.
 - Create the required `output.xlsx` for every case. These files are the final deliverables.
 - Keep temporary scripts and intermediates under `/task/work/`.
-- Solve every case independently and only modify cells within `answer_position`.
+- Solve every case independently. Keep unrelated cells unchanged, but do not let `answer_position` suppress explicit instruction requirements.
 - If the instruction asks for VBA or a macro, implement the described workbook effect directly in the spreadsheet and export the resulting workbook. Do not place VBA code in cells unless the request explicitly asks to store code text in cells.
 """
 
