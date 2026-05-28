@@ -83,7 +83,10 @@ fi
 
 USE_LOCAL_SKILLS=0
 if [ -d "$LOCAL_SKILLS_REPO" ]; then
-    if [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-cli/SKILL.md" ] || [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-spreadsheet-tdd/SKILL.md" ]; then
+    if [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-cli/SKILL.md" ] ||
+        [ ! -f "$LOCAL_SKILLS_REPO/skills/use-univer-cli/SKILL.md" ] ||
+        [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-plan/SKILL.md" ] ||
+        [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-tdd/SKILL.md" ]; then
         echo "local skills repo is missing expected Univer skills: $LOCAL_SKILLS_REPO" >&2
         exit 2
     fi

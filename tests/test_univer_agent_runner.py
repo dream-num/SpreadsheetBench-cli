@@ -393,12 +393,14 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\nA\n")
 
-        self.assertIn("skill: univer-spreadsheet-tdd", prompt)
-        self.assertNotIn("skill: univer-cli", prompt)
+        self.assertIn("skill: use-univer-cli", prompt)
+        self.assertIn("load `univer-plan` before editing migration source", prompt)
+        self.assertIn("`univer-tdd` before writing assertions or running verification", prompt)
+        self.assertNotIn("skill: univer-spreadsheet-tdd", prompt)
         self.assertIn("assertions.ts", prompt)
         self.assertIn("univer sac verify <workspace> --json", prompt)
         self.assertIn("status `passed`", prompt)
-        self.assertIn("Follow the `univer-spreadsheet-tdd` operating contract", prompt)
+        self.assertIn("Follow the `univer-plan` and `univer-tdd` operating contracts", prompt)
         self.assertIn("derive `assertions.ts` from the instruction and workbook evidence", prompt)
         self.assertIn("cover explicit workbook-visible effects and boundaries", prompt)
         self.assertIn("non-skipped `univer sac verify <workspace> --json` report", prompt)
@@ -483,6 +485,63 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "Do not independently sort computed output values such as transformed words unless explicitly requested",
             prompt,
         )
+
+    def test_agent_prompt_requires_output_contract_for_complex_tasks(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "task-1",
+            "instruction": (
+                "Create a summary table sorted by region, preserve text labels exactly, "
+                "and calculate rolling 365-day totals."
+            ),
+            "instruction_type": "Sheet-Level Manipulation",
+            "answer_position": "'Summary'!A1:D20",
+        }
+
+        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Summary\n")
+
+        self.assertIn("write a short output contract in your implementation plan", prompt)
+        self.assertIn("final target shape", prompt)
+        self.assertIn("source-to-target mapping", prompt)
+        self.assertIn("ordering/sort precedence", prompt)
+        self.assertIn("exact text provenance", prompt)
+        self.assertIn("blank/zero/error/display-text policy", prompt)
+        self.assertIn("formula boundary cases", prompt)
+        self.assertIn("segmented table headers or example/demo ranges", prompt)
+        self.assertIn("Critical semantic gate", prompt)
+        self.assertIn("every high-risk semantic decision MUST have evidence", prompt)
+        self.assertIn("candidate interpretations", prompt)
+        self.assertIn("based only on domain intuition", prompt)
+        self.assertIn("Assertions must cover at least one cell for each non-obvious output-contract decision", prompt)
+
+    def test_agent_prompt_requires_discriminating_evidence_for_ambiguous_mapping(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "task-1",
+            "instruction": (
+                "Split signed amounts from column C into Debits and Credits columns "
+                "using absolute values."
+            ),
+            "instruction_type": "Sheet-Level Manipulation",
+            "answer_position": "'Sheet1'!H1:I10",
+        }
+
+        prompt = build_agent_prompt(
+            task,
+            [1],
+            spreadsheet_content="Sheet Name: Sheet1\nDate\tAmount\tBalance\n",
+        )
+
+        self.assertIn("Evidence must be discriminating evidence", prompt)
+        self.assertIn("not merely be compatible with the chosen interpretation", prompt)
+        self.assertIn("Separate observed workbook facts from semantic labels", prompt)
+        self.assertIn("adjacent balance changes", prompt)
+        self.assertIn("do not by themselves prove which target label or output column should receive", prompt)
+        self.assertIn("explicit`, `inferred`, or `underdetermined assumption", prompt)
+        self.assertIn("This is a non-interactive benchmark", prompt)
+        self.assertIn("Do not present an underdetermined assumption as workbook-proven evidence", prompt)
 
     def test_prepare_sac_workspace_initializes_generated_workspace_in_container(self):
         from inference.univer_agent.docker_runner import prepare_sac_workspace
