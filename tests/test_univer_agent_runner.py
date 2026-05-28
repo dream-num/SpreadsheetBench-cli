@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from openpyxl import Workbook
 
-from inference.univer_agent import RunnerConfig, output_xlsx_path, run_task, test_case_input_path
+from inference.univer_agent import RunnerConfig, build_agent_prompt, output_xlsx_path, run_task, test_case_input_path
 from inference.univer_agent import cli
 from inference.univer_agent.agents import resolve_stream_agent_output
 from inference.univer_agent.cli import env_file_model, parse_option, reset_run_dir
@@ -380,6 +380,34 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertFalse((task_root / "cases" / "case_1" / "1_task-1_answer.xlsx").exists())
             self.assertFalse((task_root / "workbook_context.md").exists())
             self.assertEqual(test_case_input_path(dataset_path, task, 1).name, "1_task-1_input.xlsx")
+
+    def test_agent_prompt_documents_stable_sheet_name_api(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Fill B2.",
+                "instruction_type": "Cell-Level Manipulation",
+                "answer_position": "B2",
+            }
+        )
+
+        self.assertIn("getSheetName()", prompt)
+        self.assertIn("workbook.getSheets().map((sheet) => sheet.getSheetName())", prompt)
+        self.assertIn("Do not call `sheet.getName()`", prompt)
+
+    def test_agent_prompt_documents_supported_export_syntax(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Fill B2.",
+                "instruction_type": "Cell-Level Manipulation",
+                "answer_position": "B2",
+            }
+        )
+
+        self.assertIn("univer export <input.univer> <output.xlsx> --json", prompt)
+        self.assertIn("Do not use `--overwrite`", prompt)
+        self.assertIn("rm -f <output.xlsx>", prompt)
 
     def test_run_task_invokes_docker_with_task_mount_and_env_file_then_collects_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:

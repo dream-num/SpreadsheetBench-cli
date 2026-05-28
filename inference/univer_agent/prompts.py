@@ -39,6 +39,7 @@ Rules:
 - You must use only the installed `univer` CLI and public `univer-cli` skill workflows for workbook reads, edits, verification, and export.
 - The `.xlsx` inputs have already been imported to `.univer`; treat the listed `/task/cases/case_N/input.univer` paths as the only workbook sources for solving.
 - Do not read, copy, import, parse, inspect, or modify `/task/cases/case_N/input.xlsx` with Python, Node.js, npm packages, office libraries, zip tools, or any non-`univer` workbook tool. The final `.xlsx` must be produced by running `univer export` from the edited `.univer` workbook.
+- Export with the installed CLI syntax exactly as documented: `univer export <input.univer> <output.xlsx> --json`. Do not use `--overwrite`; this CLI does not support it. If the output file may already exist, remove it first with `rm -f <output.xlsx>`, then export.
 - Edit the listed `/task/cases/case_N/input.univer` workbook directly and export it to the required output path. Do not copy the workbook package just for routine edits.
 - If you truly need a separate workbook copy, remember `.univer` is a directory package and copy it recursively with `cp -R` or `cp -a`; never use plain `cp` on `.univer`.
 
@@ -56,6 +57,7 @@ Follow this five-stage workflow for every case. Do not skip, reorder, or collaps
 - For tasks involving structural changes or data reshaping, verify at least three mappings after the final layout is determined: the first target cell, one middle target cell, and the last target cell. For each mapping, confirm the source coordinate, final target coordinate, and semantic key such as date, header, category, or identifier.
 - Treat workbook-visible sheet names as authoritative. If the instruction mentions a sheet name that differs from the inspected workbook and `answer_position` does not explicitly include that sheet, do not rename sheets just to match the wording; complete the requested edit on the existing worksheet unless the user explicitly asks to rename, create, or delete a sheet.
 - If `answer_position` explicitly names a target sheet, that sheet name is the required output location. If the inspected workbook does not currently contain that sheet, create or otherwise ensure that sheet exists in the exported workbook before writing and verifying the target range. The workbook-visible sheet-name rule above only applies when `answer_position` does not explicitly specify a sheet.
+- In Univer run scripts, read worksheet names with `FWorksheet.getSheetName()`. To enumerate names, use `const sheetNames = workbook.getSheets().map((sheet) => sheet.getSheetName());`. Do not call `sheet.getName()` or `s.getName()`; that method is not available on `FWorksheet` and fails at runtime. For a quick workbook-level name list, prefer `univer inspect workbook` before writing a script.
 - If the instruction requires a sheet to be active at the end, use the facade API `const workbook = univerAPI.getActiveWorkbook(); workbook.setActiveSheet(sheet)` where `sheet` is an `FWorksheet`, or `workbook.setActiveSheet(sheetId)` with a sheet id. After verifying the requested `answer_position` and active sheet once, export and stop; do not repeatedly re-import/export just to probe focus state.
 
 ### Read and verification APIs
@@ -100,6 +102,7 @@ Follow this five-stage workflow for every case. Do not skip, reorder, or collaps
 
 ### Task-specific APIs
 - For background color tasks, use facade style APIs instead of guessing style internals: write with `range.setBackgroundColor('#ffff00')` or `range.setBackground('#ffff00')`, and verify with `range.getBackground()` or `range.getBackgrounds()`. Do not rely only on `getCellDatas()` / `cellData.s` to decide whether a background color succeeded.
+- Color strings passed to formatting APIs must be xlsx-safe: prefer `#RRGGBB` or `rgb(r, g, b)`. Do not pass named colors or malformed hex values. If a requested color is incomplete or ambiguous, infer a valid color only from clear context, state the assumption in `Implementation plan:` `Formatting/style:`, and verify against the normalized color.
 - For rich text or partial text highlighting, use the official rich text builder API. Example:
   ```ts
   const richText = univerAPI.newRichText()
