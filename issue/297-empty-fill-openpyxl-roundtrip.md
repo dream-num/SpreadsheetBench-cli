@@ -105,6 +105,17 @@ exported.xlsx fills 11 empty_fill 1
 - `332-55060`
 - `384-57989`
 
+## 当前复测状态
+
+截至 `2026-05-28`，错题矩阵中该 issue 关联的 6 个 task 在最近两次 codex gpt-5.5 报告中均已通过：
+
+```text
+20260527-220546: 3911 PASS, 35742 PASS, 51090 PASS, 52541 PASS, 55060 PASS, 57989 PASS
+allwrong96-exskip-w5-timeout480-20260527-232251: 3911 PASS, 35742 PASS, 51090 PASS, 52541 PASS, 55060 PASS, 57989 PASS
+```
+
+这说明当前 SpreadsheetBench agent 输出路径下这些 task 已不再因该已知现象失败；不等同于上游 import/export roundtrip 问题已经消失，若需要关闭上游 issue 仍应用最小复现包重新验证。
+
 ## 附件状态
 
 本地已准备复现包：

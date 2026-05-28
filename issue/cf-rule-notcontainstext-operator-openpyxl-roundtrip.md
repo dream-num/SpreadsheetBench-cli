@@ -143,3 +143,16 @@ task-id: 54590
 ```text
 .runs/cli-roundtrip-ver400-openpyxl-error-keep-20260526-120117
 ```
+
+## 当前复测状态
+
+截至 `2026-05-28`，错题矩阵中 `54590` 在最近两次 codex gpt-5.5 报告中仍为失败：
+
+```text
+20260527-220546: FAIL
+allwrong96-exskip-w5-timeout480-20260527-232251: FAIL
+```
+
+最新 `allwrong96-exskip-w5-timeout480-20260527-232251` 输出已复核：`openpyxl.load_workbook(..., data_only=True)` 可以读取 output 和 golden；导出的 worksheet 没有 `operator="notContainsText"`，因此这次失败不再是本 issue 描述的非法 operator 读取失败。
+
+最新失败形态是 `GK29` 缓存值不一致：golden 为 `692.71486185`，output 为 `0`。根因记录见 `issue/54590-external-reference-formula-cache-pollution.md`。

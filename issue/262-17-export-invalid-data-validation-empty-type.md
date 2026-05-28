@@ -144,3 +144,14 @@ task-id: 262-17
 ```text
 issue/262-17-export-invalid-data-validation-empty-type.md
 ```
+
+## 当前复测状态
+
+截至 `2026-05-28`，错题矩阵中 `262-17` 在最近两次 codex gpt-5.5 报告中均已通过：
+
+```text
+20260527-220546: PASS
+allwrong96-exskip-w5-timeout480-20260527-232251: PASS
+```
+
+这说明当前 SpreadsheetBench agent 输出路径下 `262-17` 已不再因该已知现象失败；不等同于上游 export 序列化问题已经消失，若需要关闭上游 issue 仍应用最小复现包重新验证。
