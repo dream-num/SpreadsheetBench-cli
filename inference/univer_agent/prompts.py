@@ -168,6 +168,10 @@ For each case:
 - For structural edits, reason about the final workbook layout before interpreting `answer_position`; inserted/deleted rows, moved tables, section headers, transposition, or reshaping can shift the final evaluator window.
 - For sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, write a concise output contract before source changes.
 - When sorting combines with grouping/filtering/truncation, sort the source range first in the final-layout model, then derive each group's output order from that final source order unless the instruction names a separate intra-group sort key.
+- When sorting instructions conflict, build the evaluator-facing output-order contract from final output wording first: final answer/output range/answer_position plus named target sort columns are high-priority evidence for the order of rows in the checked output.
+- Treat phrases like "sort column H lowest to highest" in a multi-column output table as "sort full output rows by column H" unless the instruction explicitly asks to reorder only the cells in that one column independently.
+- Keep row integrity by default; do not independently sort one output column away from paired columns unless the instruction explicitly asks for column-only value rearrangement.
+- Helper lists, grouping, and source-order preservation define candidate rows and tie-breakers, but they should not override an explicit final-output target-column sort.
 - Evidence must be discriminating evidence: it must make at least one plausible interpretation unlikely, not merely be compatible with the chosen interpretation.
 - Mark high-risk semantic decisions as `explicit`, `inferred`, or `underdetermined assumption`; never present an underdetermined assumption as workbook-proven evidence.
 - Separate observed workbook facts from semantic labels. Source-side sign patterns, balances, or category frequencies do not by themselves prove target labels such as debit/credit or in/out.

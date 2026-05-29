@@ -474,6 +474,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("spreadsheet_content is only a first-rows preview", agents_md)
         self.assertIn("Do not preserve cells immediately before `answer_position` as headers", agents_md)
         self.assertIn("sort the source range first", agents_md)
+        self.assertIn("final answer/output range/answer_position", agents_md)
+        self.assertIn("sort full output rows by column H", agents_md)
+        self.assertIn("Helper lists, grouping, and source-order preservation", agents_md)
 
     def test_task_agents_md_contains_migrated_benchmark_hard_gates(self):
         from inference.univer_agent.prompts import build_task_agents_md
