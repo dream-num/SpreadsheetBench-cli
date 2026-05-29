@@ -7,6 +7,13 @@
 - 常用参数：`--agent`、`--agent-command`、`--dataset`、`--task-id`、`--limit`、`--workers`、`--run-id`、`--agent-timeout`、`--env-file`。详情见 `RUN.md`。
 - 沙箱中运行 `codex`、`claude` 等外部 agent 时，如遇网络、认证、DNS、模型请求或依赖下载问题，按疑似沙箱限制处理，使用提权方式重跑测试命令。
 
+## Agent Docker 镜像与 CLI
+
+- 默认使用官方发布版 `univer-cli` 构建 agent 镜像：执行 `bash scripts/build_agent_docker.sh`，该脚本使用 `docker/spreadsheetbench-univer-cli-agent/Dockerfile` 中的 `univer-cli@latest`，并生成/覆盖 tag `spreadsheetbench-univer-cli-agent`。runner 默认使用这个 tag。
+- 只有在明确需要验证本地 `/Users/otime/project/univer-cli` 仓库改动时，才使用 `bash scripts/build_agent_docker_from_local_univer_cli.sh`；该脚本会先构建本地仓库、打包 `apps/cli/dist`，再把本地 tarball 安装进同名镜像。
+- 重构建默认官方 CLI 镜像后，可用 `docker run --rm --entrypoint jq spreadsheetbench-univer-cli-agent --version` 验证镜像内 `jq` 可用；如日志出现 `jq: not found`，先重构建镜像再复测相关任务。
+- agent 镜像应包含 `jq`，用于容器内 JSON 报告、日志和 CLI 输出诊断；但仍不内置 Python 或 workbook 解析库，agent 应优先使用 Univer CLI 处理工作簿。
+
 ## 数据集
 
 - `sample_data_200`：样例数据集，200 道题。用户简写为 `sample`、`sample200`、`200` 或 `s200` 时，自动推断为该数据集。

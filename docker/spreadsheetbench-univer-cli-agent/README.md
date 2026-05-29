@@ -2,13 +2,17 @@
 
 This image is the black-box solver environment for SpreadsheetBench Univer agent runs.
 
-Build:
+Build the default image with the official published `univer-cli@latest`:
 
 ```bash
 bash scripts/build_agent_docker.sh
 ```
 
-Build with a local `/Users/otime/project/univer-cli` checkout instead of `univer-cli@latest`:
+The default image tag is `spreadsheetbench-univer-cli-agent`, which is the tag
+used by the runner.
+
+Rebuild with a local `/Users/otime/project/univer-cli` checkout only when you
+need to validate local CLI changes instead of `univer-cli@latest`:
 
 ```bash
 bash scripts/build_agent_docker_from_local_univer_cli.sh
@@ -46,3 +50,4 @@ The container must write:
 Agent configuration is provided at runtime by read-only mounts. For Codex, mount auth and config files to `/home/node/.codex/auth.json` and `/home/node/.codex/config.toml`. For Claude, mount settings to `/home/node/.claude/settings.json`. Secrets are not baked into the image and are not copied into `/task`.
 
 The image intentionally does not include Python or workbook parsing libraries. Agents should use the installed Univer CLI tooling inside `/task`.
+It does include `jq` for JSON log, report, and CLI output inspection.
