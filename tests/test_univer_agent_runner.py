@@ -359,9 +359,10 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertTrue((task_root / "prompt.md").is_file())
             prompt_text = (task_root / "prompt.md").read_text(encoding="utf-8")
             self.assertIn("You are a spreadsheet expert helping a user complete a workbook editing request", prompt_text)
+            self.assertIn("skill: benchmarking-univer-cli", prompt_text)
             self.assertIn("Request id: task-1", prompt_text)
             self.assertNotIn("SpreadsheetBench", prompt_text)
-            self.assertIn("Benchmark evaluation contract:", prompt_text)
+            self.assertIn("Benchmark task envelope:", prompt_text)
             self.assertNotIn("golden", prompt_text.lower())
             self.assertNotIn("answer.xlsx", prompt_text)
             self.assertNotIn("host checks", prompt_text)
@@ -369,10 +370,10 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertNotIn("xlsx` inputs have already been imported to `.univer", prompt_text)
             self.assertIn("/task/cases/case_1/sac: prepared SaC workspace", prompt_text)
             self.assertIn("/task/cases/case_1/sac/artifacts/sac.univer", prompt_text)
-            self.assertIn("Do not run `univer sac init --from` again", prompt_text)
-            self.assertIn("preseeded Linux-compatible `node_modules`", prompt_text)
-            self.assertIn("Do not run `pnpm install` during normal solving", prompt_text)
-            self.assertIn("CI=true pnpm install --prefer-offline", prompt_text)
+            self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt_text)
+            self.assertNotIn("Do not run `univer sac init --from` again", prompt_text)
+            self.assertNotIn("preseeded Linux-compatible `node_modules`", prompt_text)
+            self.assertNotIn("CI=true pnpm install --prefer-offline", prompt_text)
             self.assertTrue((task_root / "outputs" / "case_1").is_dir())
             self.assertTrue((task_root / "outputs" / "case_2").is_dir())
             self.assertTrue((task_root / "logs").is_dir())
@@ -393,17 +394,13 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\nA\n")
 
-        self.assertIn("skill: use-univer-cli", prompt)
-        self.assertIn("load `univer-plan` before editing migration source", prompt)
-        self.assertIn("`univer-tdd` before writing assertions or running verification", prompt)
+        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt)
+        self.assertIn("plan/assertion/verify/export discipline", prompt)
+        self.assertNotIn("skill: use-univer-cli", prompt)
+        self.assertNotIn("univer-plan", prompt)
+        self.assertNotIn("univer-tdd", prompt)
         self.assertNotIn("skill: univer-spreadsheet-tdd", prompt)
-        self.assertIn("assertions.ts", prompt)
-        self.assertIn("univer sac verify <workspace> --json", prompt)
-        self.assertIn("status `passed`", prompt)
-        self.assertIn("Follow the `univer-plan` and `univer-tdd` operating contracts", prompt)
-        self.assertIn("derive `assertions.ts` from the instruction and workbook evidence", prompt)
-        self.assertIn("cover explicit workbook-visible effects and boundaries", prompt)
-        self.assertIn("non-skipped `univer sac verify <workspace> --json` report", prompt)
 
     def test_agent_prompt_does_not_let_answer_position_override_explicit_instruction(self):
         from inference.univer_agent.prompts import build_agent_prompt
@@ -425,20 +422,23 @@ class UniverAgentRunnerTest(unittest.TestCase):
             spreadsheet_content="Sheet Name: Sheet1\nAROINTED\t\tEARTHPEA\tHEARTPEA\n",
         )
 
-        self.assertIn(
+        self.assertIn("### answer_position\n'Sheet1'!C2:D5000", prompt)
+        self.assertIn("Sort the names in column A in alphabetical order", prompt)
+        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertNotIn(
             "answer_position` as an inspection/fill window, not an override of explicit instruction requirements",
             prompt,
         )
-        self.assertIn(
+        self.assertNotIn(
             "sort column A even if answer_position only names C:D",
             prompt,
         )
-        self.assertIn(
+        self.assertNotIn(
             "Do not preserve cells immediately before answer_position as headers or examples unless the instruction explicitly says to keep them",
             prompt,
         )
 
-    def test_agent_prompt_includes_benchmark_evaluator_contract(self):
+    def test_agent_prompt_points_to_benchmark_skill_for_evaluator_contract(self):
         from inference.univer_agent.prompts import build_agent_prompt
 
         task = {
@@ -450,13 +450,14 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Output\n")
 
-        self.assertIn("Benchmark evaluation contract:", prompt)
-        self.assertIn("answer_position` is the final evaluator inspection window", prompt)
-        self.assertIn("classify nearby workbook ranges by role before editing", prompt)
-        self.assertIn("openpyxl `data_only=True`", prompt)
-        self.assertIn("blank-versus-zero values", prompt)
-        self.assertIn("spreadsheet_content` is only a first-rows preview", prompt)
-        self.assertIn("verify representative first, middle, and last cells", prompt)
+        self.assertIn("Benchmark task envelope:", prompt)
+        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("answer_position", prompt)
+        self.assertIn("'Output'!A2:G15", prompt)
+        self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt)
+        self.assertNotIn("Benchmark evaluation contract:", prompt)
+        self.assertNotIn("openpyxl `data_only=True`", prompt)
+        self.assertNotIn("verify representative first, middle, and last cells", prompt)
 
     def test_agent_prompt_preserves_final_source_order_for_grouped_extraction_after_sorting(self):
         from inference.univer_agent.prompts import build_agent_prompt
@@ -473,15 +474,17 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\n")
 
-        self.assertIn(
+        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Group matching results by suffix", prompt)
+        self.assertNotIn(
             "When an instruction combines sorting a source range with grouped or filtered extraction",
             prompt,
         )
-        self.assertIn(
+        self.assertNotIn(
             "derive each group's output order from the final sorted source order unless the instruction names a separate intra-group sort key",
             prompt,
         )
-        self.assertIn(
+        self.assertNotIn(
             "Do not independently sort computed output values such as transformed words unless explicitly requested",
             prompt,
         )
@@ -501,19 +504,16 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Summary\n")
 
-        self.assertIn("write a short output contract in your implementation plan", prompt)
-        self.assertIn("final target shape", prompt)
-        self.assertIn("source-to-target mapping", prompt)
-        self.assertIn("ordering/sort precedence", prompt)
-        self.assertIn("exact text provenance", prompt)
-        self.assertIn("blank/zero/error/display-text policy", prompt)
-        self.assertIn("formula boundary cases", prompt)
-        self.assertIn("segmented table headers or example/demo ranges", prompt)
-        self.assertIn("Critical semantic gate", prompt)
-        self.assertIn("every high-risk semantic decision MUST have evidence", prompt)
-        self.assertIn("candidate interpretations", prompt)
-        self.assertIn("based only on domain intuition", prompt)
-        self.assertIn("Assertions must cover at least one cell for each non-obvious output-contract decision", prompt)
+        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Create a summary table sorted by region", prompt)
+        self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt)
+        self.assertNotIn("write a short output contract in your implementation plan", prompt)
+        self.assertNotIn("Critical semantic gate", prompt)
+        self.assertNotIn("every high-risk semantic decision MUST have evidence", prompt)
+        self.assertNotIn(
+            "Assertions must cover at least one cell for each non-obvious output-contract decision",
+            prompt,
+        )
 
     def test_agent_prompt_requires_discriminating_evidence_for_ambiguous_mapping(self):
         from inference.univer_agent.prompts import build_agent_prompt
@@ -534,14 +534,13 @@ class UniverAgentRunnerTest(unittest.TestCase):
             spreadsheet_content="Sheet Name: Sheet1\nDate\tAmount\tBalance\n",
         )
 
-        self.assertIn("Evidence must be discriminating evidence", prompt)
-        self.assertIn("not merely be compatible with the chosen interpretation", prompt)
-        self.assertIn("Separate observed workbook facts from semantic labels", prompt)
-        self.assertIn("adjacent balance changes", prompt)
-        self.assertIn("do not by themselves prove which target label or output column should receive", prompt)
-        self.assertIn("explicit`, `inferred`, or `underdetermined assumption", prompt)
-        self.assertIn("This is a non-interactive benchmark", prompt)
-        self.assertIn("Do not present an underdetermined assumption as workbook-proven evidence", prompt)
+        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Split signed amounts from column C", prompt)
+        self.assertNotIn("Evidence must be discriminating evidence", prompt)
+        self.assertNotIn("not merely be compatible with the chosen interpretation", prompt)
+        self.assertNotIn("Separate observed workbook facts from semantic labels", prompt)
+        self.assertNotIn("explicit`, `inferred`, or `underdetermined assumption", prompt)
+        self.assertNotIn("Do not present an underdetermined assumption as workbook-proven evidence", prompt)
 
     def test_prepare_sac_workspace_initializes_generated_workspace_in_container(self):
         from inference.univer_agent.docker_runner import prepare_sac_workspace
@@ -595,15 +594,34 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("pnpm install --prefer-offline", content)
             self.assertIn("sac-cache.univer", content)
             self.assertIn("spreadsheetbench-sac-node_modules", content)
+            self.assertIn("/home/node/.univer/sac/types", content)
+            self.assertIn("/home/node/.univer/sac/toolchains", content)
+            self.assertIn("node_modules/rolldown", content)
+            self.assertIn("node_modules/.bin/tsgo", content)
 
     def test_local_univer_cli_builder_can_bake_local_skills_repo(self):
         local_builder = Path("scripts/build_agent_docker_from_local_univer_cli.sh").read_text(encoding="utf-8")
 
         self.assertIn("--skills-repo", local_builder)
         self.assertIn("../skills", local_builder)
+        self.assertIn("benchmarking-univer-cli", local_builder)
         self.assertIn("local-skills/skills", local_builder)
         self.assertIn("/home/node/.codex/skills/", local_builder)
         self.assertIn("/home/node/.claude/skills/", local_builder)
+
+    def test_local_benchmark_wrapper_hardens_model_timeout_image_and_skills(self):
+        wrapper = Path("scripts/run_local_univer_cli_skill_benchmark.sh").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/build_agent_docker_from_local_univer_cli.sh", wrapper)
+        self.assertIn("/Users/morris/Developer/univer/univer-cli", wrapper)
+        self.assertIn("/Users/morris/Developer/univer/skills", wrapper)
+        self.assertIn("spreadsheetbench-univer-cli-agent-local", wrapper)
+        self.assertIn("--agent-timeout", wrapper)
+        self.assertIn("600", wrapper)
+        self.assertIn("gpt-5.5", wrapper)
+        self.assertIn("model_reasoning_effort", wrapper)
+        self.assertIn("medium", wrapper)
+        self.assertIn("scripts/run_univer_agent_eval.sh", wrapper)
 
     def test_agent_entrypoint_seeds_sac_node_modules_before_agent_runs(self):
         run_task_script = Path("docker/spreadsheetbench-univer-cli-agent/run-task.sh").read_text(encoding="utf-8")

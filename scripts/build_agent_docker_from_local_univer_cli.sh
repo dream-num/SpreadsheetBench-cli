@@ -3,7 +3,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-LOCAL_UNIVER_CLI_REPO="/Users/otime/project/univer-cli"
+DEFAULT_LOCAL_UNIVER_CLI_REPO="$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)/univer-cli"
+if [ ! -d "$DEFAULT_LOCAL_UNIVER_CLI_REPO" ]; then
+    DEFAULT_LOCAL_UNIVER_CLI_REPO="/Users/morris/Developer/univer/univer-cli"
+fi
+
+LOCAL_UNIVER_CLI_REPO="$DEFAULT_LOCAL_UNIVER_CLI_REPO"
 LOCAL_SKILLS_REPO=""
 LOCAL_SKILLS_REPO_EXPLICIT=0
 IMAGE_TAG="spreadsheetbench-univer-cli-agent"
@@ -49,7 +54,7 @@ Builds the SpreadsheetBench solver image with a locally built univer-cli package
 and, when available, a local sibling skills repository.
 
 Defaults:
-  --repo        /Users/otime/project/univer-cli
+  --repo        sibling ../univer-cli when present, otherwise /Users/morris/Developer/univer/univer-cli
   --skills-repo ../skills relative to --repo when that directory exists
   --tag         spreadsheetbench-univer-cli-agent
 
@@ -84,9 +89,7 @@ fi
 USE_LOCAL_SKILLS=0
 if [ -d "$LOCAL_SKILLS_REPO" ]; then
     if [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-cli/SKILL.md" ] ||
-        [ ! -f "$LOCAL_SKILLS_REPO/skills/use-univer-cli/SKILL.md" ] ||
-        [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-plan/SKILL.md" ] ||
-        [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-tdd/SKILL.md" ]; then
+        [ ! -f "$LOCAL_SKILLS_REPO/skills/benchmarking-univer-cli/SKILL.md" ]; then
         echo "local skills repo is missing expected Univer skills: $LOCAL_SKILLS_REPO" >&2
         exit 2
     fi
@@ -174,6 +177,26 @@ RUN tmp="$(mktemp -d)" \
     && univer new "$tmp/warmup.univer" >/dev/null \
     && univer inspect workbook "$tmp/warmup.univer" >/dev/null \
     && univer config set experimental.sac true >/dev/null \
+    && univer new "$tmp/sac-cache.univer" >/dev/null \
+    && univer sac init "$tmp/sac" --from "$tmp/sac-cache.univer" >/dev/null \
+    && (cd "$tmp/sac" && CI=true pnpm install --prefer-offline >/dev/null) \
+    && cp -a "$tmp/sac/node_modules" /home/node/.cache/spreadsheetbench-sac-node_modules \
+    && test -d /home/node/.univer/sac/types \
+    && univer sac init "$tmp/toolchain-sac" >/dev/null \
+    && mkdir -p "$tmp/toolchain-sac/migrations/20200101000000-cache-warmup" \
+    && printf '%s\n' \
+        'import { defineFacadeMigrationPack } from "univer:sac/facade-migration-pack";' \
+        'const pack = defineFacadeMigrationPack({' \
+        '  id: "20200101000000-cache-warmup",' \
+        '  title: "Cache Warmup",' \
+        '  files: []' \
+        '});' \
+        'export default { pack, sheetMigrations: [] };' \
+        > "$tmp/toolchain-sac/migrations/20200101000000-cache-warmup/pack.ts" \
+    && (univer sac apply "$tmp/toolchain-sac" --no-commit >/dev/null || true) \
+    && test -d /home/node/.univer/sac/toolchains \
+    && find /home/node/.univer/sac/toolchains -path '*/node_modules/rolldown' -print -quit | grep -q . \
+    && find /home/node/.univer/sac/toolchains -path '*/node_modules/.bin/tsgo' -print -quit | grep -q . \
     && univer view stop >/dev/null \
     && univer daemon stop >/dev/null \
     && rm -rf "$tmp"
