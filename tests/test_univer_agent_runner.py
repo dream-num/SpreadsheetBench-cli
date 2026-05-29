@@ -709,6 +709,15 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("medium", wrapper)
         self.assertIn("scripts/run_univer_agent_eval.sh", wrapper)
 
+    def test_local_benchmark_wrapper_handles_zero_forwarded_args_under_nounset(self):
+        wrapper = Path("scripts/run_local_univer_cli_skill_benchmark.sh").read_text(encoding="utf-8")
+
+        self.assertIn("ARG_COUNT=$#", wrapper)
+        self.assertIn('if [ "$ARG_COUNT" -eq 0 ]; then', wrapper)
+        self.assertIn('while [ "$idx" -lt "$ARG_COUNT" ]; do', wrapper)
+        self.assertIn('if [ "$ARG_COUNT" -gt 0 ]; then', wrapper)
+        self.assertNotIn('while [ "$idx" -lt "${#ARGS[@]}" ]; do', wrapper)
+
     def test_agent_entrypoint_seeds_sac_node_modules_before_agent_runs(self):
         run_task_script = Path("docker/spreadsheetbench-univer-cli-agent/run-task.sh").read_text(encoding="utf-8")
 

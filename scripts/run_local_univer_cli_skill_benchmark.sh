@@ -13,10 +13,14 @@ ENV_FILE_NAME="${ENV_FILE:-.env.codex}"
 SKIP_LOCAL_BUILD="${SKIP_LOCAL_BUILD:-0}"
 
 ARGS=("$@")
+ARG_COUNT=$#
 
 has_arg() {
     local name="$1"
     local arg
+    if [ "$ARG_COUNT" -eq 0 ]; then
+        return 1
+    fi
     for arg in "${ARGS[@]}"; do
         if [ "$arg" = "$name" ] || [[ "$arg" == "$name="* ]]; then
             return 0
@@ -29,7 +33,7 @@ arg_value() {
     local name="$1"
     local value=""
     local idx=0
-    while [ "$idx" -lt "${#ARGS[@]}" ]; do
+    while [ "$idx" -lt "$ARG_COUNT" ]; do
         case "${ARGS[$idx]}" in
             "$name")
                 idx=$((idx + 1))
@@ -154,7 +158,7 @@ scope_label() {
     local only_task=""
     local limit_value=""
     local idx=0
-    while [ "$idx" -lt "${#ARGS[@]}" ]; do
+    while [ "$idx" -lt "$ARG_COUNT" ]; do
         case "${ARGS[$idx]}" in
             --task-id)
                 idx=$((idx + 1))
@@ -215,4 +219,8 @@ if ! has_arg "--run-id"; then
     )
 fi
 
-bash scripts/run_univer_agent_eval.sh "${run_args[@]}" "${ARGS[@]}"
+if [ "$ARG_COUNT" -gt 0 ]; then
+    bash scripts/run_univer_agent_eval.sh "${run_args[@]}" "${ARGS[@]}"
+else
+    bash scripts/run_univer_agent_eval.sh "${run_args[@]}"
+fi
