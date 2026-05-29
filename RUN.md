@@ -6,7 +6,9 @@
 host runner -> /task workspace -> Docker solver -> outputs/case_N/output.xlsx -> evaluation/report
 ```
 
-host runner 只负责准备 `/task`、把 `input.xlsx` 预导入为 `input.univer`、收集输出和执行评测；解题、修改 workbook、导出 `output.xlsx` 都在 Docker solver 内完成。为对标 main 分支的 SpreadsheetBench prompt 口径，host runner 会从 case 1 input workbook 读取前几行生成 `spreadsheet_content`，并把 dataset 中的 `answer_position` 放进 prompt。`solution.js` 或其他临时脚本只属于容器内部实现细节，外部 runner 不关心。
+host runner 只负责准备 `/task`、把每个 case 初始化成已采用输入 artifact 的 SaC workspace、收集输出和执行评测；解题、修改 workbook、导出 `output.xlsx` 都在 Docker solver 内完成。runner 会先把 `input.xlsx` 临时导入为 `input.univer`，执行 `univer sac init <workspace> --from <input.univer>`，再把已经带 baseline ledger 的 artifact 本地化到 `sac/artifacts/sac.univer`，并保持 workspace 为 adopted 模式。raw input 拷贝是 runner 中间产物，不作为容器内解题 source 保留。
+
+benchmark 约束由 task-local `/task/AGENTS.md` 承载；prompt 只保留动态任务 envelope。这样 Codex 会优先遵循 workspace 内的硬约束，也避免把 SpreadsheetBench 专属约束放进通用 skill。
 
 ## 构建解题镜像
 
@@ -36,7 +38,7 @@ bash scripts/build_agent_docker_from_local_univer_cli.sh \
   --tag spreadsheetbench-univer-cli-agent-sac
 ```
 
-镜像内包含 Node/npm、bash、`univer-cli@latest`、Codex、Claude 和官方 `univer-cli` skill。基础系统包只保留脚本执行、拉取 npm/skill 所需的 bash、证书和 git。
+镜像内包含 Node/npm、bash、`univer-cli@latest`、Codex、Claude 和 Univer 相关 skills。SpreadsheetBench 专属约束不依赖 benchmark skill，而是由 runner 写入 `/task/AGENTS.md`。
 
 ## 认证
 
@@ -207,16 +209,22 @@ data/<dataset>/outputs/univer_agent_<model>/
 
 ## Task Workspace
 
-host runner 为每个 task 创建独立目录：
+host runner 为每个 task 创建独立目录。agent 在容器内从 `/task` 启动，
+`/task/AGENTS.md` 是唯一的 benchmark 指令文件：
 
 ```text
 .runs/univer-agent/<run-id>/<task-id>/task/
+  AGENTS.md
   prompt.md
   cases/
-    case_1/input.xlsx
-    case_1/input.univer
-    case_2/input.xlsx
-    case_2/input.univer
+    case_1/sac/
+      sac.config.ts
+      artifacts/sac.univer
+      migrations/
+    case_2/sac/
+      sac.config.ts
+      artifacts/sac.univer
+      migrations/
   outputs/
     case_1/
     case_2/
@@ -264,7 +272,7 @@ output_path
 
 `spreadsheet_content` 来自 case 1 input workbook 的前 5 行。host runner 不会生成 `workbook_context.md`，也不会挂载 answer 文件。
 
-容器不能访问 answer 文件、dataset 根目录、其他 task workspace 或 report。agent 应使用当前 task 内预导入的 `input.univer`，并通过 `univer inspect/search/pipe/run/help/export` 完成修改和导出。
+容器不能访问 answer 文件、dataset 根目录、其他 task workspace 或 report。agent 应使用当前 task 内准备好的 SaC adopted workspace 和 `sac/artifacts/sac.univer`，不要读取或重新导入 raw input。所有 benchmark 硬约束和 SaC 使用方式写在 `/task/AGENTS.md`。
 
 ## 日志和结果
 

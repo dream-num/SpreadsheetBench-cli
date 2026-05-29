@@ -1,9 +1,0 @@
-{
-  "status": "finished",
-  "started_at": "2026-05-23T23:07:59",
-  "finished_at": "2026-05-23T23:09:35",
-  "duration_seconds": 96.258,
-  "returncode": 0,
-  "timeout": false,
-  "timeout_seconds": 300
-}

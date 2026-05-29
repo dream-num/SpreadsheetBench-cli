@@ -88,9 +88,26 @@ fi
 
 USE_LOCAL_SKILLS=0
 if [ -d "$LOCAL_SKILLS_REPO" ]; then
-    if [ ! -f "$LOCAL_SKILLS_REPO/skills/univer-cli/SKILL.md" ] ||
-        [ ! -f "$LOCAL_SKILLS_REPO/skills/benchmarking-univer-cli/SKILL.md" ]; then
-        echo "local skills repo is missing expected Univer skills: $LOCAL_SKILLS_REPO" >&2
+    REQUIRED_LOCAL_SKILLS=(
+        "using-univer-cli"
+        "univer-cli"
+        "writing-univer-plans"
+        "executing-univer-plans"
+        "test-driven-univer-spreadsheet-development"
+    )
+    for skill_name in "${REQUIRED_LOCAL_SKILLS[@]}"; do
+        if [ ! -f "$LOCAL_SKILLS_REPO/skills/$skill_name/SKILL.md" ]; then
+            echo "local skills repo is missing expected Univer skill '$skill_name': $LOCAL_SKILLS_REPO" >&2
+            exit 2
+        fi
+    done
+    REMOVED_BENCHMARK_SKILL="benchmarking""-univer-cli"
+    if rg -q "$REMOVED_BENCHMARK_SKILL" \
+        "$LOCAL_SKILLS_REPO/skills/using-univer-cli" \
+        "$LOCAL_SKILLS_REPO/skills/executing-univer-plans" \
+        "$LOCAL_SKILLS_REPO/skills/test-driven-univer-spreadsheet-development"
+    then
+        echo "local skills repo still routes through removed benchmark skill: $LOCAL_SKILLS_REPO" >&2
         exit 2
     fi
     USE_LOCAL_SKILLS=1
@@ -127,8 +144,10 @@ cp docker/spreadsheetbench-univer-cli-agent/entrypoint.sh "$BUILD_ROOT/"
 cp docker/spreadsheetbench-univer-cli-agent/run-task.sh "$BUILD_ROOT/"
 
 if [ "$USE_LOCAL_SKILLS" -eq 1 ]; then
-    mkdir -p "$BUILD_ROOT/local-skills"
-    cp -R "$LOCAL_SKILLS_REPO/skills" "$BUILD_ROOT/local-skills/"
+    mkdir -p "$BUILD_ROOT/local-skills/skills"
+    for skill_name in "${REQUIRED_LOCAL_SKILLS[@]}"; do
+        cp -R "$LOCAL_SKILLS_REPO/skills/$skill_name" "$BUILD_ROOT/local-skills/skills/"
+    done
 fi
 
 cat > "$BUILD_ROOT/Dockerfile" <<'EOF'
@@ -137,7 +156,8 @@ FROM node:22-alpine
 RUN apk add --no-cache \
         bash \
         ca-certificates \
-        git
+        git \
+        ripgrep
 
 COPY univer-cli-*.tgz /tmp/univer-cli.tgz
 

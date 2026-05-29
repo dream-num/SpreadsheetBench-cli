@@ -25,6 +25,10 @@ if [ ! -f /task/prompt.md ]; then
     echo "missing /task/prompt.md" >&2
     exit 2
 fi
+if [ ! -f /task/AGENTS.md ]; then
+    echo "missing /task/AGENTS.md" >&2
+    exit 2
+fi
 
 mkdir -p /task/logs /task/work
 

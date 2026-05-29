@@ -18,7 +18,7 @@ while [ "$#" -gt 0 ]; do
             cat <<'EOF'
 Usage: spreadsheetbench-agent-entrypoint --agent codex|claude [--agent-command COMMAND]
 
-The container reads /task/prompt.md and writes /task/outputs/case_N/output.xlsx.
+The container reads /task/AGENTS.md plus /task/prompt.md and writes /task/outputs/case_N/output.xlsx.
 EOF
             exit 0
             ;;

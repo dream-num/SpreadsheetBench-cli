@@ -3,7 +3,8 @@ FROM node:22-alpine
 RUN apk add --no-cache \
         bash \
         ca-certificates \
-        git
+        git \
+        ripgrep
 
 RUN npm install -g \
         univer-cli@latest \

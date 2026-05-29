@@ -13,7 +13,7 @@ from typing import Dict, Iterable, List, Optional
 
 from .config import RunnerConfig, RunnerError
 from .paths import output_xlsx_path, safe_task_dir_name, task_id_text, test_case_input_path
-from .prompts import build_agent_prompt, build_spreadsheet_content
+from .prompts import build_agent_prompt, build_spreadsheet_content, build_task_agents_md
 
 
 @dataclass
@@ -63,14 +63,23 @@ def run_workspace_setup_command(args: List[str], *, cwd: Optional[Path] = None) 
         raise RunnerError(f"Failed to prepare SaC workspace with `{command}`{location}: exit {result.returncode}")
 
 
-def write_generated_sac_config(workspace_path: Path) -> None:
+def copy_path(source: Path, target: Path) -> None:
+    remove_existing_path(target)
+    if source.is_dir():
+        shutil.copytree(source, target)
+    else:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+
+def write_adopted_sac_config(workspace_path: Path) -> None:
     (workspace_path / "sac.config.ts").write_text(
         'export default {\n'
         '  source: {\n'
         '    migrationsDir: "./migrations"\n'
         '  },\n'
         '  artifacts: {\n'
-        '    mode: "generated",\n'
+        '    mode: "adopted",\n'
         '    defaultWorkbook: "./artifacts/sac.univer"\n'
         '  }\n'
         '};\n',
@@ -105,7 +114,10 @@ def prepare_sac_workspace(
             script,
         ]
     )
-    write_generated_sac_config(workspace_path)
+    artifact_path = workspace_path / "artifacts" / "sac.univer"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    copy_path(input_univer_path, artifact_path)
+    write_adopted_sac_config(workspace_path)
 
 
 def prepare_docker_task_workspace(
@@ -140,7 +152,10 @@ def prepare_docker_task_workspace(
         input_univer = case_dir / "input.univer"
         import_xlsx_to_univer(copied_input, input_univer)
         prepare_sac_workspace(config, container_task_dir, input_univer, case_dir / "sac")
+        remove_existing_path(copied_input)
+        remove_existing_path(input_univer)
 
+    (container_task_dir / "AGENTS.md").write_text(build_task_agents_md(case_list), encoding="utf-8")
     prompt_path = container_task_dir / "prompt.md"
     spreadsheet_content = build_spreadsheet_content(first_input) if first_input else ""
     prompt_path.write_text(
@@ -284,6 +299,35 @@ def subprocess_output_text(value) -> str:
     return str(value)
 
 
+def is_codex_diff_boundary_line(text: str) -> bool:
+    stripped = text.strip()
+    if stripped in {"codex", "exec", "apply patch", "patch: completed", "tokens used"}:
+        return True
+    if stripped.startswith("/bin/sh -lc "):
+        return True
+    return re.match(r"^(succeeded|exited \d+) in \d+ms:", stripped) is not None
+
+
+def write_merged_output_line(output_file, label: str, text: str, state: Dict[str, bool]) -> None:
+    if label == "stderr":
+        if text.startswith("diff --git "):
+            if not state.get("omitting_codex_diff", False):
+                output_file.write(
+                    "[stderr] [omitted Codex-rendered diff block from docker.output.txt; "
+                    "see docker.stderr.txt for the raw stream]\n"
+                )
+            state["omitting_codex_diff"] = True
+            return
+
+        if state.get("omitting_codex_diff", False):
+            if is_codex_diff_boundary_line(text):
+                state["omitting_codex_diff"] = False
+            else:
+                return
+
+    output_file.write(f"[{label}] {text}")
+
+
 def write_timing(
     log_dir: Path,
     *,
@@ -319,6 +363,7 @@ def stream_pipe_to_logs(
     stream_file,
     output_file,
     output_lock: threading.Lock,
+    merged_output_state: Dict[str, bool],
     label: str,
     stream_agent_output: bool,
 ) -> None:
@@ -332,7 +377,7 @@ def stream_pipe_to_logs(
         stream_file.write(text)
         stream_file.flush()
         with output_lock:
-            output_file.write(f"[{label}] {text}")
+            write_merged_output_line(output_file, label, text, merged_output_state)
             output_file.flush()
         if stream_agent_output:
             print(text, end="", file=sys.stderr if label == "stderr" else sys.stdout, flush=True)
@@ -378,14 +423,31 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
                 bufsize=1,
             )
             output_lock = threading.Lock()
+            merged_output_state: Dict[str, bool] = {}
             stdout_thread = threading.Thread(
                 target=stream_pipe_to_logs,
-                args=(process.stdout, stdout_file, output_file, output_lock, "stdout", config.stream_agent_output),
+                args=(
+                    process.stdout,
+                    stdout_file,
+                    output_file,
+                    output_lock,
+                    merged_output_state,
+                    "stdout",
+                    config.stream_agent_output,
+                ),
                 daemon=True,
             )
             stderr_thread = threading.Thread(
                 target=stream_pipe_to_logs,
-                args=(process.stderr, stderr_file, output_file, output_lock, "stderr", config.stream_agent_output),
+                args=(
+                    process.stderr,
+                    stderr_file,
+                    output_file,
+                    output_lock,
+                    merged_output_state,
+                    "stderr",
+                    config.stream_agent_output,
+                ),
                 daemon=True,
             )
             stdout_thread.start()

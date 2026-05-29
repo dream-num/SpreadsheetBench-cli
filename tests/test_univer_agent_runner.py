@@ -107,8 +107,10 @@ class UniverAgentRunnerTest(unittest.TestCase):
     def fake_prepare_sac_workspace(self, config, container_task_dir, input_univer_path, workspace_path):
         workspace_path.mkdir(parents=True)
         (workspace_path / "migrations").mkdir()
+        (workspace_path / "artifacts").mkdir()
+        (workspace_path / "artifacts" / "sac.univer").write_text("managed baseline", encoding="utf-8")
         (workspace_path / "sac.config.ts").write_text(
-            'export default { artifacts: { mode: "generated", defaultWorkbook: "./artifacts/sac.univer" } };\n',
+            'export default { artifacts: { mode: "adopted", defaultWorkbook: "./artifacts/sac.univer" } };\n',
             encoding="utf-8",
         )
 
@@ -275,6 +277,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn('exec codex "${codex_args[@]}" - < /task/prompt.md', run_task_script)
+        self.assertIn("cd /task", run_task_script)
         self.assertNotIn('exec codex "${codex_args[@]}" "$prompt"', run_task_script)
 
     def test_claude_agent_reads_prompt_from_stdin_to_avoid_argument_limit(self):
@@ -335,7 +338,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("missing default env file: .env.missingagent", result.stderr)
 
-    def test_prepare_docker_task_workspace_copies_only_inputs_and_prompt(self):
+    def test_prepare_docker_task_workspace_writes_agents_and_removes_raw_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1, 2))
@@ -351,16 +354,22 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 workspace = prepare_docker_task_workspace(config, task, [1, 2])
 
             task_root = workspace.container_task_dir
-            self.assertTrue((task_root / "cases" / "case_1" / "input.xlsx").is_file())
-            self.assertTrue((task_root / "cases" / "case_2" / "input.xlsx").is_file())
-            self.assertTrue((task_root / "cases" / "case_1" / "input.univer").exists())
-            self.assertTrue((task_root / "cases" / "case_2" / "input.univer").exists())
+            self.assertFalse((task_root / "cases" / "case_1" / "input.xlsx").exists())
+            self.assertFalse((task_root / "cases" / "case_2" / "input.xlsx").exists())
+            self.assertFalse((task_root / "cases" / "case_1" / "input.univer").exists())
+            self.assertFalse((task_root / "cases" / "case_2" / "input.univer").exists())
             self.assertTrue((task_root / "cases" / "case_1" / "sac" / "sac.config.ts").is_file())
             self.assertTrue((task_root / "cases" / "case_2" / "sac" / "sac.config.ts").is_file())
+            self.assertTrue((task_root / "cases" / "case_1" / "sac" / "artifacts" / "sac.univer").is_file())
+            self.assertTrue((task_root / "cases" / "case_2" / "sac" / "artifacts" / "sac.univer").is_file())
+            self.assertTrue((task_root / "AGENTS.md").is_file())
+            self.assertFalse((task_root / "cases" / "case_1" / "sac" / "AGENTS.md").exists())
             self.assertTrue((task_root / "prompt.md").is_file())
             prompt_text = (task_root / "prompt.md").read_text(encoding="utf-8")
+            agents_text = (task_root / "AGENTS.md").read_text(encoding="utf-8")
             self.assertIn("You are a spreadsheet expert helping a user complete a workbook editing request", prompt_text)
-            self.assertIn("skill: benchmarking-univer-cli", prompt_text)
+            self.assertIn("Follow /task/AGENTS.md", prompt_text)
+            self.assertNotIn("benchmarking-univer-cli", prompt_text)
             self.assertIn("Request id: task-1", prompt_text)
             self.assertNotIn("SpreadsheetBench", prompt_text)
             self.assertIn("Benchmark task envelope:", prompt_text)
@@ -371,7 +380,18 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertNotIn("xlsx` inputs have already been imported to `.univer", prompt_text)
             self.assertIn("/task/cases/case_1/sac: prepared SaC workspace", prompt_text)
             self.assertIn("/task/cases/case_1/sac/artifacts/sac.univer", prompt_text)
-            self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt_text)
+            self.assertIn("Benchmark Workspace Contract", agents_text)
+            self.assertNotIn("benchmarking-univer-cli", agents_text)
+            self.assertIn("using-univer-cli", agents_text)
+            self.assertIn("writing-univer-plans", agents_text)
+            self.assertIn("executing-univer-plans", agents_text)
+            self.assertIn("test-driven-univer-spreadsheet-development", agents_text)
+            self.assertIn("Detailed Univer CLI and SaC", agents_text)
+            self.assertIn("mode: \"adopted\"", agents_text)
+            self.assertIn("Do not initialize or reinitialize SaC workspaces", agents_text)
+            self.assertIn("`*-materialize-current` is baseline checkpoint source", agents_text)
+            self.assertIn("SAC_VERIFY_TARGET_MISSING", agents_text)
+            self.assertIn("openpyxl `data_only=True`", agents_text)
             self.assertNotIn("Do not run `univer sac init --from` again", prompt_text)
             self.assertNotIn("preseeded Linux-compatible `node_modules`", prompt_text)
             self.assertNotIn("CI=true pnpm install --prefer-offline", prompt_text)
@@ -383,7 +403,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertFalse((task_root / "workbook_context.md").exists())
             self.assertEqual(test_case_input_path(dataset_path, task, 1).name, "1_task-1_input.xlsx")
 
-    def test_agent_prompt_requires_spreadsheet_tdd_skill_and_verify_gate(self):
+    def test_agent_prompt_points_to_task_agents_md_not_benchmark_skill(self):
         from inference.univer_agent.prompts import build_agent_prompt
 
         task = {
@@ -395,9 +415,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\nA\n")
 
-        self.assertIn("skill: benchmarking-univer-cli", prompt)
-        self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt)
-        self.assertIn("plan/assertion/verify/export discipline", prompt)
+        self.assertIn("Follow /task/AGENTS.md", prompt)
+        self.assertIn("prepared SaC workspaces", prompt)
+        self.assertNotIn("benchmarking-univer-cli", prompt)
         self.assertNotIn("skill: use-univer-cli", prompt)
         self.assertNotIn("univer-plan", prompt)
         self.assertNotIn("univer-tdd", prompt)
@@ -425,7 +445,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         self.assertIn("### answer_position\n'Sheet1'!C2:D5000", prompt)
         self.assertIn("Sort the names in column A in alphabetical order", prompt)
-        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Follow /task/AGENTS.md", prompt)
+        self.assertNotIn("benchmarking-univer-cli", prompt)
         self.assertNotIn(
             "answer_position` as an inspection/fill window, not an override of explicit instruction requirements",
             prompt,
@@ -439,26 +460,71 @@ class UniverAgentRunnerTest(unittest.TestCase):
             prompt,
         )
 
-    def test_agent_prompt_points_to_benchmark_skill_for_evaluator_contract(self):
-        from inference.univer_agent.prompts import build_agent_prompt
+    def test_task_agents_md_contains_evaluator_contract(self):
+        from inference.univer_agent.prompts import build_task_agents_md
 
-        task = {
-            "id": "task-1",
-            "instruction": "Fill the requested output range.",
-            "instruction_type": "Cell-Level Manipulation",
-            "answer_position": "'Output'!A2:G15",
-        }
+        agents_md = build_task_agents_md([1, 2])
 
-        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Output\n")
+        self.assertIn("## Benchmark Evaluation Contract", agents_md)
+        self.assertIn("openpyxl `data_only=True`", agents_md)
+        self.assertIn("answer_position", agents_md)
+        self.assertIn("/task/cases/case_1/sac", agents_md)
+        self.assertIn("/task/cases/case_2/sac", agents_md)
+        self.assertIn("verify representative first, middle, and last cells", agents_md)
+        self.assertIn("spreadsheet_content is only a first-rows preview", agents_md)
+        self.assertIn("Do not preserve cells immediately before `answer_position` as headers", agents_md)
+        self.assertIn("sort the source range first", agents_md)
 
-        self.assertIn("Benchmark task envelope:", prompt)
-        self.assertIn("skill: benchmarking-univer-cli", prompt)
-        self.assertIn("answer_position", prompt)
-        self.assertIn("'Output'!A2:G15", prompt)
-        self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt)
-        self.assertNotIn("Benchmark evaluation contract:", prompt)
-        self.assertNotIn("openpyxl `data_only=True`", prompt)
-        self.assertNotIn("verify representative first, middle, and last cells", prompt)
+    def test_task_agents_md_contains_migrated_benchmark_hard_gates(self):
+        from inference.univer_agent.prompts import build_task_agents_md
+
+        agents_md = build_task_agents_md([1])
+
+        self.assertIn("Do not run dependency installation during normal solving", agents_md)
+        self.assertIn("make one offline retry inside that workspace", agents_md)
+        self.assertIn("If SaC cannot produce an artifact, fail the task", agents_md)
+        self.assertIn("Do not inspect the exported `output.xlsx`", agents_md)
+        self.assertIn("Run only the commands needed to reach the next gate", agents_md)
+        self.assertIn("Do not run broad workbook diffs", agents_md)
+        self.assertIn("checkedPackCount > 0", agents_md)
+        self.assertIn("zero-assertion, all-skipped, or unchecked changed-pack", agents_md)
+        self.assertIn("ERR_WORKBOOK_PACKAGE_TRANSACTION_FAILED", agents_md)
+        self.assertIn("Code too long", agents_md)
+
+    def test_task_agents_md_routes_cli_and_facade_details_to_skills(self):
+        from inference.univer_agent.prompts import build_task_agents_md
+
+        agents_md = build_task_agents_md([1])
+
+        self.assertIn("## Required Skill Route", agents_md)
+        self.assertIn("using-univer-cli", agents_md)
+        self.assertIn("univer-cli", agents_md)
+        self.assertIn("writing-univer-plans", agents_md)
+        self.assertIn("executing-univer-plans", agents_md)
+        self.assertIn("test-driven-univer-spreadsheet-development", agents_md)
+        self.assertIn("Exact Univer CLI syntax", agents_md)
+        self.assertIn("owned by the required skills", agents_md)
+        self.assertNotIn("`getCellDatas()` is the source for complete cell model verification", agents_md)
+        self.assertNotIn("Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based", agents_md)
+
+    def test_task_agents_md_restricts_sac_type_lookup_to_workspace_types(self):
+        from inference.univer_agent.prompts import build_task_agents_md
+
+        agents_md = build_task_agents_md([1])
+
+        self.assertIn("## SaC Type And API Lookup", agents_md)
+        self.assertIn("/task/cases/case_N/sac/types", agents_md)
+        self.assertIn("UNIVER_HOME/sac/types", agents_md)
+        self.assertIn("rg \"setFormula|class FRange\" /task/cases/case_N/sac/types -g '*.d.ts'", agents_md)
+        self.assertIn(
+            "Do not run broad `rg`, `sed`, `cat`, `find`, or file reads under `/usr/local/lib/node_modules/univer-cli`",
+            agents_md,
+        )
+        self.assertIn("chunks/", agents_md)
+        self.assertIn("internal/", agents_md)
+        self.assertIn("view/browser/assets/", agents_md)
+        self.assertIn("vendor*.js", agents_md)
+        self.assertIn("Do not infer Facade APIs from CLI implementation bundles", agents_md)
 
     def test_agent_prompt_preserves_final_source_order_for_grouped_extraction_after_sorting(self):
         from inference.univer_agent.prompts import build_agent_prompt
@@ -475,7 +541,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\n")
 
-        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Follow /task/AGENTS.md", prompt)
+        self.assertNotIn("benchmarking-univer-cli", prompt)
         self.assertIn("Group matching results by suffix", prompt)
         self.assertNotIn(
             "When an instruction combines sorting a source range with grouped or filtered extraction",
@@ -505,9 +572,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Summary\n")
 
-        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Follow /task/AGENTS.md", prompt)
         self.assertIn("Create a summary table sorted by region", prompt)
-        self.assertIn("Follow `benchmarking-univer-cli` for SaC-only mutation", prompt)
+        self.assertNotIn("benchmarking-univer-cli", prompt)
         self.assertNotIn("write a short output contract in your implementation plan", prompt)
         self.assertNotIn("Critical semantic gate", prompt)
         self.assertNotIn("every high-risk semantic decision MUST have evidence", prompt)
@@ -535,7 +602,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
             spreadsheet_content="Sheet Name: Sheet1\nDate\tAmount\tBalance\n",
         )
 
-        self.assertIn("skill: benchmarking-univer-cli", prompt)
+        self.assertIn("Follow /task/AGENTS.md", prompt)
+        self.assertNotIn("benchmarking-univer-cli", prompt)
         self.assertIn("Split signed amounts from column C", prompt)
         self.assertNotIn("Evidence must be discriminating evidence", prompt)
         self.assertNotIn("not merely be compatible with the chosen interpretation", prompt)
@@ -543,7 +611,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertNotIn("explicit`, `inferred`, or `underdetermined assumption", prompt)
         self.assertNotIn("Do not present an underdetermined assumption as workbook-proven evidence", prompt)
 
-    def test_prepare_sac_workspace_initializes_generated_workspace_in_container(self):
+    def test_prepare_sac_workspace_initializes_adopted_workspace_with_local_baseline(self):
         from inference.univer_agent.docker_runner import prepare_sac_workspace
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -568,6 +636,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
                         '};\n',
                         encoding="utf-8",
                     )
+                    input_univer.write_text("managed input artifact", encoding="utf-8")
                 return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
 
             with patch("inference.univer_agent.docker_runner.subprocess.run", side_effect=fake_run):
@@ -582,8 +651,10 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertNotIn("univer config set", command)
             self.assertNotIn(["pnpm", "install"], [call[0] for call in calls])
             config_text = (workspace / "sac.config.ts").read_text(encoding="utf-8")
-            self.assertIn('mode: "generated"', config_text)
+            self.assertIn('mode: "adopted"', config_text)
             self.assertIn('defaultWorkbook: "./artifacts/sac.univer"', config_text)
+            self.assertEqual((workspace / "artifacts" / "sac.univer").read_text(encoding="utf-8"), "managed input artifact")
+            self.assertFalse((workspace / "AGENTS.md").exists())
 
     def test_agent_docker_images_preheat_sac_dependency_cache(self):
         dockerfile = Path("docker/spreadsheetbench-univer-cli-agent/Dockerfile").read_text(encoding="utf-8")
@@ -602,12 +673,24 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("node_modules/rolldown", content)
             self.assertIn("node_modules/.bin/tsgo", content)
 
+    def test_agent_docker_images_include_ripgrep(self):
+        dockerfile = Path("docker/spreadsheetbench-univer-cli-agent/Dockerfile").read_text(encoding="utf-8")
+        local_builder = Path("scripts/build_agent_docker_from_local_univer_cli.sh").read_text(encoding="utf-8")
+
+        for content in [dockerfile, local_builder]:
+            self.assertIn("apk add --no-cache", content)
+            self.assertIn("ripgrep", content)
+
     def test_local_univer_cli_builder_can_bake_local_skills_repo(self):
         local_builder = Path("scripts/build_agent_docker_from_local_univer_cli.sh").read_text(encoding="utf-8")
 
         self.assertIn("--skills-repo", local_builder)
         self.assertIn("../skills", local_builder)
-        self.assertIn("benchmarking-univer-cli", local_builder)
+        self.assertNotIn("benchmarking-univer-cli", local_builder)
+        self.assertIn("using-univer-cli", local_builder)
+        self.assertIn("writing-univer-plans", local_builder)
+        self.assertIn("executing-univer-plans", local_builder)
+        self.assertIn("test-driven-univer-spreadsheet-development", local_builder)
         self.assertIn("local-skills/skills", local_builder)
         self.assertIn("/home/node/.codex/skills/", local_builder)
         self.assertIn("/home/node/.claude/skills/", local_builder)
@@ -1001,6 +1084,50 @@ model_reasoning_effort = "medium"
             timing = json.loads((workspace.container_task_dir / "logs" / "docker.timing.json").read_text(encoding="utf-8"))
             self.assertEqual(timing["status"], "finished")
             self.assertEqual(timing["returncode"], 0)
+
+    def test_run_task_container_omits_codex_diff_blocks_from_merged_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
+            config = self.make_config(tmp_path, dataset_path, agent_timeout=30)
+            with patch(
+                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
+                side_effect=self.fake_import_xlsx_to_univer,
+            ), patch(
+                "inference.univer_agent.docker_runner.prepare_sac_workspace",
+                side_effect=self.fake_prepare_sac_workspace,
+            ):
+                workspace = prepare_docker_task_workspace(config, task, [1])
+
+            stderr_text = (
+                "diff --git a/cases/case_1/sac/plans/plan.md b/cases/case_1/sac/plans/plan.md\n"
+                "index 0000000..1111111 100644\n"
+                "--- a/cases/case_1/sac/plans/plan.md\n"
+                "+++ b/cases/case_1/sac/plans/plan.md\n"
+                "@@ -1 +1 @@\n"
+                "-old plan line\n"
+                "+new plan line\n"
+                "exec\n"
+                "/bin/sh -lc 'univer sac verify /task/cases/case_1/sac --json' in /task\n"
+                " succeeded in 12ms:\n"
+                "{\"success\":true}\n"
+            )
+
+            with patch(
+                "inference.univer_agent.docker_runner.subprocess.Popen",
+                return_value=self.make_fake_process(stdout="done\n", stderr=stderr_text),
+            ):
+                run_task_container(config, workspace)
+
+            log_dir = workspace.container_task_dir / "logs"
+            self.assertIn("diff --git", (log_dir / "docker.stderr.txt").read_text(encoding="utf-8"))
+            output_text = (log_dir / "docker.output.txt").read_text(encoding="utf-8")
+            self.assertIn("[omitted Codex-rendered diff block", output_text)
+            self.assertNotIn("diff --git", output_text)
+            self.assertNotIn("new plan line", output_text)
+            self.assertIn("[stderr] exec", output_text)
+            self.assertIn("[stderr]  succeeded in 12ms:", output_text)
+            self.assertIn("[stdout] done", output_text)
 
     def test_run_task_removes_stale_outputs_before_docker_runs(self):
         with tempfile.TemporaryDirectory() as tmp:

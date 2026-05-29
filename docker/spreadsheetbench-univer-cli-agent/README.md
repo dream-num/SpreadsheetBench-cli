@@ -34,12 +34,16 @@ This local build script runs `pnpm build` in the checkout, packs `apps/cli/dist`
 installs that tarball into the solver image, then runs the same CLI warmup and
 stops both `univer view` and `univer daemon` before the image layer is finalized.
 
-The host runner mounts exactly one task directory at `/task`:
+The host runner mounts exactly one task directory at `/task`. The agent starts
+from `/task`, and `/task/AGENTS.md` is the only benchmark instruction file:
 
 ```text
 /task
+  AGENTS.md
   prompt.md
-  cases/case_1/input.xlsx
+  cases/case_1/sac/sac.config.ts
+  cases/case_1/sac/artifacts/sac.univer
+  cases/case_1/sac/migrations/
   outputs/case_1/
   logs/
   work/
@@ -53,4 +57,4 @@ The container must write:
 
 Agent configuration is provided at runtime by read-only mounts. For Codex, mount auth and config files to `/home/node/.codex/auth.json` and `/home/node/.codex/config.toml`. For Claude, mount settings to `/home/node/.claude/settings.json`. Secrets are not baked into the image and are not copied into `/task`.
 
-The image intentionally does not include Python or workbook parsing libraries. Agents should use the installed Univer CLI tooling inside `/task`.
+The image intentionally does not include Python or workbook parsing libraries. Agents should follow `/task/AGENTS.md` and use the prepared SaC workspaces plus installed Univer CLI tooling inside `/task`.
