@@ -13,6 +13,7 @@ inference/log/*
 debug
 debug-tmp
 tmp-issue
+tmp
 .venv
 .claude
 .codex
