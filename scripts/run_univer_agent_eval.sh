@@ -245,9 +245,9 @@ fi
 
 echo "[pipeline] inference start"
 if [ -n "$ENV_FILE_NAME" ]; then
-    ENV_FILE="$ENV_FILE_NAME" bash inference/scripts/inference_univer_agent.sh "${ARGS[@]}"
+    PYTHON_BIN="$PYTHON_BIN" ENV_FILE="$ENV_FILE_NAME" bash inference/scripts/inference_univer_agent.sh "${ARGS[@]}"
 else
-    bash inference/scripts/inference_univer_agent.sh "${ARGS[@]}"
+    PYTHON_BIN="$PYTHON_BIN" bash inference/scripts/inference_univer_agent.sh "${ARGS[@]}"
 fi
 echo "[pipeline] inference done"
 

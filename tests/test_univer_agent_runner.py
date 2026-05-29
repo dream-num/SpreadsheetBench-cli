@@ -309,6 +309,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("codex_config_model", script_text)
         self.assertIn("CLAUDE_SETTINGS_JSON", script_text)
         self.assertIn("claude_settings_model", script_text)
+        self.assertIn('PYTHON_BIN="$PYTHON_BIN" ENV_FILE="$ENV_FILE_NAME"', script_text)
         self.assertNotIn("CODEX_MODEL)", script_text)
         self.assertNotIn("ANTHROPIC_MODEL)", script_text)
 
@@ -591,11 +592,13 @@ class UniverAgentRunnerTest(unittest.TestCase):
         for content in [dockerfile, local_builder]:
             self.assertIn("pnpm", content)
             self.assertIn("univer sac init", content)
+            self.assertIn('if [ -f "$tmp/sac/package.json" ]', content)
             self.assertIn("pnpm install --prefer-offline", content)
             self.assertIn("sac-cache.univer", content)
             self.assertIn("spreadsheetbench-sac-node_modules", content)
             self.assertIn("/home/node/.univer/sac/types", content)
             self.assertIn("/home/node/.univer/sac/toolchains", content)
+            self.assertIn("Object.values(buildInfoModule)", content)
             self.assertIn("node_modules/rolldown", content)
             self.assertIn("node_modules/.bin/tsgo", content)
 
