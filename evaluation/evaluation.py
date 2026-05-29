@@ -229,12 +229,17 @@ def get_proc_path(dataset_path, setting, model, data_id, case_index, source='out
 def get_ground_truth_path(dataset_path, data_id, case_index):
     dataset_path = Path(dataset_path)
     data_id = str(data_id)
+    spreadsheet_dir = dataset_path / 'spreadsheet' / data_id
     answer_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_answer.xlsx'
     if answer_path.is_file():
         return answer_path
     golden_path = dataset_path / 'spreadsheet' / data_id / f'{case_index}_{data_id}_golden.xlsx'
     if golden_path.is_file():
         return golden_path
+    for suffix in ('answer', 'golden'):
+        candidates = sorted(spreadsheet_dir.glob(f'{case_index}_*_{suffix}.xlsx'))
+        if len(candidates) == 1:
+            return candidates[0]
     legacy_golden_path = dataset_path / 'spreadsheet' / data_id / 'golden.xlsx'
     if case_index == 1 and legacy_golden_path.is_file():
         return legacy_golden_path
@@ -251,6 +256,12 @@ def discover_case_indices(dataset_path, data_id):
             prefix = answer_file.name.split('_', 1)[0]
             if prefix.isdigit():
                 cases.append(int(prefix))
+    if not cases:
+        for suffix in ('answer', 'golden'):
+            for answer_file in spreadsheet_dir.glob(f'*_*_{suffix}.xlsx'):
+                prefix = answer_file.name.split('_', 1)[0]
+                if prefix.isdigit():
+                    cases.append(int(prefix))
     if (spreadsheet_dir / 'golden.xlsx').is_file():
         cases.append(1)
     return sorted(set(cases))
