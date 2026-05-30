@@ -48,7 +48,36 @@ seed_sac_node_modules() {
     done
 }
 
+warm_univer_daemon() {
+    local start_log="/task/logs/univer-daemon-start.log"
+    local status_log="/task/logs/univer-daemon-status.json"
+    local warmup_log="/task/logs/univer-daemon-warmup.log"
+
+    if ! univer daemon start >"$start_log" 2>&1; then
+        cat "$start_log" >&2
+        exit 2
+    fi
+
+    if ! univer daemon status --json >"$status_log" 2>&1; then
+        cat "$status_log" >&2
+        exit 2
+    fi
+
+    : >"$warmup_log"
+    local workbook
+    for workbook in /task/cases/case_*/sac/artifacts/sac.univer; do
+        if [ ! -e "$workbook" ]; then
+            continue
+        fi
+        if ! univer inspect workbook "$workbook" >>"$warmup_log" 2>&1; then
+            cat "$warmup_log" >&2
+            exit 2
+        fi
+    done
+}
+
 seed_sac_node_modules
+warm_univer_daemon
 
 if [ -n "$agent_command" ]; then
     export SPREADSHEETBENCH_PROMPT_FILE=/task/prompt.md

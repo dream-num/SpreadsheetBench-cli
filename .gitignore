@@ -16,6 +16,7 @@ tmp-issue
 .venv
 .claude
 .codex
+.benchmark-agent
 .runs
 .worktree
 

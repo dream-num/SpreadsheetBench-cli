@@ -755,6 +755,21 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("/task/cases/case_*/sac", run_task_script)
         self.assertIn("cp -a", run_task_script)
 
+    def test_agent_entrypoint_warms_univer_daemon_before_agent_runs(self):
+        run_task_script = Path("docker/spreadsheetbench-univer-cli-agent/run-task.sh").read_text(encoding="utf-8")
+
+        self.assertIn("warm_univer_daemon", run_task_script)
+        self.assertIn("univer daemon start", run_task_script)
+        self.assertIn("univer daemon status --json", run_task_script)
+        self.assertIn("univer inspect workbook", run_task_script)
+        self.assertIn("/task/logs/univer-daemon-start.log", run_task_script)
+        self.assertIn("/task/logs/univer-daemon-status.json", run_task_script)
+        self.assertIn("/task/logs/univer-daemon-warmup.log", run_task_script)
+        self.assertLess(
+            run_task_script.index("warm_univer_daemon"),
+            run_task_script.index('exec codex "${codex_args[@]}" - < /task/prompt.md'),
+        )
+
     def test_run_task_invokes_docker_with_task_mount_and_env_file_then_collects_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
