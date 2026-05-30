@@ -1,0 +1,118 @@
+{
+  "accuracy": 0.5,
+  "correct_case_count": 2,
+  "error_case_count": 0,
+  "timeout_case_count": 2,
+  "total_case_count": 4,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300/summary.json",
+    "metadata": {
+      "run_id": "tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 4,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-05-30T18:09:21",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-30T18:24:38"
+    },
+    "total_task_count": 4,
+    "ok_task_count": 2,
+    "error_task_count": 2,
+    "timeout_task_count": 2,
+    "tasks": [
+      {
+        "id": "191-40",
+        "status": "error",
+        "error": "Docker command timed out after 900 seconds for task 191-40"
+      },
+      {
+        "id": "524-31",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300/524-31",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300/524-31/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_524-31_output.xlsx"
+        ],
+        "started_at": "2026-05-30T18:09:21",
+        "finished_at": "2026-05-30T18:18:55",
+        "duration_seconds": 574.245
+      },
+      {
+        "id": "599-9",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300/599-9",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300/599-9/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_599-9_output.xlsx"
+        ],
+        "started_at": "2026-05-30T18:09:21",
+        "finished_at": "2026-05-30T18:20:57",
+        "duration_seconds": 696.05
+      },
+      {
+        "id": "57232",
+        "status": "error",
+        "error": "Docker command timed out after 900 seconds for task 57232"
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-524-57232-191-599-w4-evidence-review-20260530-193300.json",
+    "accuracy": 0.5,
+    "correct_case_count": 2,
+    "error_case_count": 0,
+    "timeout_case_count": 2,
+    "total_case_count": 4,
+    "results": [
+      {
+        "id": "191-40",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "524-31",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "599-9",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": 57232,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "accuracy": 1.0,
+  "correct_case_count": 2,
+  "error_case_count": 0,
+  "timeout_case_count": 0,
+  "total_case_count": 2,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842/summary.json",
+    "metadata": {
+      "run_id": "tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 2,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-05-30T17:39:40",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-30T17:48:23"
+    },
+    "total_task_count": 2,
+    "ok_task_count": 2,
+    "error_task_count": 0,
+    "timeout_task_count": 0,
+    "tasks": [
+      {
+        "id": "203-15",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842/203-15",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842/203-15/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_203-15_output.xlsx"
+        ],
+        "started_at": "2026-05-30T17:39:40",
+        "finished_at": "2026-05-30T17:48:05",
+        "duration_seconds": 505.252
+      },
+      {
+        "id": "59595",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842/59595",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842/59595/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_59595_output.xlsx"
+        ],
+        "started_at": "2026-05-30T17:39:40",
+        "finished_at": "2026-05-30T17:48:23",
+        "duration_seconds": 523.205
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-203-15-59595-w2-stale-target-20260530-173842.json",
+    "accuracy": 1.0,
+    "correct_case_count": 2,
+    "error_case_count": 0,
+    "timeout_case_count": 0,
+    "total_case_count": 2,
+    "results": [
+      {
+        "id": "203-15",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": 59595,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      }
+    ]
+  }
+}

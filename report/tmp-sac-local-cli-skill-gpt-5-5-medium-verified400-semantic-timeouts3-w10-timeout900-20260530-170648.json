@@ -1,0 +1,111 @@
+{
+  "accuracy": 0.3333333333333333,
+  "correct_case_count": 1,
+  "error_case_count": 2,
+  "timeout_case_count": 0,
+  "total_case_count": 3,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/summary.json",
+    "metadata": {
+      "run_id": "tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 10,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-05-30T17:07:05",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-30T17:20:21"
+    },
+    "total_task_count": 3,
+    "ok_task_count": 3,
+    "error_task_count": 0,
+    "timeout_task_count": 0,
+    "tasks": [
+      {
+        "id": "203-15",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/203-15",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/203-15/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_203-15_output.xlsx"
+        ],
+        "started_at": "2026-05-30T17:07:05",
+        "finished_at": "2026-05-30T17:17:47",
+        "duration_seconds": 641.138
+      },
+      {
+        "id": "59595",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/59595",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/59595/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_59595_output.xlsx"
+        ],
+        "started_at": "2026-05-30T17:07:05",
+        "finished_at": "2026-05-30T17:16:34",
+        "duration_seconds": 568.478
+      },
+      {
+        "id": "56427",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/56427",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648/56427/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_56427_output.xlsx"
+        ],
+        "started_at": "2026-05-30T17:07:05",
+        "finished_at": "2026-05-30T17:20:21",
+        "duration_seconds": 795.693
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-semantic-timeouts3-w10-timeout900-20260530-170648.json",
+    "accuracy": 0.3333333333333333,
+    "correct_case_count": 1,
+    "error_case_count": 2,
+    "timeout_case_count": 0,
+    "total_case_count": 3,
+    "results": [
+      {
+        "id": "203-15",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 59595,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 56427,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      }
+    ]
+  }
+}

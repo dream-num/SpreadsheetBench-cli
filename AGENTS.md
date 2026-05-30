@@ -31,6 +31,13 @@
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
 - 对比 SaC 与非 SaC bench 差异时，优先比较生成后的 `/task/AGENTS.md`、`task/prompt.md`、runner 分支/commit、skill 版本、agent timeout、`report/*.json` 和 `outputs/eval_*.json`，不要只看矩阵三态。
 - 如果 SaC `univer sac verify` 通过但正式 evaluator FAIL，优先怀疑 assertion 自证或导出后 evaluator-facing 状态偏差；重点复核语义仲裁、label 保留、blank/zero/#N/A、结构变化后的 `answer_position`、公式缓存值、非法颜色和 export smoke check。
+- 分析 SaC 失败时，额外检查 plan 是否做了类似非 SaC runner 的 `Evidence sufficiency check` 和 `Plan review`：每个输出决策是否列出支持证据、可能反例/缺失 probe、实施前动作，以及至少一个能排除错误解释的 targeted probe 或 assertion。
+- 对 lookup/match/join/fill 类失败，必须检查 key 是否重复，以及 agent 是 first-match、last-match、aggregate 还是额外列消歧；不能只看普通唯一 key 样本。若 migration 使用 `Map.set` 或对象覆盖行为，要特别警惕默认 last-wins。
+- 对 formula 写入类 lookup/match 失败，必须先判定公式输出行的 row anchor：该 G/结果列每一行是对应左侧表格当前行、右侧外部 lookup/input 当前行，还是 `answer_position` 自身行。不要因为公式在同一行就默认以左侧表格行为输出对象；如果题目说“表格和外部单元格位置不对应”或公式位于外部数据旁，应优先检查右侧外部 D/E 等输入行是否才是输出行锚点。
+- 对无匹配/缺失结果失败，必须区分真实空白、`#N/A`、`n/a`、`-`、0 和显示占位。现有公式或示例显示 `#N/A` 只能作为证据，不能直接当最终合同；至少检查一个有匹配和一个无匹配/空结果样本。
+- 对示例数据、worked example、existing output 或 preview cells，要默认视为参考证据，不是最终合同。若示例与题目要求、实际 workbook 数据结构、字段含义、目标区域格式或真实数据形态冲突，优先依据题目明示信息和实际数据形式；只有题目或 workbook 证据明确要求沿用示例时，才把示例当作写回规则。
+- 对日期 copy/transfer 类失败，不能只看 Univer display text 或导出后重新 import 的显示值；必须用 openpyxl `data_only=True` 或 Facade cell model/number format 判断最终 output 是真实日期值还是字符串显示文本。
+- 对 SaC 超时/修复循环，区分 assertion 表达错误、migration source 错误和 ledger/setup 错误。`null` vs `""`、字符串数字 vs 数字这类 assertion 表达问题应优先修合同/assertion；遇到 `SAC_ARTIFACT_DRIFT` 不要无限 rollback/apply/rebuild，若必须 rebuild，容器内优先设置 `TMPDIR=/task/work/tmp` 避免跨设备 `EXDEV`。
 - 用户要求调查、分析或复核问题时，默认只读检查并向用户输出详细调查结论，不要自动写入 `wrong-report-matrix.univer` 或其它 `.univer` 文件。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
 

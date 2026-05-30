@@ -144,6 +144,21 @@ Do not start implementation from business convention, source-side sign patterns,
 arithmetic, or visual similarity alone. Those can be evidence inputs, but the plan must connect them
 to instruction wording, target labels, examples, existing output, or an explicit assumption.
 
+Before finalizing the plan, include an `Evidence sufficiency check` for output-affecting decisions.
+Use this shape:
+
+`Decision | Supporting inspected evidence | Plausible contrary evidence or missing probe | Action before implementation`
+
+If a decision still has missing discriminating evidence, run one targeted readonly probe for the
+missing range, boundary, duplicate key, cell model, formula, label, blank/error row, date type, or
+representative mapping before writing assertions or migration source.
+
+Then write a short `Plan review` that audits the evidence chain before editing. For the riskiest
+semantic decisions, list at least one plausible counter-interpretation and the inspected evidence
+that rules it out. If the evidence does not rule it out, keep the uncertainty visible as an
+`underdetermined assumption` and add an assertion or readonly probe that would expose the opposite
+interpretation.
+
 ## Semantic Arbitration Gate
 
 Before writing assertions or migration source, add a concise decision table to the plan:
@@ -155,6 +170,7 @@ This table is required for every high-risk semantic decision, especially:
 - sign-to-column mapping
 - singular/plural label wording
 - blank versus zero versus #N/A
+- duplicate lookup or matching keys, including first-match versus last-match versus aggregate policy
 - date-window inclusive boundary
 - structural answer_position interpretation
 - formula cached-value strategy
@@ -178,6 +194,26 @@ Use the following benchmark arbitration rules:
 - No-match outputs must be real blanks when workbook evidence calls for blanks. Do not write `#N/A`,
   `n/a`, spaces, NBSPs, or display-only sentinels unless the instruction or target pattern requires
   that exact value.
+- Existing formulas, examples, or preview cells that display `#N/A`, `n/a`, `-`, zero, or blank are
+  evidence, not authority. For no-match and missing-result policies, compare instruction wording,
+  target examples, current target cells, and lookup behavior. Assertions must include at least one
+  matched row and one unmatched or blank-result row when those cases can occur.
+- Example data, worked examples, existing output, and preview cells are reference evidence only, not
+  the final contract. If examples conflict with the instruction, actual workbook data structure,
+  field meaning, target-range format, or real data shape, prioritize explicit task information and the
+  inspected workbook data form. Treat an example as the writeback rule only when instruction wording
+  or workbook evidence clearly requires preserving that example pattern.
+- For lookup, match, join, categorization, and fill-down tasks, probe whether the chosen key or key
+  tuple is unique. If duplicate keys exist, explicitly choose first match, last match, aggregate,
+  priority-by-extra-column, or another tie-break rule from workbook evidence. Do not rely on `Map.set`
+  overwrite behavior, arbitrary object key order, or whichever duplicate row was inspected first.
+  Assertions or probes must cover at least one duplicate-key case when duplicates are present.
+- For formula-writing lookup or match tasks, decide the output row anchor before writing formulas.
+  Record whether each output row represents the left table row, the right/outside lookup row, or the
+  `answer_position` row itself. Do not assume the row containing the formula is anchored to the left
+  table just because the formula is on the same worksheet row. If the task says table rows and outside
+  cells do not correspond, or the output column sits beside outside input columns, probe that outside
+  input row as the likely output object and look back into the table by key.
 - Existing values inside `answer_position` are evidence, not authority. When the instruction asks to
   compute, fill, repair, replace, reshape, transpose, consolidate, or enter formulas into that range,
   treat existing target values as examples or stale state until proven otherwise.
@@ -222,9 +258,38 @@ For each output column or range, decide and record the expected stored value mod
 - boolean cell
 - formula cell plus evaluator-visible stored/cached value
 
-Display text is not enough evidence for this decision. `inspect`, `pipe out`, `getValues()`, and
-preview text may show formatted values, but they do not prove the stored value type, number format,
-formula model, rich text, or force-text state.
+Display text is not enough evidence for this decision. Carefully distinguish stored cell value,
+number format, and display text:
+
+- Stored cell value is the evaluator-facing data.
+- Number format is style metadata that controls display; it does not change the stored cell value.
+- Display text is an application-visible rendering of value plus format, not an independent value to
+  copy or reverse-engineer blindly.
+
+`inspect`, `pipe out`, `getValues()`, and preview text may show formatted values, but they do not
+prove the stored value type, number format, formula model, rich text, or force-text state.
+
+For source-to-target aggregation, transformation, fill, lookup, or reshaping tasks, use source cells
+to understand input meaning, but inspect the target column, nearby target examples, or existing
+output cells before choosing the written `v`, `t`, and number format. If target examples store
+numbers and rely on number formats to display blanks, hyphens, percentages, currencies, or other
+special display text, write the corresponding stored value and preserve or reuse the target number
+format. Do not write the display text itself unless instruction wording or inspected target cell
+models explicitly require real text.
+
+When instruction wording and workbook evidence conflict, apply this display-vs-stored arbitration:
+
+- Phrases such as `show`, `display`, `appear as`, `shown as`, or `instead of showing` normally describe
+  presentation. They are not enough by themselves to turn a numeric, blank, date, percentage, currency,
+  or formula result into stored text.
+- If target evidence stores a numeric/blank/date/formula value and uses number format or style to show
+  a placeholder such as `-`, blank text, percent signs, currency symbols, or rounded text, preserve that
+  stored model and reproduce the presentation through number format or style.
+- Choose literal text only when the instruction explicitly asks to write/enter/store text, or when
+  inspected target cell models for the same role store literal text.
+- If the plan chooses literal text for a display-like token, record the exact instruction phrase or
+  inspected target cell model that proves text is required, and add an assertion/probe for the contrary
+  numeric/blank/formatted interpretation.
 
 When type or format matters, use targeted readonly Facade probes against the managed `.univer`
 artifact to inspect complete cell models with `getCellDatas()` and number formats. Keep probes short
@@ -244,11 +309,21 @@ Hard rules for evaluator-facing output:
 - For copy, reorder, sort, transpose, extract, or move tasks, preserve full cell models by default
   unless the instruction clearly asks for value-only output. Copying display values is not enough when
   dates, booleans, formulas, rich text, identifiers, percentages, currencies, or formats are involved.
+  Prefer `getCellDatas()` -> deep clone -> `clearContent()` -> `setValues()` or an equivalent
+  model-preserving workbook operation for moved/copied cells.
+- For date-like copy or transfer tasks, do not infer the output type from visible date text such as
+  `1-Aug`. Probe the source and target cell models and number formats. If the source is a real date
+  value or the target pattern expects real dates, write a date serial/value with a date number format;
+  only write literal date text when instruction wording or workbook-visible target evidence explicitly
+  requires text.
 - For formula tasks, choose whether the benchmark needs formulas, stored values, or both. If formulas
   are used, verify that exported evaluator-visible stored values will match the intended result.
 
 Assertions or readonly probes must include at least one type-sensitive cell when relevant: date,
 boolean, blank, zero, text-number, identifier, percentage, currency, formula, and exact text.
+When target display text can be produced by number format, assertions or probes must include both
+the stored model (`v`, `t`) and the resolved number format or display for at least one representative
+cell.
 
 ## Type-Sensitive Write Rules
 
@@ -257,8 +332,15 @@ identifiers, formulas, percentages, currencies, blanks, and copied cells must no
 ambiguous display strings.
 
 - Do not use bare JavaScript values for evaluator-facing type-sensitive output. Do not write `setValues([["2-2", 123, true]])`; write explicit cell data with `v`, `t`, `f`, and required number format/style fields.
+- Do not use formatted display text, rounded display text, or `getValues()` output as a substitute
+  for a source or target cell model. If a display requirement changes how a value should appear, satisfy
+  that through the chosen number format or style unless the instruction explicitly changes the stored
+  value or formula semantics.
 - Date outputs should be numeric Excel date serials with a date number format, unless the instruction
   or target pattern explicitly requires literal date text.
+- Copying a formatted date cell by display string is a type change. When copying date cells, deep-clone
+  the full cell model or write an explicit numeric date model plus number format, then verify the
+  stored model rather than only the displayed text.
 - Boolean outputs should be boolean cells, not text labels.
 - Text identifiers that must not auto-convert should use force-text semantics.
 - When replacing an existing range, call `clearContent()` before writing the replacement matrix so old
@@ -289,6 +371,7 @@ At minimum, cover these when relevant:
 - evaluator-facing cells inside `answer_position`
 - at least one source-to-target mapping
 - first/middle/last or boundary rows for large ranges
+- duplicate-key, no-match, missing-result, or tie-break rows when the task uses lookup/match/join logic
 - a blank, true zero, error, date, boolean, text-number, identifier, formula, percentage/currency,
   or exact-text edge case, checked by stored value model when display text can mislead
 - preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
@@ -307,6 +390,11 @@ If the instruction requires formulas, preserve or write formulas and also explai
 values will be evaluator-visible after SaC apply and export. If the instruction does not require
 formulas and cached formula values cannot be confidently guaranteed, prefer writing the
 evaluator-needed stored values directly.
+
+Formula cells still follow the stored value / number format / display text split. Preserve or rebuild
+the formula semantics with `f` or formula APIs, use number format for display requirements, and verify
+the formula cell model with `getCellDatas()` when exported cached values matter. Do not use a
+display-rendered value as proof that the formula cell's stored/cache model is correct.
 
 ## SaC Type And API Lookup
 
@@ -332,6 +420,14 @@ evaluator-needed stored values directly.
 - `SAC_VERIFY_TARGET_MISSING` or `SAC_UNMANAGED_ARTIFACT` before follow-up pack work is a runner/setup bug in this benchmark, not a signal to apply the baseline checkpoint.
 - `SAC_TYPECHECK_FAILED`: fix the named TypeScript/import/API issue once from the diagnostic. If the same diagnostic repeats, change approach once or stop with the typecheck blocker.
 - `SAC_APPLIED_PACK_HASH_MISMATCH`: do not keep editing an already-applied pack. Prefer a new follow-up Migration Pack. If the follow-up also hits a hash mismatch, stop.
+- `SAC_ARTIFACT_DRIFT`: do not enter an open-ended rollback/apply/rebuild loop. Classify whether the
+  previous failure was an assertion expectation issue, migration source issue, or ledger/setup issue.
+  If recovery is needed, use the documented SaC recovery path once; if rebuild is required inside the
+  benchmark container, set `TMPDIR=/task/work/tmp` to avoid cross-device package transactions. If
+  recovery still fails, stop and report the blocker.
+- For failed SaC verification, inspect the report before changing source. If failures are assertion
+  representation issues such as `null` versus `""` for blank cells or display strings versus stored
+  numbers, repair the assertions or cell-model contract first instead of rolling back the artifact.
 - `SAC_EMPTY_MIGRATION_PACK` or `SAC_PACK_FILE_INVALID`: fix the pack manifest/source once from the diagnostic. If the same pack remains invalid, stop with the pack-structure blocker.
 - `ERR_WORKBOOK_PACKAGE_TRANSACTION_FAILED` with `Code too long`: stop and report the SaC/package transaction limit. Do not retry with a larger generated code block.
 
@@ -347,6 +443,8 @@ evaluator-needed stored values directly.
 - Do not preserve cells immediately before `answer_position` as headers or examples unless the instruction or workbook evidence says to preserve them.
 - For structural edits, reason about the final workbook layout before interpreting `answer_position`; inserted/deleted rows, moved tables, section headers, transposition, or reshaping can shift the final evaluator window.
 - For sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, write a concise output contract before source changes.
+- For lookup/match/join/fill tasks, verify key uniqueness or document duplicate-key policy before
+  implementation. Include a duplicate-key assertion or readonly probe if duplicates are found.
 - When sorting combines with grouping/filtering/truncation, sort the source range first in the final-layout model, then derive each group's output order from that final source order unless the instruction names a separate intra-group sort key.
 - When sorting instructions conflict, build the evaluator-facing output-order contract from final output wording first: final answer/output range/answer_position plus named target sort columns are high-priority evidence for the order of rows in the checked output.
 - Treat phrases like "sort column H lowest to highest" in a multi-column output table as "sort full output rows by column H" unless the instruction explicitly asks to reorder only the cells in that one column independently.

@@ -1,0 +1,146 @@
+{
+  "accuracy": 0.0,
+  "correct_case_count": 0,
+  "error_case_count": 7,
+  "timeout_case_count": 0,
+  "total_case_count": 7,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/summary.json",
+    "metadata": {
+      "run_id": "tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 1,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-05-30T15:02:25",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-30T15:02:55"
+    },
+    "total_task_count": 7,
+    "ok_task_count": 0,
+    "error_task_count": 7,
+    "timeout_task_count": 0,
+    "tasks": [
+      {
+        "id": "57232",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/57232/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      },
+      {
+        "id": "59595",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/59595/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      },
+      {
+        "id": "44017",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/44017/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      },
+      {
+        "id": "56427",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/56427/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      },
+      {
+        "id": "56786",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/56786/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      },
+      {
+        "id": "56953",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/56953/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      },
+      {
+        "id": "59884",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800/59884/task:/task spreadsheetbench-univer-cli-agent -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: Unable to find image 'spreadsheetbench-univer-cli-agent:latest' locally\ndocker: Error response from daemon: pull access denied for spreadsheetbench-univer-cli-agent, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information"
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-sac-local-cli-skill-gpt-5-5-medium-verified400-usage-limit7-w1-20260530-145800.json",
+    "accuracy": 0.0,
+    "correct_case_count": 0,
+    "error_case_count": 7,
+    "timeout_case_count": 0,
+    "total_case_count": 7,
+    "results": [
+      {
+        "id": 57232,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 59595,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 44017,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 56427,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 56786,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 56953,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 59884,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      }
+    ]
+  }
+}
