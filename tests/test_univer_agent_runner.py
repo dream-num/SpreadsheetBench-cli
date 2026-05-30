@@ -287,8 +287,23 @@ class UniverAgentRunnerTest(unittest.TestCase):
             / "run-task.sh"
         ).read_text(encoding="utf-8")
 
-        self.assertIn('exec codex "${codex_args[@]}" - < /task/prompt.md', run_task_script)
+        self.assertIn('codex "${codex_args[@]}" - < /task/prompt.md', run_task_script)
         self.assertNotIn('exec codex "${codex_args[@]}" "$prompt"', run_task_script)
+
+    def test_codex_agent_writes_jsonl_events_directly(self):
+        run_task_script = (
+            Path(__file__).resolve().parents[1]
+            / "docker"
+            / "spreadsheetbench-univer-cli-agent"
+            / "run-task.sh"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("--json", run_task_script)
+        self.assertIn("--output-last-message", run_task_script)
+        self.assertIn("/task/logs/codex.final.md", run_task_script)
+        self.assertIn("> /task/logs/codex.events.jsonl", run_task_script)
+        self.assertNotIn("tee /task/logs/codex.events.jsonl", run_task_script)
+        self.assertNotIn("jq -r", run_task_script)
 
     def test_claude_agent_reads_prompt_from_stdin_to_avoid_argument_limit(self):
         run_task_script = (
@@ -300,6 +315,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         self.assertIn("exec claude -p \\", run_task_script)
         self.assertIn("< /task/prompt.md", run_task_script)
+        self.assertIn("> /task/logs/claude.events.jsonl", run_task_script)
         self.assertNotIn('claude -p "$prompt"', run_task_script)
 
     def test_shell_wrappers_default_to_agent_specific_env_files(self):
@@ -613,7 +629,7 @@ model_reasoning_effort = "medium"
                 with self.assertRaisesRegex(Exception, "Missing container output"):
                     run_task(config, task, cases=[1])
 
-    def test_run_task_timeout_with_partial_output_writes_logs_and_reports_timeout(self):
+    def test_run_task_timeout_drains_output_without_docker_text_logs(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
@@ -649,14 +665,16 @@ model_reasoning_effort = "medium"
                     run_task_container(config, workspace)
 
             log_dir = workspace.container_task_dir / "logs"
-            self.assertEqual((log_dir / "docker.stdout.txt").read_text(encoding="utf-8"), "partial stdout\n")
-            self.assertEqual((log_dir / "docker.stderr.txt").read_text(encoding="utf-8"), "partial stderr\n")
+            self.assertFalse((log_dir / "docker.stdout.txt").exists())
+            self.assertFalse((log_dir / "docker.stderr.txt").exists())
+            self.assertFalse((log_dir / "docker.output.txt").exists())
             timing = json.loads((log_dir / "docker.timing.json").read_text(encoding="utf-8"))
             self.assertTrue(timing["timeout"])
             self.assertEqual(timing["returncode"], -1)
             self.assertEqual(timing["status"], "timeout")
+            self.assertIn("partial stderr", timing["error"])
 
-    def test_run_task_container_streams_logs_before_process_exits(self):
+    def test_run_task_container_drains_pipes_before_process_exits_without_docker_text_logs(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
@@ -711,10 +729,10 @@ model_reasoning_effort = "medium"
                 thread.start()
 
                 log_dir = workspace.container_task_dir / "logs"
-                self.wait_until(lambda: (log_dir / "docker.stdout.txt").is_file())
-                self.wait_until(lambda: "first stdout" in (log_dir / "docker.stdout.txt").read_text(encoding="utf-8"))
-                self.wait_until(lambda: "first stderr" in (log_dir / "docker.stderr.txt").read_text(encoding="utf-8"))
-                self.wait_until(lambda: "[stdout] first stdout" in (log_dir / "docker.output.txt").read_text(encoding="utf-8"))
+                self.wait_until(lambda: (log_dir / "docker.timing.json").is_file())
+                self.assertFalse((log_dir / "docker.stdout.txt").exists())
+                self.assertFalse((log_dir / "docker.stderr.txt").exists())
+                self.assertFalse((log_dir / "docker.output.txt").exists())
                 self.assertTrue(thread.is_alive())
                 timing = json.loads((log_dir / "docker.timing.json").read_text(encoding="utf-8"))
                 self.assertEqual(timing["status"], "running")
@@ -727,6 +745,10 @@ model_reasoning_effort = "medium"
             timing = json.loads((workspace.container_task_dir / "logs" / "docker.timing.json").read_text(encoding="utf-8"))
             self.assertEqual(timing["status"], "finished")
             self.assertEqual(timing["returncode"], 0)
+            log_dir = workspace.container_task_dir / "logs"
+            self.assertFalse((log_dir / "docker.stdout.txt").exists())
+            self.assertFalse((log_dir / "docker.stderr.txt").exists())
+            self.assertFalse((log_dir / "docker.output.txt").exists())
 
     def test_run_task_removes_stale_outputs_before_docker_runs(self):
         with tempfile.TemporaryDirectory() as tmp:

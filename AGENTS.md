@@ -37,7 +37,7 @@
 - 用户说“错题表上所有错题”或“错题表所有错题”时，指对应 sheet 第 3 行以后所有有 `task_id` 的历史失败/未执行 task，也就是任一报告列曾经出现过 `FAIL` 或 `NOT_RUN` 的行。这不是最新报告仍失败/未执行的数量。用户说“错题表最新错题”或“当前最新错题”时，指对应 sheet 最右侧最新报告列为 `FAIL` 或 `NOT_RUN` 的 task，数量以该列第 2 行公式中的 `F` 与 `NR` 分项为准。用户说“错题表未调查题目”或“未调查候选”时，指“错题表上所有错题”中 `备注` 列为空的 task，不要求最新报告列仍为 `FAIL` 或 `NOT_RUN`；已有备注的问题不要重复算未调查，如果新 run 出现不同失败形态，需要明确说明和备注列已知问题的差异。
 - 对失败或超时 case，按以下顺序定位原因：
   1. 读该 case 的 `task/prompt.md`，确认 `answer_position` 和任务要求。
-  2. 查 `task/logs/docker.output.txt`、`docker.stderr.txt`、`docker.timing.json`。
+  2. 优先查 `task/logs/codex.events.jsonl`、`codex.final.md`、`docker.timing.json`；旧 run 如没有 JSONL，再回退查 `docker.output.txt`、`docker.stderr.txt`。
   3. 对比 output 与 golden 在 `answer_position` 内的差异；必要时同时检查值、公式、数字格式、样式、空白行和工作表结构。
   4. 判断失败类型：理解错误、范围/边界错误、值类型或格式错误、工具链错误、超时/网络问题。
 - 当前 `evaluation/evaluation.py` 的正式判分逻辑使用 `openpyxl.load_workbook(..., data_only=True)` 读取 output 和 golden，然后只比较 `answer_position` 内的 `cell.value`；公式文本、样式、填充色和字体色默认不参与判分（颜色比较代码是注释状态）。分析错题时必须先按这个逻辑复现评测结果；如果 output 与 golden 的 `data_only=True` 值一致但评测仍 FAIL，应优先检查 `answer_position` 解析、sheet 名、不可见字符（例如 NBSP `\u00A0`）、范围格式、文件路径和 openpyxl 读取异常，不要仅因公式或样式差异就归因为 agent 输出错误。

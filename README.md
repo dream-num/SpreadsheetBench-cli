@@ -209,9 +209,8 @@ Each task keeps Docker logs in `.runs/univer-agent/<run-id>/<task-id>/task/logs/
 
 - `prompt.md`: generated agent prompt.
 - `docker.command.txt`: exact Docker command.
-- `docker.output.txt`: combined stdout/stderr log.
-- `docker.stdout.txt`: raw Docker stdout.
-- `docker.stderr.txt`: raw Docker stderr.
+- `<agent>.events.jsonl`: structured agent event stream, for presets that emit JSONL.
+- `codex.final.md`: final Codex response, when running the Codex preset.
 - `docker.timing.json`: duration, exit code, timeout.
 
 Useful runner options:

@@ -42,8 +42,11 @@ case "$agent" in
             --dangerously-bypass-approvals-and-sandbox
             exec
             --skip-git-repo-check
+            --json
+            --output-last-message
+            /task/logs/codex.final.md
         )
-        exec codex "${codex_args[@]}" - < /task/prompt.md
+        exec codex "${codex_args[@]}" - < /task/prompt.md > /task/logs/codex.events.jsonl
         ;;
     claude)
         cd /task
@@ -52,7 +55,7 @@ case "$agent" in
             --no-session-persistence \
             --output-format stream-json \
             --verbose \
-            < /task/prompt.md
+            < /task/prompt.md > /task/logs/claude.events.jsonl
         ;;
     "")
         echo "--agent is required when --agent-command is not set" >&2

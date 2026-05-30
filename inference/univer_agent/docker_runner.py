@@ -263,13 +263,23 @@ def write_timing(
     )
 
 
-def stream_pipe_to_logs(
+def _append_captured_output(captured: List[str], text: str, max_chars: int = 8000) -> None:
+    captured.append(text)
+    total = sum(len(part) for part in captured)
+    while total > max_chars and captured:
+        removed = captured.pop(0)
+        total -= len(removed)
+
+
+def _captured_output_excerpt(captured: List[str]) -> str:
+    return "".join(captured).strip()
+
+
+def drain_pipe(
     pipe,
-    stream_file,
-    output_file,
-    output_lock: threading.Lock,
     label: str,
     stream_agent_output: bool,
+    captured: Optional[List[str]] = None,
 ) -> None:
     if pipe is None:
         return
@@ -278,11 +288,8 @@ def stream_pipe_to_logs(
         if line == "":
             break
         text = subprocess_output_text(line)
-        stream_file.write(text)
-        stream_file.flush()
-        with output_lock:
-            output_file.write(f"[{label}] {text}")
-            output_file.flush()
+        if captured is not None:
+            _append_captured_output(captured, text)
         if stream_agent_output:
             print(text, end="", file=sys.stderr if label == "stderr" else sys.stdout, flush=True)
 
@@ -307,53 +314,47 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
         timeout_seconds=config.agent_timeout,
         status="running",
     )
-    stdout_path = log_dir / "docker.stdout.txt"
-    stderr_path = log_dir / "docker.stderr.txt"
-    output_path = log_dir / "docker.output.txt"
     timed_out = False
     returncode: Optional[int] = None
     process: Optional[subprocess.Popen] = None
+    stderr_capture: List[str] = []
 
     try:
-        with stdout_path.open("w", encoding="utf-8") as stdout_file, stderr_path.open(
-            "w", encoding="utf-8"
-        ) as stderr_file, output_path.open("w", encoding="utf-8") as output_file:
-            process = subprocess.Popen(
-                command,
-                cwd=workspace.task_dir,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-            )
-            output_lock = threading.Lock()
-            stdout_thread = threading.Thread(
-                target=stream_pipe_to_logs,
-                args=(process.stdout, stdout_file, output_file, output_lock, "stdout", config.stream_agent_output),
-                daemon=True,
-            )
-            stderr_thread = threading.Thread(
-                target=stream_pipe_to_logs,
-                args=(process.stderr, stderr_file, output_file, output_lock, "stderr", config.stream_agent_output),
-                daemon=True,
-            )
-            stdout_thread.start()
-            stderr_thread.start()
+        process = subprocess.Popen(
+            command,
+            cwd=workspace.task_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        stdout_thread = threading.Thread(
+            target=drain_pipe,
+            args=(process.stdout, "stdout", config.stream_agent_output),
+            daemon=True,
+        )
+        stderr_thread = threading.Thread(
+            target=drain_pipe,
+            args=(process.stderr, "stderr", config.stream_agent_output, stderr_capture),
+            daemon=True,
+        )
+        stdout_thread.start()
+        stderr_thread.start()
 
+        try:
+            returncode = process.wait(timeout=config.agent_timeout)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            process.terminate()
             try:
-                returncode = process.wait(timeout=config.agent_timeout)
+                process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                timed_out = True
-                process.terminate()
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait()
-                returncode = -1
+                process.kill()
+                process.wait()
+            returncode = -1
 
-            stdout_thread.join()
-            stderr_thread.join()
+        stdout_thread.join()
+        stderr_thread.join()
     except BaseException as exc:
         interrupted = isinstance(exc, KeyboardInterrupt)
         if process is not None and process.poll() is None:
@@ -363,7 +364,8 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
-        stop_docker_container(config, container_name)
+        if process is not None:
+            stop_docker_container(config, container_name)
         finished_at = datetime.datetime.now()
         duration_seconds = round(time.monotonic() - started, 3)
         write_timing(
@@ -390,11 +392,15 @@ def run_task_container(config: RunnerConfig, workspace: DockerTaskWorkspace) -> 
         timed_out=timed_out,
         timeout_seconds=config.agent_timeout,
         status="timeout" if timed_out else "finished",
+        error=_captured_output_excerpt(stderr_capture) if timed_out and stderr_capture else None,
     )
 
     if timed_out:
         raise RunnerError(f"Docker command timed out after {config.agent_timeout} seconds for task {workspace.task_id}")
     if returncode != 0:
+        detail = _captured_output_excerpt(stderr_capture)
+        if detail:
+            raise RunnerError(f"Docker command failed for task {workspace.task_id}: {returncode}: {detail}")
         raise RunnerError(f"Docker command failed for task {workspace.task_id}: {returncode}")
 
 

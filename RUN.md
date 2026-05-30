@@ -257,9 +257,8 @@ output_path
 
 ```text
 .runs/univer-agent/<run-id>/<task-id>/task/logs/docker.command.txt
-.runs/univer-agent/<run-id>/<task-id>/task/logs/docker.stdout.txt
-.runs/univer-agent/<run-id>/<task-id>/task/logs/docker.stderr.txt
-.runs/univer-agent/<run-id>/<task-id>/task/logs/docker.output.txt
+.runs/univer-agent/<run-id>/<task-id>/task/logs/<agent>.events.jsonl
+.runs/univer-agent/<run-id>/<task-id>/task/logs/codex.final.md
 .runs/univer-agent/<run-id>/<task-id>/task/logs/docker.timing.json
 ```
 
@@ -288,8 +287,7 @@ jq '{metadata, counts: (.tasks | group_by(.status) | map({status: .[0].status, c
 如果 Docker 阶段失败：
 
 ```bash
-cat .runs/univer-agent/<run-id>/<task-id>/task/logs/docker.stderr.txt
-cat .runs/univer-agent/<run-id>/<task-id>/task/logs/docker.stdout.txt
+cat .runs/univer-agent/<run-id>/<task-id>/task/logs/docker.timing.json
 cat .runs/univer-agent/<run-id>/<task-id>/task/logs/docker.command.txt
 ```
 
