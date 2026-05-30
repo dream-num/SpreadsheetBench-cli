@@ -99,7 +99,7 @@ command syntax must come from the required local skills and `univer help`, not f
 - Do not use direct runtime scripts, pipe-in writes, package edits, Python, openpyxl, zip tools, or Office libraries to mutate the final workbook.
 - Runtime scripts are allowed only for short readonly probes when SaC diagnostics or assertions need workbook-visible evidence.
 - If SaC cannot produce an artifact, fail the task rather than creating `output.xlsx` through direct workbook mutation.
-- Workbook inspection is for `.univer` or `.unv` packages, not exported `.xlsx` files. Do not inspect the exported `output.xlsx`.
+- Workbook inspection is for `.univer` or `.unv` packages. Do not inspect the exported `output.xlsx` except for the bounded export compatibility smoke check.
 - Do not rely on Python, openpyxl, zip tools, office libraries, or ad hoc Node scripts for final post-export checking.
 - Keep temporary scripts and probe output under `/task/work`.
 - Create exactly one required `/task/outputs/case_N/output.xlsx` per case.
@@ -163,6 +163,78 @@ error placeholders because the changed value looks cleaner, more natural, or mor
 If normalization appears necessary, record the instruction phrase or workbook evidence that requires
 it in the plan and cover the decision with an assertion or readonly probe.
 
+## Evaluator-Facing Cell Model Gate
+
+Before writing assertions or migration source, write an evaluator-facing cell model contract for
+`answer_position`.
+
+For each output column or range, decide and record the expected stored value model:
+
+- blank cell
+- text or force-text identifier
+- number
+- date/time as Excel serial value plus number format
+- percentage or currency as numeric value plus number format
+- boolean cell
+- formula cell plus evaluator-visible stored/cached value
+
+Display text is not enough evidence for this decision. `inspect`, `pipe out`, `getValues()`, and
+preview text may show formatted values, but they do not prove the stored value type, number format,
+formula model, rich text, or force-text state.
+
+When type or format matters, use targeted readonly Facade probes against the managed `.univer`
+artifact to inspect complete cell models with `getCellDatas()` and number formats. Keep probes short
+and under `/task/work`.
+
+Hard rules for evaluator-facing output:
+
+- Do not write date-looking display strings such as `2-Sep-22` or `16-Nov-20` when the target pattern
+  expects a real date value. Write the Excel date serial as a number and preserve or set the date
+  number format.
+- Do not write `"TRUE"` or `"FALSE"` strings when the target pattern expects booleans. Write boolean
+  cells.
+- Do not turn real zeroes into blanks. Blank-vs-zero policy must be decided from instruction wording
+  and workbook evidence, then asserted with at least one true-zero row and one blank row when relevant.
+- Do not turn numeric-looking identifiers, codes, phone numbers, ZIP/postal codes, or hyphenated text
+  into numbers or dates. Use force-text when semantics require text.
+- For copy, reorder, sort, transpose, extract, or move tasks, preserve full cell models by default
+  unless the instruction clearly asks for value-only output. Copying display values is not enough when
+  dates, booleans, formulas, rich text, identifiers, percentages, currencies, or formats are involved.
+- For formula tasks, choose whether the benchmark needs formulas, stored values, or both. If formulas
+  are used, verify that exported evaluator-visible stored values will match the intended result.
+
+Assertions or readonly probes must include at least one type-sensitive cell when relevant: date,
+boolean, blank, zero, text-number, identifier, percentage, currency, formula, and exact text.
+
+## Type-Sensitive Write Rules
+
+Use explicit cell data for type-sensitive writes. Dates, booleans, numbers, text, force-text
+identifiers, formulas, percentages, currencies, blanks, and copied cells must not be written as
+ambiguous display strings.
+
+- Do not use bare JavaScript values for evaluator-facing type-sensitive output. Do not write `setValues([["2-2", 123, true]])`; write explicit cell data with `v`, `t`, `f`, and required number format/style fields.
+- Date outputs should be numeric Excel date serials with a date number format, unless the instruction
+  or target pattern explicitly requires literal date text.
+- Boolean outputs should be boolean cells, not text labels.
+- Text identifiers that must not auto-convert should use force-text semantics.
+- When replacing an existing range, call `clearContent()` before writing the replacement matrix so old
+  formulas, rich text, custom data, or merged cell data do not survive accidentally.
+- Copy, reorder, transpose, extract, and move tasks should use `getCellDatas()` and deep-cloned cell
+  models by default when source value type, formula, formatting, rich text, or custom data may matter.
+
+## Known Facade Footguns
+
+These benchmark-visible Facade details are important enough to keep in this contract even though most
+API details belong to the required skills:
+
+- Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column arguments.
+  `numRows` and `numColumns` are counts, not end indexes.
+- `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used indexes.
+- Extend the sheet before creating an out-of-bounds range. Far-right or far-down target ranges fail
+  immediately if the range object is created before the sheet is expanded.
+- `setValues()` merges object cell data into existing cells; it does not automatically clear old
+  values, formulas, rich text, styles, or custom data.
+
 ## Assertion Anti-Self-Confirmation
 
 Assertions must not only confirm that the migration wrote what the plan said. For each high-risk
@@ -173,7 +245,8 @@ At minimum, cover these when relevant:
 - evaluator-facing cells inside `answer_position`
 - at least one source-to-target mapping
 - first/middle/last or boundary rows for large ranges
-- a blank, zero, error, date, boolean, text-number, or exact-text edge case
+- a blank, true zero, error, date, boolean, text-number, identifier, formula, percentage/currency,
+  or exact-text edge case, checked by stored value model when display text can mislead
 - preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
   ranges that must not be changed
 
@@ -186,9 +259,10 @@ The evaluator compares stored values from the final `.xlsx` with openpyxl `data_
 Formula text can be workbook-correct but still fail benchmark value scoring if the exported workbook
 does not contain the expected stored/cached values.
 
-If the plan writes formulas, it must explain how final stored values will be evaluator-visible after
-SaC apply and export. When that cannot be confidently guaranteed, prefer writing the evaluator-needed
-stored values directly unless the instruction explicitly requires formulas.
+If the instruction requires formulas, preserve or write formulas and also explain how final stored
+values will be evaluator-visible after SaC apply and export. If the instruction does not require
+formulas and cached formula values cannot be confidently guaranteed, prefer writing the
+evaluator-needed stored values directly.
 
 ## SaC Type And API Lookup
 
@@ -254,6 +328,10 @@ Before exporting:
 - The relevant skill-guided SaC verification status is `passed`.
 - `checkedPackCount > 0`.
 - The changed follow-up pack has assertion evidence.
+- The changed follow-up pack has evaluator-facing cell model evidence for every relevant date,
+  boolean, blank/zero, text-number, formula, percentage/currency, or copied-cell preservation risk.
+- If export could change evaluator-facing stored values or types, the plan includes a bounded export
+  compatibility smoke check for `answer_position`.
 - A verify result with zero assertions, all skipped packs, or a zero-assertion, all-skipped, or unchecked changed-pack state is not a pass.
 - Readonly probes are auxiliary evidence only.
 - No hidden answer, host evaluation artifact, or raw input file was used.
@@ -261,9 +339,14 @@ Before exporting:
 ## Export Stop Gate
 
 When case `N` passes the Passing Gate, export the managed artifact to exactly
-`/task/outputs/case_N/output.xlsx` once, confirm the file is non-empty, then stop immediately. Do
-not run more workbook commands, imports, inspections, Python/Node scripts, diffs, verify-report
-reads, or re-exports after the output file exists.
+`/task/outputs/case_N/output.xlsx` once, confirm the file is non-empty, then stop immediately unless
+the plan requires the bounded export compatibility smoke check.
+
+For that smoke check only: import it into a temporary `.univer` under `/task/work`, inspect only
+`answer_position` or the specific type-sensitive cells named in the plan,
+and do not mutate, re-export, diff broad ranges, read hidden artifacts, or use Python/openpyxl/zip
+tools. If the smoke check reveals an export-only value/type problem, report that blocker rather than
+silently producing a second export.
 """
 
 
