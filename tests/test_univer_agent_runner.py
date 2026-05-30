@@ -290,7 +290,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn('codex "${codex_args[@]}" - < /task/prompt.md', run_task_script)
         self.assertNotIn('exec codex "${codex_args[@]}" "$prompt"', run_task_script)
 
-    def test_codex_agent_writes_jsonl_events_directly(self):
+    def test_codex_agent_writes_jsonl_events_via_tee(self):
         run_task_script = (
             Path(__file__).resolve().parents[1]
             / "docker"
@@ -301,8 +301,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("--json", run_task_script)
         self.assertIn("--output-last-message", run_task_script)
         self.assertIn("/task/logs/codex.final.md", run_task_script)
-        self.assertIn("> /task/logs/codex.events.jsonl", run_task_script)
-        self.assertNotIn("tee /task/logs/codex.events.jsonl", run_task_script)
+        self.assertIn("| tee /task/logs/codex.events.jsonl", run_task_script)
+        self.assertNotIn("> /task/logs/codex.events.jsonl", run_task_script)
         self.assertNotIn("jq -r", run_task_script)
 
     def test_claude_agent_reads_prompt_from_stdin_to_avoid_argument_limit(self):

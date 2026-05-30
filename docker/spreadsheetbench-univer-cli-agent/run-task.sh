@@ -46,7 +46,7 @@ case "$agent" in
             --output-last-message
             /task/logs/codex.final.md
         )
-        exec codex "${codex_args[@]}" - < /task/prompt.md > /task/logs/codex.events.jsonl
+        codex "${codex_args[@]}" - < /task/prompt.md | tee /task/logs/codex.events.jsonl
         ;;
     claude)
         cd /task
