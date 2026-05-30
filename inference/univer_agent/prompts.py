@@ -119,13 +119,76 @@ For each case:
 
 1. Use the required skills before touching workbook content.
 2. Inspect the prepared artifact with bounded workbook-visible reads.
-3. Write a workspace plan under the prepared SaC workspace with target shape, source-to-target
-   mapping, ordering policy, value/formula semantics, preservation rules, and uncertainty.
-4. Add plan-derived assertions for the follow-up pack before implementation, focused on
-   workbook-visible effects and high-risk decisions.
+3. Write a workspace plan under the prepared SaC workspace that passes the Plan Quality Gate below.
+4. Add plan-derived assertions for the follow-up pack before implementation; they must pass the
+   Assertion Anti-Self-Confirmation gate below.
 5. Implement only the follow-up pack work; leave the baseline checkpoint unchanged.
 6. Use the skill-guided SaC verification/report loop to repair failures.
 7. Export only after the changed follow-up pack has meaningful passed assertion evidence.
+
+## Plan Quality Gate
+
+Before implementation, the plan must name the workbook roles it is relying on:
+
+- source ranges
+- target output ranges
+- example/demo ranges
+- helper/control or lookup ranges
+- preserve-only ranges
+- the actual write subrange when `answer_position` is only a broad inspection window
+
+For every high-risk decision, mark the evidence strength as one of:
+
+- `explicit`: directly stated by the instruction or by an existing workbook-visible target/example
+- `inferred`: supported by discriminating workbook-visible evidence
+- `underdetermined assumption`: no available evidence rules out another plausible interpretation
+
+High-risk decisions include source-to-target row mapping, sign-to-column mapping, sorting order,
+grouping/truncation order, formula-vs-static-value strategy, blank/zero/error policy, exact text
+policy, date/boolean/number type policy, section/header boundaries, and structural layout shifts.
+
+Do not start implementation from business convention, source-side sign patterns, adjacent-row
+arithmetic, or visual similarity alone. Those can be evidence inputs, but the plan must connect them
+to instruction wording, target labels, examples, existing output, or an explicit assumption.
+
+## No Unrequested Normalization
+
+Default to exact workbook-visible preservation unless the instruction explicitly asks to clean,
+normalize, summarize, or reformat.
+
+Do not silently change casing, whitespace, NBSP, punctuation, comma spacing, pluralization,
+identifiers, text-vs-number type, boolean type, date serial/date text intent, blanks, zeroes, or
+error placeholders because the changed value looks cleaner, more natural, or more conventional.
+
+If normalization appears necessary, record the instruction phrase or workbook evidence that requires
+it in the plan and cover the decision with an assertion or readonly probe.
+
+## Assertion Anti-Self-Confirmation
+
+Assertions must not only confirm that the migration wrote what the plan said. For each high-risk
+decision, include assertion or readonly-probe evidence that would distinguish the chosen rule from a plausible wrong rule.
+
+At minimum, cover these when relevant:
+
+- evaluator-facing cells inside `answer_position`
+- at least one source-to-target mapping
+- first/middle/last or boundary rows for large ranges
+- a blank, zero, error, date, boolean, text-number, or exact-text edge case
+- preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
+  ranges that must not be changed
+
+If an assertion only mirrors migration output and would also pass for a plausible wrong plan, it is
+not meaningful evidence.
+
+## Formula/Data-Only Risk
+
+The evaluator compares stored values from the final `.xlsx` with openpyxl `data_only=True`.
+Formula text can be workbook-correct but still fail benchmark value scoring if the exported workbook
+does not contain the expected stored/cached values.
+
+If the plan writes formulas, it must explain how final stored values will be evaluator-visible after
+SaC apply and export. When that cannot be confidently guaranteed, prefer writing the evaluator-needed
+stored values directly unless the instruction explicitly requires formulas.
 
 ## SaC Type And API Lookup
 
