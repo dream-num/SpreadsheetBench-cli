@@ -136,7 +136,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             opt = parse_option(Path.cwd())
 
         self.assertEqual(opt.workers, 5)
-        self.assertEqual(opt.agent_timeout, 300)
+        self.assertEqual(opt.agent_timeout, 550)
         self.assertEqual(opt.dataset, "spreadsheetbench_verified_400")
         self.assertFalse(hasattr(opt, "docker_image"))
         self.assertEqual(opt.docker_bin, "docker")
