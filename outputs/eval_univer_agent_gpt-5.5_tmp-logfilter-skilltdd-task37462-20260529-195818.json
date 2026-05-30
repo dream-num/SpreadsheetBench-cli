@@ -1,0 +1,11 @@
+[
+    {
+        "id": 37462,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    }
+]

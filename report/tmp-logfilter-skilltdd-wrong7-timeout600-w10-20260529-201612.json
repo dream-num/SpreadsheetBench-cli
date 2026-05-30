@@ -1,0 +1,181 @@
+{
+  "accuracy": 0.5714285714285714,
+  "correct_case_count": 4,
+  "error_case_count": 2,
+  "timeout_case_count": 1,
+  "total_case_count": 7,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/summary.json",
+    "metadata": {
+      "run_id": "tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 10,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/private/tmp/spreadsheetbench-codex-medium.env",
+      "started_at": "2026-05-29T20:16:19",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-29T20:26:36"
+    },
+    "total_task_count": 7,
+    "ok_task_count": 5,
+    "error_task_count": 2,
+    "timeout_task_count": 1,
+    "tasks": [
+      {
+        "id": "24-23",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/24-23",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/24-23/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_24-23_output.xlsx"
+        ],
+        "started_at": "2026-05-29T20:16:19",
+        "finished_at": "2026-05-29T20:26:36",
+        "duration_seconds": 617.22
+      },
+      {
+        "id": "209-30",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/209-30/task:/task spreadsheetbench-univer-cli-agent-local -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: ERROR SAC_EXTERNAL_IMPORT_UNSUPPORTED\n\nSaC source file migrations/20260529121624-materialize-current/pack.ts imports unsupported external specifier ,\n    migrationSourcePath: .\n\nUsage:\n  univer sac init <workspace>\n  univer sac migration create <slug> --workspace <workspace>\n  univer sac apply <workspace> [--target <workbook.univer>] [--no-commit]\n  univer sac verify <workspace>\n  univer sac rebuild <workspace> --from <workbook.univer> [--force]\n\nTry:\n  univer sac init ./model\n  univer sac apply ./model\n\nTrace ID: 54189030a974a9899f739dba0bacc405"
+      },
+      {
+        "id": "343-20",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/343-20",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/343-20/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_343-20_output.xlsx"
+        ],
+        "started_at": "2026-05-29T20:16:19",
+        "finished_at": "2026-05-29T20:25:21",
+        "duration_seconds": 541.907
+      },
+      {
+        "id": "49036",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/49036",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/49036/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_49036_output.xlsx"
+        ],
+        "started_at": "2026-05-29T20:16:19",
+        "finished_at": "2026-05-29T20:22:44",
+        "duration_seconds": 385.317
+      },
+      {
+        "id": "49667",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 49667"
+      },
+      {
+        "id": "11276",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/11276",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/11276/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_11276_output.xlsx"
+        ],
+        "started_at": "2026-05-29T20:16:19",
+        "finished_at": "2026-05-29T20:22:59",
+        "duration_seconds": 400.021
+      },
+      {
+        "id": "18645",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/18645",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612/18645/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_18645_output.xlsx"
+        ],
+        "started_at": "2026-05-29T20:16:19",
+        "finished_at": "2026-05-29T20:23:48",
+        "duration_seconds": 449.732
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-logfilter-skilltdd-wrong7-timeout600-w10-20260529-201612.json",
+    "accuracy": 0.5714285714285714,
+    "correct_case_count": 4,
+    "error_case_count": 2,
+    "timeout_case_count": 1,
+    "total_case_count": 7,
+    "results": [
+      {
+        "id": "24-23",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": "209-30",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "343-20",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": 49036,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 49667,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 11276,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": 18645,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      }
+    ]
+  }
+}

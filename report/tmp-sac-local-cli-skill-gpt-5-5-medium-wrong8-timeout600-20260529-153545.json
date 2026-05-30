@@ -1,0 +1,167 @@
+{
+  "accuracy": 0.125,
+  "correct_case_count": 1,
+  "error_case_count": 1,
+  "timeout_case_count": 6,
+  "total_case_count": 8,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-wrong8-timeout600-20260529-153545/summary.json",
+    "metadata": {
+      "run_id": "tmp-sac-local-cli-skill-gpt-5-5-medium-wrong8-timeout600-20260529-153545",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 3,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/private/tmp/spreadsheetbench-codex-gpt55-medium.env",
+      "started_at": "2026-05-29T15:36:01",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-29T16:05:43"
+    },
+    "total_task_count": 8,
+    "ok_task_count": 1,
+    "error_task_count": 7,
+    "timeout_task_count": 6,
+    "tasks": [
+      {
+        "id": "24-23",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 24-23"
+      },
+      {
+        "id": "209-30",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-wrong8-timeout600-20260529-153545/209-30/task:/task spreadsheetbench-univer-cli-agent-local -lc 'univer sac init /task/cases/case_1/sac --from /task/cases/case_1/input.univer'`: ERROR SAC_EXTERNAL_IMPORT_UNSUPPORTED\n\nSaC source file migrations/20260529073604-materialize-current/pack.ts imports unsupported external specifier ,\n    migrationSourcePath: .\n\nUsage:\n  univer sac init <workspace>\n  univer sac migration create <slug> --workspace <workspace>\n  univer sac apply <workspace> [--target <workbook.univer>] [--no-commit]\n  univer sac verify <workspace>\n  univer sac rebuild <workspace> --from <workbook.univer> [--force]\n\nTry:\n  univer sac init ./model\n  univer sac apply ./model\n\nTrace ID: 3daa9ae9767b57f61d1bfe2f8e2236fd"
+      },
+      {
+        "id": "343-20",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 343-20"
+      },
+      {
+        "id": "49036",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 49036"
+      },
+      {
+        "id": "49667",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 49667"
+      },
+      {
+        "id": "11276",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 11276"
+      },
+      {
+        "id": "18645",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-wrong8-timeout600-20260529-153545/18645",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-local-cli-skill-gpt-5-5-medium-wrong8-timeout600-20260529-153545/18645/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_18645_output.xlsx"
+        ],
+        "started_at": "2026-05-29T15:46:15",
+        "finished_at": "2026-05-29T15:55:33",
+        "duration_seconds": 557.26
+      },
+      {
+        "id": "37462",
+        "status": "error",
+        "error": "Docker command timed out after 600 seconds for task 37462"
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-sac-local-cli-skill-gpt-5-5-medium-wrong8-timeout600-20260529-153545.json",
+    "accuracy": 0.125,
+    "correct_case_count": 1,
+    "error_case_count": 1,
+    "timeout_case_count": 6,
+    "total_case_count": 8,
+    "results": [
+      {
+        "id": "24-23",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "209-30",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": "343-20",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 49036,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 49667,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 11276,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      },
+      {
+        "id": 18645,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+      },
+      {
+        "id": 37462,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      }
+    ]
+  }
+}
