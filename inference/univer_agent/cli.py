@@ -188,7 +188,7 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--setting", default="univer_agent")
     parser.add_argument("--agent", default=None, choices=agent_choices())
     parser.add_argument("--agent-command", default="", help="container-internal command for the agent")
-    parser.add_argument("--agent-timeout", type=int, default=300)
+    parser.add_argument("--agent-timeout", type=int, default=900)
     parser.add_argument(
         "--stream-agent-output",
         action="store_true",

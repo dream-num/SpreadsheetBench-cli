@@ -17,7 +17,7 @@
 
 - 先看 `.runs/univer-agent/<run-id>/summary.json`：确认任务数、`ok/error/timeout`、耗时最高的任务。
 - 再看 `report/<run-id>.json` 和 `outputs/eval_*<run-id>.json`：统计准确率、失败 case、超时 case。
-- 根目录 `wrong-report-matrix.univer` 用来累计记录不同报告中的错题稳定性；以后只更新这个 `.univer` 文件，不保留配套 `.xlsx`。每个 sheet 按 `<agent>-<model>-<题集>` 命名，例如 `codex-gpt-5.5-verified400`；第 1 行是表头，第 2 行固定为错题数统计行：`A2` 写 `错题数`，各报告列使用 `COUNTIF(<报告列>3:<报告列>1000,"FAIL")` 统计该列失败数；task 数据从第 3 行开始。行只保留至少在该 sheet 任一报告中失败过一次的 task；基础列固定为 `task_id`、`备注`，后面每个报告一列。报告列名使用简短 run-id：在不丢失辨识度的前提下去掉已由 sheet 名表达的 agent/model/题集公共前缀，例如 `codex-gpt-5-5-verified400-all-20260525-153934` 在 `codex-gpt-5.5-verified400` sheet 中记为 `20260525-153934`。报告列按时间从左到右追加。通过的单元格留空，失败、超时、缺评测项或空 `test_case_results` 写 `FAIL`。新增全量报告后，应根据 `outputs/eval_*<run-id>.json` 在对应 agent/model/题集 sheet 末尾追加一列，并在第 2 行补充该报告列的 `COUNTIF` 公式；如果出现新的错题，需要在该 sheet 第 3 行及之后追加新行。不要添加题目序号列、`classification` 列或 summary sheet；稳定过、稳定错、偶发错通过横向查看空白/`FAIL` 判断。
+- 根目录 `wrong-report-matrix.univer` 用来累计记录不同报告中的错题稳定性；以后只更新这个 `.univer` 文件，不保留配套 `.xlsx`。每个 sheet 按 `<agent>-<model>-<题集>` 命名，例如 `codex-gpt-5.5-verified400`；第 1 行是表头，第 2 行固定为错题数统计行：`A2` 写 `错题数`，各报告列使用 `COUNTIF(<报告列>3:<报告列>1000,"FAIL")` 和 `COUNTIF(<报告列>3:<报告列>1000,"NOT_RUN")` 统计该列失败数和未运行数，显示为 `F:<失败数>，NR:<未运行数>`；task 数据从第 3 行开始。行只保留至少在该 sheet 任一报告中失败过一次的 task；基础列固定为 `task_id`、`备注`，后面每个报告一列。报告列名使用简短 run-id：在不丢失辨识度的前提下去掉已由 sheet 名表达的 agent/model/题集公共前缀，例如 `codex-gpt-5-5-verified400-all-20260525-153934` 在 `codex-gpt-5.5-verified400` sheet 中记为 `20260525-153934`。报告列按时间从左到右追加。新增报告列必须显式写三态：评测通过写 `PASS`；失败、超时、缺评测项或空 `test_case_results` 写 `FAIL`；该 sheet 历史已有 task 行但本轮报告未覆盖的写 `NOT_RUN`。新增报告列后，应根据 `outputs/eval_*<run-id>.json` 在对应 agent/model/题集 sheet 末尾追加一列，并在第 2 行补充该报告列的 `F/NR` 统计公式；如果出现新的错题，需要在该 sheet 第 3 行及之后追加新行。新增报告列必须沿用或扩展该 sheet 的 `PASS`、`FAIL`、`NOT_RUN` 条件格式到新列。不要添加题目序号列、`classification` 列或 summary sheet；稳定过、稳定错、偶发错通过横向查看 `PASS`/`FAIL`/`NOT_RUN` 判断。
 - 用户说“错题表上所有错题”或“错题表所有错题”时，指对应 sheet 第 3 行以后所有有 `task_id` 的历史失败 task，也就是任一报告列曾经出现过 `FAIL` 的行；这不是最新报告仍失败的数量。用户说“错题表最新错题”或“当前最新错题”时，指对应 sheet 最右侧最新报告列为 `FAIL` 的 task，数量以该列第 2 行 `COUNTIF` 统计为准。用户说“错题表未调查题目”或“未调查候选”时，指“错题表上所有错题”中 `备注` 列为空的 task，不要求最新报告列仍为 `FAIL`；已有备注的问题不要重复算未调查，如果新 run 出现不同失败形态，需要明确说明和备注列已知问题的差异。
 - 对失败或超时 case，按以下顺序定位原因：
   1. 读该 case 的 `task/prompt.md`，确认 `answer_position` 和任务要求。
@@ -29,6 +29,8 @@
 - 逐题分析必须写出 agent 操作时的卡点：是否有命令误用、失败重试、API 探测、硬编码范围、排序/截断前后顺序风险、验证不足、耗时异常、或接近违反 `answer_position`/文件访问约束的行为。
 - 不要只依赖评测 JSON。评测程序较简单时，也要检查最终 `output.xlsx`：优先用 `openpyxl` 直接读取 output 和 golden 的 `.xlsx`，检查 `answer_position` 内的值、公式、数字格式、样式、空白区、工作表结构、排序、截断、导出结果或范围外污染；只有需要 Univer 可见状态或 CLI 行为对照时，再把 `.xlsx` 临时导入为 `.univer` 辅助检查。
 - 对正确 case 也要扫日志中的可恢复问题，尤其是 `cp: omitting directory`、`Unknown argument`、`Missing workbook package file`、`Range is out of bounds`、`Sheet not found`、`python/jq not found`、`npm install`、`univer export` 崩溃等。报告中区分“最终正确但过程有问题”和“评测失败”。
+- 对比 SaC 与非 SaC bench 差异时，优先比较生成后的 `/task/AGENTS.md`、`task/prompt.md`、runner 分支/commit、skill 版本、agent timeout、`report/*.json` 和 `outputs/eval_*.json`，不要只看矩阵三态。
+- 如果 SaC `univer sac verify` 通过但正式 evaluator FAIL，优先怀疑 assertion 自证或导出后 evaluator-facing 状态偏差；重点复核语义仲裁、label 保留、blank/zero/#N/A、结构变化后的 `answer_position`、公式缓存值、非法颜色和 export smoke check。
 - 用户要求调查、分析或复核问题时，默认只读检查并向用户输出详细调查结论，不要自动写入 `wrong-report-matrix.univer` 或其它 `.univer` 文件。
 - 用户要求详细分析时，输出两部分：失败/超时原因报告；正确 case 执行问题与优化建议。
 
@@ -36,7 +38,7 @@
 
 逐题错因分析时先查根目录 `wrong-report-matrix.univer` 中对应 agent/model/题集 sheet 的 `备注` 列。已知问题、上游 issue、数据问题、历史失败形态和已修复但矩阵尚未重跑的状态都记录在该列；不要在 `AGENTS.md` 维护静态已知错题清单。
 
-只有用户明确要求“记录到矩阵”、“更新备注”、“写入 `wrong-report-matrix.univer`”或同等含义时，才允许把调查结论写入 `wrong-report-matrix.univer`。写入前应说明要写入的 sheet、单元格/范围和原因；未得到明确要求时，即使已经确认新根因，也只在对话中报告结论。
+只有用户明确要求“记录到矩阵”、“更新备注”、“写入 `wrong-report-matrix.univer`”或同等含义时，才允许把调查结论写入 `wrong-report-matrix.univer`。写入前应说明要写入的 sheet、单元格/范围和原因；未得到明确要求时，即使已经确认新根因，也只在对话中报告结论。用户要求按最新失败清理备注时，只保留最新报告列为 `FAIL` 的行的备注，最新报告列为 `PASS` 或 `NOT_RUN` 的行备注清空。
 
 需要找当前最新错题、稳定错题、偶发错题或未调查候选时，优先用 `univer inspect workbook wrong-report-matrix.univer` 确认 sheet 和 used range，再用 `univer pipe out wrong-report-matrix.univer --range '<sheet>!A1:ZZ1000' --format tsv` 或 `univer inspect range` 读取可见表格。
 

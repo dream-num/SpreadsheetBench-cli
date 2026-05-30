@@ -1,7 +1,4 @@
-from pathlib import Path
 from typing import Dict, Iterable, Optional
-
-from openpyxl import load_workbook
 
 from .paths import task_id_text
 
@@ -16,7 +13,6 @@ This prompt is only the dynamic task envelope. /task/AGENTS.md is the benchmark 
 The request contains these types of information:
 - instruction: The user's workbook editing request.
 - spreadsheet_path: The prepared SaC workspace and managed artifact paths you need to manipulate.
-- spreadsheet_content: A first-rows preview of the first input spreadsheet file.
 - instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
 - answer_position: The evaluator-facing target/check range for the final workbook state.
 - output_path: The required modified spreadsheet files.
@@ -28,9 +24,6 @@ Request id: {task_id}
 
 ### spreadsheet_path
 {case_lines}
-
-### spreadsheet_content
-{spreadsheet_content}
 
 ### instruction_type
 {instruction_type}
@@ -150,6 +143,57 @@ policy, date/boolean/number type policy, section/header boundaries, and structur
 Do not start implementation from business convention, source-side sign patterns, adjacent-row
 arithmetic, or visual similarity alone. Those can be evidence inputs, but the plan must connect them
 to instruction wording, target labels, examples, existing output, or an explicit assumption.
+
+## Semantic Arbitration Gate
+
+Before writing assertions or migration source, add a concise decision table to the plan:
+
+`Chosen rule | Plausible wrong rule | Discriminating evidence | Assertion or readonly probe`
+
+This table is required for every high-risk semantic decision, especially:
+
+- sign-to-column mapping
+- singular/plural label wording
+- blank versus zero versus #N/A
+- date-window inclusive boundary
+- structural answer_position interpretation
+- formula cached-value strategy
+- malformed color strings
+- exact text, casing, whitespace, punctuation, and NBSP preservation
+
+Use the following benchmark arbitration rules:
+
+- Do not infer debit/credit direction from business convention, source-side sign, or balance movement
+  alone. Prove the chosen sign-to-column rule from target labels, examples, instruction wording, or
+  explicitly record the remaining assumption and assert both sides of the split.
+- Preserve workbook-visible label text when writing headers, categories, statuses, departments, names,
+  and similar labels. Normalize labels only for matching unless the instruction explicitly asks to
+  rename, clean, singularize, pluralize, or reformat the written label.
+- Distinguish instruction references from final written workbook values. When instruction text names a
+  label with different casing, spacing, punctuation, or singular/plural wording than the inspected
+  workbook, treat the instruction text as a reference to the workbook label unless workbook evidence
+  or explicit wording shows a rename/normalization intent. In the plan, state whether the task calls
+  for preserving the workbook-visible label, writing the instruction's literal string, or applying a
+  deliberate rename.
+- No-match outputs must be real blanks when workbook evidence calls for blanks. Do not write `#N/A`,
+  `n/a`, spaces, NBSPs, or display-only sentinels unless the instruction or target pattern requires
+  that exact value.
+- Existing values inside `answer_position` are evidence, not authority. When the instruction asks to
+  compute, fill, repair, replace, reshape, transpose, consolidate, or enter formulas into that range,
+  treat existing target values as examples or stale state until proven otherwise.
+- If existing target values conflict with the instruction-derived rule, compare both interpretations
+  in the plan and choose using instruction wording plus inspected source/target evidence. Assertions
+  must include a counterexample that would fail if the stale/example value were incorrectly preserved.
+- Date-window formulas and period logic must verify the first computed row, the row before and after
+  the boundary, one middle row, and the last row. State whether the window is inclusive or exclusive
+  and what happens before a full window exists.
+- For structural changes, decide final workbook layout before interpreting `answer_position`; inserted,
+  deleted, moved, transposed, or reshaped areas can shift the evaluator-facing cells.
+- Normalize malformed or shorthand colors to valid `#RRGGBB` or a safe `rgb(r, g, b)` form before
+  applying styles. Do not pass malformed hex, incomplete hex, named colors, or ambiguous color text
+  directly to workbook style APIs.
+- A passing assertion that would also pass for the plausible wrong rule is not evidence. Strengthen
+  the assertion or add a readonly probe that would fail for the wrong rule before implementing.
 
 ## No Unrequested Normalization
 
@@ -297,7 +341,6 @@ evaluator-needed stored values directly.
 - The evaluator compares stored values from the final `.xlsx` with openpyxl `data_only=True`.
 - Formula text, styles, and formatting can still matter to the workbook task, but benchmark value scoring reads final cached/stored values in `answer_position`.
 - Exact text, casing, whitespace, NBSP, blank-versus-zero, text-versus-number, dates, percentages, currencies, identifiers, and error placeholders matter when workbook-visible.
-- spreadsheet_content is only a first-rows preview. It is not the complete workbook and is not a substitute for inspecting the prepared SaC workspace.
 - Classify nearby workbook ranges by role before editing: source data, target output, example/demo, helper/control input, lookup/reference, existing output, and preserve-only area.
 - For large or structural `answer_position` ranges, verify representative first, middle, and last cells plus boundary rows and plausible wrong interpretations.
 - Do not let `answer_position` suppress explicit instruction requirements outside that range.
@@ -350,27 +393,9 @@ silently producing a second export.
 """
 
 
-def build_spreadsheet_content(input_file: Path, max_rows: int = 5) -> str:
-    workbook = load_workbook(input_file, data_only=False, read_only=True)
-    sections = []
-    for sheet in workbook.worksheets:
-        rows = []
-        for row in sheet.iter_rows(max_row=max_rows, values_only=True):
-            rows.append("\t".join("" if value is None else str(value) for value in row))
-        sections.append(
-            "Sheet Name: " + sheet.title + "\n"
-            + "\n".join(rows)
-            + "\n"
-            + "-" * 50
-        )
-    workbook.close()
-    return "\n".join(sections)
-
-
 def build_agent_prompt(
     task: Dict,
     cases: Optional[Iterable[int]] = None,
-    spreadsheet_content: str = "",
 ) -> str:
     case_list = list(cases or [1])
     case_lines = "\n".join(
@@ -391,7 +416,6 @@ def build_agent_prompt(
         instruction=task.get("instruction", ""),
         instruction_type=task.get("instruction_type", ""),
         answer_position=task.get("answer_position", ""),
-        spreadsheet_content=spreadsheet_content,
         case_lines=case_lines,
         output_lines=output_lines,
     )

@@ -119,7 +119,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             opt = parse_option(Path.cwd())
 
         self.assertEqual(opt.workers, 5)
-        self.assertEqual(opt.agent_timeout, 300)
+        self.assertEqual(opt.agent_timeout, 900)
         self.assertEqual(opt.dataset, "spreadsheetbench_verified_400")
         self.assertEqual(opt.docker_image, "spreadsheetbench-univer-cli-agent")
         self.assertEqual(opt.docker_bin, "docker")
@@ -413,7 +413,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "answer_position": "Sheet1!B2",
         }
 
-        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\nA\n")
+        prompt = build_agent_prompt(task, [1])
 
         self.assertIn("Follow /task/AGENTS.md", prompt)
         self.assertIn("prepared SaC workspaces", prompt)
@@ -422,6 +422,20 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertNotIn("univer-plan", prompt)
         self.assertNotIn("univer-tdd", prompt)
         self.assertNotIn("skill: univer-spreadsheet-tdd", prompt)
+
+    def test_agent_prompt_omits_spreadsheet_content_preview(self):
+        from inference.univer_agent.prompts import build_agent_prompt
+
+        task = {
+            "id": "task-1",
+            "instruction": "Fill B2.",
+            "instruction_type": "Cell-Level Manipulation",
+            "answer_position": "Sheet1!B2",
+        }
+
+        prompt = build_agent_prompt(task, [1])
+
+        self.assertNotIn("### spreadsheet_content", prompt)
 
     def test_agent_prompt_does_not_let_answer_position_override_explicit_instruction(self):
         from inference.univer_agent.prompts import build_agent_prompt
@@ -437,11 +451,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "answer_position": "'Sheet1'!C2:D5000",
         }
 
-        prompt = build_agent_prompt(
-            task,
-            [1],
-            spreadsheet_content="Sheet Name: Sheet1\nAROINTED\t\tEARTHPEA\tHEARTPEA\n",
-        )
+        prompt = build_agent_prompt(task, [1])
 
         self.assertIn("### answer_position\n'Sheet1'!C2:D5000", prompt)
         self.assertIn("Sort the names in column A in alphabetical order", prompt)
@@ -495,12 +505,30 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("evaluator-facing cell model evidence", agents_md)
         self.assertIn("export compatibility smoke check", agents_md)
         self.assertIn("verify representative first, middle, and last cells", agents_md)
-        self.assertIn("spreadsheet_content is only a first-rows preview", agents_md)
+        self.assertNotIn("spreadsheet_content", agents_md)
         self.assertIn("Do not preserve cells immediately before `answer_position` as headers", agents_md)
         self.assertIn("sort the source range first", agents_md)
         self.assertIn("final answer/output range/answer_position", agents_md)
         self.assertIn("sort full output rows by column H", agents_md)
         self.assertIn("Helper lists, grouping, and source-order preservation", agents_md)
+        self.assertIn("## Semantic Arbitration Gate", agents_md)
+        self.assertIn("Chosen rule | Plausible wrong rule | Discriminating evidence", agents_md)
+        self.assertIn("sign-to-column mapping", agents_md)
+        self.assertIn("singular/plural label wording", agents_md)
+        self.assertIn("blank versus zero versus #N/A", agents_md)
+        self.assertIn("date-window inclusive boundary", agents_md)
+        self.assertIn("malformed color strings", agents_md)
+        self.assertIn("Do not infer debit/credit direction from business convention", agents_md)
+        self.assertIn("Preserve workbook-visible label text when writing headers", agents_md)
+        self.assertIn("Distinguish instruction references from final written workbook values", agents_md)
+        self.assertIn("treat the instruction text as a reference to the workbook label", agents_md)
+        self.assertIn("explicit wording shows a rename/normalization intent", agents_md)
+        self.assertIn("No-match outputs must be real blanks when workbook evidence calls for blanks", agents_md)
+        self.assertIn("Existing values inside `answer_position` are evidence, not authority", agents_md)
+        self.assertIn("treat existing target values as examples or stale state until proven otherwise", agents_md)
+        self.assertIn("stale/example value were incorrectly preserved", agents_md)
+        self.assertIn("Normalize malformed or shorthand colors to valid `#RRGGBB`", agents_md)
+        self.assertIn("A passing assertion that would also pass for the plausible wrong rule is not evidence", agents_md)
 
     def test_task_agents_md_contains_migrated_benchmark_hard_gates(self):
         from inference.univer_agent.prompts import build_task_agents_md
@@ -568,7 +596,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "answer_position": "'Sheet1'!C:D",
         }
 
-        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Sheet1\n")
+        prompt = build_agent_prompt(task, [1])
 
         self.assertIn("Follow /task/AGENTS.md", prompt)
         self.assertNotIn("benchmarking-univer-cli", prompt)
@@ -599,7 +627,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "answer_position": "'Summary'!A1:D20",
         }
 
-        prompt = build_agent_prompt(task, [1], spreadsheet_content="Sheet Name: Summary\n")
+        prompt = build_agent_prompt(task, [1])
 
         self.assertIn("Follow /task/AGENTS.md", prompt)
         self.assertIn("Create a summary table sorted by region", prompt)
@@ -625,11 +653,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
             "answer_position": "'Sheet1'!H1:I10",
         }
 
-        prompt = build_agent_prompt(
-            task,
-            [1],
-            spreadsheet_content="Sheet Name: Sheet1\nDate\tAmount\tBalance\n",
-        )
+        prompt = build_agent_prompt(task, [1])
 
         self.assertIn("Follow /task/AGENTS.md", prompt)
         self.assertNotIn("benchmarking-univer-cli", prompt)
@@ -732,7 +756,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("/Users/morris/Developer/univer/skills", wrapper)
         self.assertIn("spreadsheetbench-univer-cli-agent-local", wrapper)
         self.assertIn("--agent-timeout", wrapper)
-        self.assertIn("600", wrapper)
+        self.assertIn("900", wrapper)
         self.assertIn("gpt-5.5", wrapper)
         self.assertIn("model_reasoning_effort", wrapper)
         self.assertIn("medium", wrapper)
