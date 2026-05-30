@@ -425,6 +425,23 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("Do not use `--overwrite`", prompt)
         self.assertIn("rm -f <output.xlsx>", prompt)
 
+    def test_agent_prompt_requires_extending_sheet_to_answer_position_bounds(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Fill B2.",
+                "instruction_type": "Cell-Level Manipulation",
+                "answer_position": "B2:D100",
+            }
+        )
+
+        self.assertIn("Treat `answer_position` as the final workbook-state range", prompt)
+        self.assertIn("Use `getMaxRows()` and `getMaxColumns()`", prompt)
+        self.assertIn("you must extend the sheet with `setRowCount(requiredRowCount)`", prompt)
+        self.assertIn("`setColumnCount(requiredColumnCount)` before inspecting, writing, or verifying", prompt)
+        self.assertIn("return the current physical sheet bounds", prompt)
+        self.assertIn("does not mean every cell in `answer_position` must be filled", prompt)
+
     def test_run_task_invokes_docker_with_task_mount_and_env_file_then_collects_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
