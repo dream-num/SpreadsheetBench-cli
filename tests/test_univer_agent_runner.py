@@ -425,7 +425,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("Do not use `--overwrite`", prompt)
         self.assertIn("rm -f <output.xlsx>", prompt)
 
-    def test_agent_prompt_requires_extending_sheet_to_answer_position_bounds(self):
+    def test_agent_prompt_describes_answer_position_as_review_region(self):
         prompt = build_agent_prompt(
             {
                 "id": "task-1",
@@ -435,12 +435,55 @@ class UniverAgentRunnerTest(unittest.TestCase):
             }
         )
 
-        self.assertIn("Treat `answer_position` as the final workbook-state range", prompt)
+        self.assertIn(
+            "The region that the evaluator and human reviewers use to check the final result",
+            prompt,
+        )
+        self.assertIn(
+            "not as the full boundary of the task",
+            prompt,
+        )
+        self.assertIn("complete the workbook task according to the instruction", prompt)
+        self.assertNotIn(
+            "Only modify or fill values within the range specified by answer_position",
+            prompt,
+        )
         self.assertIn("Use `getMaxRows()` and `getMaxColumns()`", prompt)
         self.assertIn("you must extend the sheet with `setRowCount(requiredRowCount)`", prompt)
         self.assertIn("`setColumnCount(requiredColumnCount)` before inspecting, writing, or verifying", prompt)
         self.assertIn("return the current physical sheet bounds", prompt)
         self.assertIn("does not mean every cell in `answer_position` must be filled", prompt)
+
+    def test_agent_prompt_treats_required_cleanup_as_part_of_task(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Sort the data and replace the old results.",
+                "instruction_type": "Sheet-Level Manipulation",
+                "answer_position": "C2:D100",
+            }
+        )
+
+        self.assertIn("Complete the requested effect without unrelated additions", prompt)
+        self.assertIn("required sorting, clearing, moving, deletion, or structural edits", prompt)
+        self.assertIn("exact affected range boundaries", prompt)
+        self.assertIn("row headers, column headers, section headers", prompt)
+        self.assertIn("accidentally include or exclude row headers", prompt)
+        self.assertIn("verify the first and last affected rows or columns", prompt)
+
+    def test_agent_prompt_treats_examples_as_references(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Use the example to infer the transformation.",
+                "instruction_type": "Sheet-Level Manipulation",
+                "answer_position": "C2:D100",
+            }
+        )
+
+        self.assertIn("Examples in the instruction or workbook are references", prompt)
+        self.assertIn("not answers to copy mechanically", prompt)
+        self.assertIn("actual instruction and workbook contents", prompt)
 
     def test_run_task_invokes_docker_with_task_mount_and_env_file_then_collects_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:
