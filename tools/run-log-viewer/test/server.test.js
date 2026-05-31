@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { appShellHtml, readReportDetails, readRunSummary, readTaskDetails, scanWorkspace } from "../server.js";
+import { appShellHtml, readReportDetails, readRunSummary, readTaskDetails, resolveTaskOutputFile, scanWorkspace } from "../server.js";
 
 async function writeJson(filePath, value) {
   await mkdir(path.dirname(filePath), { recursive: true });
@@ -70,6 +70,8 @@ test("readTaskDetails prefers JSONL events and collapses command lifecycle", asy
     returncode: 0,
   });
   await writeFile(path.join(workDir, "inspect.js"), "() => ({ success: true })\n", "utf8");
+  await mkdir(path.join(taskDir, "outputs", "case_1"), { recursive: true });
+  await writeFile(path.join(taskDir, "outputs", "case_1", "output.xlsx"), "xlsx bytes");
   await writeFile(path.join(logsDir, "codex.final.md"), "Final answer\n", "utf8");
   await writeFile(
     path.join(logsDir, "codex.events.jsonl"),
@@ -149,7 +151,32 @@ test("readTaskDetails prefers JSONL events and collapses command lifecycle", asy
   assert.equal(details.workFiles[0].path, "/task/work/inspect.js");
   assert.equal(details.workFiles[0].content, "() => ({ success: true })\n");
   assert.equal(details.workFiles[0].size, Buffer.byteLength(details.workFiles[0].content));
+  assert.deepEqual(details.outputFiles, [
+    {
+      caseName: "case_1",
+      name: "output.xlsx",
+      path: "/task/outputs/case_1/output.xlsx",
+      size: 10,
+      downloadUrl: "/api/runs/run-1/tasks/task-1/outputs/case_1/output.xlsx",
+    },
+  ]);
   assert.deepEqual(details.analysisMarkers, []);
+});
+
+test("resolveTaskOutputFile only resolves output.xlsx from a case directory", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "viewer-output-"));
+  const outputPath = path.join(root, ".runs", "univer-agent", "run-1", "task-1", "task", "outputs", "case_1", "output.xlsx");
+  await mkdir(path.dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, "xlsx bytes");
+
+  const file = await resolveTaskOutputFile(root, "run-1", "task-1", "case_1", "output.xlsx");
+
+  assert.equal(file.filePath, outputPath);
+  assert.equal(file.downloadName, "run-1-task-1-case_1-output.xlsx");
+  await assert.rejects(
+    () => resolveTaskOutputFile(root, "run-1", "task-1", "case_1", "notes.txt"),
+    /只允许下载 output\.xlsx/,
+  );
 });
 
 test("readReportDetails returns summary and wrong-task links", async () => {

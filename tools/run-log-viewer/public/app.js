@@ -362,6 +362,23 @@
     );
   }
 
+  function OutputFilesPanel({ files }) {
+    if (!files?.length) return e(Empty, { description: "未找到 output.xlsx" });
+    return e(
+      Space,
+      { direction: "vertical", className: "fullWidth" },
+      files.map((file) =>
+        e(
+          Space,
+          { key: file.downloadUrl, direction: "vertical", className: "fullWidth", size: 4 },
+          e(Text, { strong: true }, file.caseName),
+          e(Button, { href: file.downloadUrl, download: true, block: true }, `下载 ${file.name}`),
+          e(Text, { type: "secondary" }, `${file.path} · ${file.size} 字节`),
+        ),
+      ),
+    );
+  }
+
   function TaskPage({ runId, taskId }) {
     const params = new URLSearchParams(window.location.search);
     const reportFile = params.get("report");
@@ -384,6 +401,7 @@
         { key: "returncode", label: "返回码", children: task.timing?.returncode ?? "无" },
         { key: "commands", label: "命令数", children: commands.length },
         { key: "files", label: "工作文件", children: task.workFiles?.length || 0 },
+        { key: "outputs", label: "输出文件", children: task.outputFiles?.length || 0 },
         { key: "changes", label: "文件变更", children: fileChanges.length },
       ] }) ) },
       { key: "question", label: "题目", children: e(QuestionPanel, { task }) },
@@ -391,7 +409,7 @@
       { key: "commands", label: "命令", children: e(CommandsPanel, { eventLog: task.eventLog }) },
       { key: "files", label: "工作文件", children: e(WorkFilesPanel, { files: task.workFiles }) },
       { key: "final", label: "最终回复", children: e("pre", { className: "codeBlock" }, task.finalMessage || "") },
-      { key: "raw", label: "原始数据", children: e("pre", { className: "codeBlock" }, JSON.stringify({ timing: task.timing, eventLog: task.eventLog, workFiles: task.workFiles }, null, 2)) },
+      { key: "raw", label: "原始数据", children: e("pre", { className: "codeBlock" }, JSON.stringify({ timing: task.timing, eventLog: task.eventLog, workFiles: task.workFiles, outputFiles: task.outputFiles }, null, 2)) },
     ];
     return e(
       "div",
@@ -409,8 +427,10 @@
             { key: "type", label: "指令类型", children: reportTask?.instructionType || "无" },
             { key: "event", label: "事件日志", children: task.eventLog?.fileName || "无" },
             { key: "work", label: "工作文件", children: task.workFiles?.length || 0 },
+            { key: "outputs", label: "输出文件", children: task.outputFiles?.length || 0 },
             { key: "tokens", label: "Token", children: task.eventLog?.usage?.total || "无" },
           ] })),
+          e(Card, { title: "输出文件" }, e(OutputFilesPanel, { files: task.outputFiles })),
           e(Card, { title: "标记" }, markers.length ? e(Space, { wrap: true }, markers.map((marker) => e(Tag, { key: marker.text, color: marker.level === "error" ? "error" : "warning" }, marker.text))) : e(Tag, { color: "success" }, "未发现明显标记")),
         ),
         e(Card, { className: "taskMain" }, e(Tabs, { defaultActiveKey: "timeline", items: tabs })),

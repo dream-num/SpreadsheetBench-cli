@@ -387,6 +387,43 @@ async function readWorkFiles(taskDir) {
   return files;
 }
 
+async function readOutputFiles(runId, taskId, taskDir) {
+  const outputsDir = path.join(taskDir, "outputs");
+  const caseNames = await listDirs(outputsDir);
+  const files = [];
+  for (const caseName of caseNames) {
+    if (!isSafeSegment(caseName)) continue;
+    const filePath = path.join(outputsDir, caseName, "output.xlsx");
+    if (!(await pathExists(filePath))) continue;
+    const fileStat = await stat(filePath);
+    files.push({
+      caseName,
+      name: "output.xlsx",
+      path: `/task/outputs/${caseName}/output.xlsx`,
+      size: fileStat.size,
+      downloadUrl: `/api/runs/${encodeURIComponent(runId)}/tasks/${encodeURIComponent(taskId)}/outputs/${encodeURIComponent(caseName)}/output.xlsx`,
+    });
+  }
+  return files;
+}
+
+export async function resolveTaskOutputFile(root, runId, taskId, caseName, fileName) {
+  if (!isSafeSegment(runId) || !isSafeSegment(taskId) || !isSafeSegment(caseName) || !isSafeSegment(fileName)) {
+    throw Object.assign(new Error("无效运行 ID、任务 ID、case 或文件名"), { statusCode: 400 });
+  }
+  if (fileName !== "output.xlsx") {
+    throw Object.assign(new Error("只允许下载 output.xlsx"), { statusCode: 400 });
+  }
+  const filePath = path.join(root, ".runs", "univer-agent", runId, taskId, "task", "outputs", caseName, fileName);
+  if (!(await pathExists(filePath))) {
+    throw Object.assign(new Error("未找到输出文件"), { statusCode: 404 });
+  }
+  return {
+    filePath,
+    downloadName: `${runId}-${taskId}-${caseName}-output.xlsx`,
+  };
+}
+
 export async function readTaskDetails(root, runId, taskId) {
   if (!isSafeSegment(runId) || !isSafeSegment(taskId)) {
     throw Object.assign(new Error("无效运行 ID 或任务 ID"), { statusCode: 400 });
@@ -405,6 +442,7 @@ export async function readTaskDetails(root, runId, taskId) {
     finalMessage: await readTextIfExists(path.join(logsDir, "codex.final.md")),
     eventLog: await readEventLog(logsDir),
     workFiles: await readWorkFiles(taskDir),
+    outputFiles: await readOutputFiles(runId, taskId, taskDir),
   };
   details.promptSections = extractPromptSections(details.prompt);
   details.analysisMarkers = analysisMarkers(details);
@@ -435,6 +473,7 @@ function contentType(filePath) {
   if (filePath.endsWith(".html")) return "text/html; charset=utf-8";
   if (filePath.endsWith(".js")) return "text/javascript; charset=utf-8";
   if (filePath.endsWith(".css")) return "text/css; charset=utf-8";
+  if (filePath.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   return "application/octet-stream";
 }
 
@@ -480,6 +519,16 @@ async function serveStatic(response, urlPath) {
   createReadStream(filePath).pipe(response);
 }
 
+async function serveTaskOutput(response, root, runId, taskId, caseName, fileName) {
+  const output = await resolveTaskOutputFile(root, runId, taskId, caseName, fileName);
+  response.writeHead(200, {
+    "content-type": contentType(output.filePath),
+    "content-disposition": `attachment; filename="${output.downloadName}"`,
+    "cache-control": "no-store",
+  });
+  createReadStream(output.filePath).pipe(response);
+}
+
 export function createServer({ root = repoRootFromHere() } = {}) {
   return http.createServer(async (request, response) => {
     try {
@@ -500,6 +549,18 @@ export function createServer({ root = repoRootFromHere() } = {}) {
       const pluralReportMatch = url.pathname.match(/^\/api\/reports\/([^/]+)$/);
       if (pluralReportMatch) {
         sendJson(response, 200, await readReportDetails(root, decodeURIComponent(pluralReportMatch[1])));
+        return;
+      }
+      const taskOutputMatch = url.pathname.match(/^\/api\/runs\/([^/]+)\/tasks\/([^/]+)\/outputs\/([^/]+)\/([^/]+)$/);
+      if (taskOutputMatch) {
+        await serveTaskOutput(
+          response,
+          root,
+          decodeURIComponent(taskOutputMatch[1]),
+          decodeURIComponent(taskOutputMatch[2]),
+          decodeURIComponent(taskOutputMatch[3]),
+          decodeURIComponent(taskOutputMatch[4]),
+        );
         return;
       }
       const pluralTaskMatch = url.pathname.match(/^\/api\/runs\/([^/]+)\/tasks\/([^/]+)$/);
