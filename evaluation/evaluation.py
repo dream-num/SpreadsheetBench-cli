@@ -196,6 +196,7 @@ def parse_option():
         help='evaluate generated outputs or original inputs')
     parser.add_argument('--task-id', action='append', help='task id to evaluate; may be repeated')
     parser.add_argument('--limit', type=int, default=None)
+    parser.add_argument('--case-index', action='append', type=int, help='case index to evaluate; may be repeated')
     parser.add_argument('--run-id', default=None, help='write a run-specific evaluation report')
 
     opt = parser.parse_args()
@@ -267,6 +268,13 @@ def discover_case_indices(dataset_path, data_id):
     return sorted(set(cases))
 
 
+def select_case_indices(discovered_cases, case_indexes):
+    if not case_indexes:
+        return discovered_cases
+    wanted = set(case_indexes)
+    return [case_index for case_index in discovered_cases if case_index in wanted]
+
+
 def evaluation(opt):
     dataset_path = Path(os.path.abspath(f'../data/{opt.dataset}'))
     with open(dataset_path / 'dataset.json', 'r') as fp:
@@ -280,7 +288,7 @@ def evaluation(opt):
     eval_results = []
     for data in tqdm(dataset):
         test_case_results = []
-        cases = discover_case_indices(dataset_path, data['id'])
+        cases = select_case_indices(discover_case_indices(dataset_path, data['id']), opt.case_index)
         for case_index in cases:
             gt_path = get_ground_truth_path(dataset_path, data['id'], case_index)
             proc_path = get_proc_path(

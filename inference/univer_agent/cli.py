@@ -36,6 +36,13 @@ def select_tasks(dataset: List[Dict], task_ids: Optional[List[str]], limit: Opti
     return selected
 
 
+def select_cases(discovered_cases: List[int], case_indexes: Optional[List[int]]) -> List[int]:
+    if not case_indexes:
+        return discovered_cases
+    wanted = set(case_indexes)
+    return [case_index for case_index in discovered_cases if case_index in wanted]
+
+
 def discover_task_cases(dataset_path: Path, task: Dict) -> List[int]:
     task_id = task_id_text(task)
     spreadsheet_dir = dataset_path / str(task.get("spreadsheet_path", f"spreadsheet/{task_id}"))
@@ -79,15 +86,30 @@ def run_id_dataset_label(dataset: str) -> str:
     return run_id_safe_label(dataset)
 
 
-def run_id_scope_label(task_ids: Optional[List[str]], limit: Optional[int]) -> str:
+def run_id_case_label(case_indexes: Optional[List[int]]) -> str:
+    if not case_indexes:
+        return ""
+    unique_cases = sorted(set(case_indexes))
+    if len(unique_cases) == 1:
+        return f"case{unique_cases[0]}"
+    return "cases" + "-".join(str(case_index) for case_index in unique_cases)
+
+
+def run_id_scope_label(task_ids: Optional[List[str]], limit: Optional[int], case_indexes: Optional[List[int]] = None) -> str:
     if limit is not None:
-        return f"first{limit}"
-    if task_ids:
+        scope = f"first{limit}"
+    elif task_ids:
         if len(task_ids) == 1:
             task_label = run_id_safe_label(task_ids[0])
-            return f"task{task_label}"
-        return f"tasks{len(task_ids)}"
-    return "all"
+            scope = f"task{task_label}"
+        else:
+            scope = f"tasks{len(task_ids)}"
+    else:
+        scope = "all"
+    case_label = run_id_case_label(case_indexes)
+    if case_label:
+        return f"{scope}-{case_label}"
+    return scope
 
 
 def default_run_id(
@@ -96,11 +118,12 @@ def default_run_id(
     dataset: str,
     task_ids: Optional[List[str]],
     limit: Optional[int],
+    case_indexes: Optional[List[int]] = None,
 ) -> str:
     agent_label = run_id_safe_label(agent or "agent")
     model_label = run_id_safe_label(model or "agent")
     dataset_label = run_id_dataset_label(dataset)
-    scope_label = run_id_scope_label(task_ids, limit)
+    scope_label = run_id_scope_label(task_ids, limit, case_indexes)
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     return f"{agent_label}-{model_label}-{dataset_label}-{scope_label}-{timestamp}"
 
@@ -197,11 +220,12 @@ def parse_option(project_root: Path) -> argparse.Namespace:
     parser.add_argument("--env-file", type=Path, default=None)
     parser.add_argument("--task-id", action="append", help="task id to run; may be repeated")
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--case-index", action="append", type=int, help="case index to run; may be repeated")
     parser.add_argument("--workers", type=int, default=5, help="number of tasks to run concurrently")
     opt = parser.parse_args()
     model = effective_model(opt.agent, opt.env_file)
     if opt.run_id is None:
-        opt.run_id = default_run_id(opt.agent, model, opt.dataset, opt.task_id, opt.limit)
+        opt.run_id = default_run_id(opt.agent, model, opt.dataset, opt.task_id, opt.limit, opt.case_index)
     opt.model = model
     return opt
 
@@ -359,9 +383,9 @@ def main(project_root: Optional[Path] = None) -> int:
     reset_run_dir(config)
 
     tasks = select_tasks(load_dataset(config.dataset_path), opt.task_id, opt.limit)
-    cases = discover_common_cases(config.dataset_path, tasks)
+    cases = select_cases(discover_common_cases(config.dataset_path, tasks), opt.case_index)
     if not cases:
-        raise RunnerError("no common input cases found for selected tasks")
+        raise RunnerError("no matching input cases found for selected tasks")
 
     metadata = {
         "run_id": config.run_id,

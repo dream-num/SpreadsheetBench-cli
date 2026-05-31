@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 import tempfile
 
-from evaluation.evaluation import discover_case_indices, get_ground_truth_path, get_proc_path
+from evaluation.evaluation import discover_case_indices, get_ground_truth_path, get_proc_path, select_case_indices
 
 
 class EvaluationPathTest(unittest.TestCase):
@@ -72,6 +72,10 @@ class EvaluationPathTest(unittest.TestCase):
 
             self.assertEqual(discover_case_indices(dataset_path, "task-1"), [1])
             self.assertEqual(get_ground_truth_path(dataset_path, "task-1", 1), golden_path)
+
+    def test_select_case_indices_filters_requested_cases(self):
+        self.assertEqual(select_case_indices([1, 2, 3], [1]), [1])
+        self.assertEqual(select_case_indices([1, 2, 3], [3, 1]), [1, 3])
 
 
 if __name__ == "__main__":

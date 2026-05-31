@@ -160,6 +160,12 @@ bash scripts/run_univer_agent_eval.sh --agent codex --dataset sample_data_200 --
 bash scripts/run_univer_agent_eval.sh --agent codex --limit 10
 ```
 
+只跑指定 case，例如只跑所选 task 的 `case_1`：
+
+```bash
+bash scripts/run_univer_agent_eval.sh --agent codex --dataset all_data_912_v0.1 --limit 1 --case-index 1
+```
+
 只跑指定题目：
 
 ```bash

@@ -17,6 +17,7 @@ SHOW_HELP=0
 EVAL_SELECTION_ARGS=()
 TASK_IDS=()
 LIMIT_VALUE=""
+CASE_INDEXES=()
 
 ARGS=("$@")
 idx=0
@@ -52,6 +53,11 @@ while [ "$idx" -lt "$#" ]; do
             EVAL_SELECTION_ARGS+=(--limit "${ARGS[$idx]}")
             LIMIT_VALUE="${ARGS[$idx]}"
             ;;
+        --case-index)
+            idx=$((idx + 1))
+            EVAL_SELECTION_ARGS+=(--case-index "${ARGS[$idx]}")
+            CASE_INDEXES+=("${ARGS[$idx]}")
+            ;;
         --dataset=* )
             DATASET_NAME="${arg#--dataset=}"
             ;;
@@ -71,6 +77,10 @@ while [ "$idx" -lt "$#" ]; do
         --limit=* )
             EVAL_SELECTION_ARGS+=(--limit "${arg#--limit=}")
             LIMIT_VALUE="${arg#--limit=}"
+            ;;
+        --case-index=* )
+            EVAL_SELECTION_ARGS+=(--case-index "${arg#--case-index=}")
+            CASE_INDEXES+=("${arg#--case-index=}")
             ;;
     esac
     idx=$((idx + 1))
@@ -219,18 +229,24 @@ run_id_safe_label() {
 
 run_id_scope_label() {
     if [ -n "$LIMIT_VALUE" ]; then
-        echo "first${LIMIT_VALUE}"
+        scope="first${LIMIT_VALUE}"
+    elif [ "${#TASK_IDS[@]}" -eq 1 ]; then
+        scope="$(echo "task${TASK_IDS[0]}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')"
+    elif [ "${#TASK_IDS[@]}" -gt 1 ]; then
+        scope="tasks${#TASK_IDS[@]}"
+    else
+        scope="all"
+    fi
+
+    if [ "${#CASE_INDEXES[@]}" -eq 1 ]; then
+        echo "${scope}-case${CASE_INDEXES[0]}"
+        return
+    elif [ "${#CASE_INDEXES[@]}" -gt 1 ]; then
+        cases_label="$(printf '%s\n' "${CASE_INDEXES[@]}" | sort -n | uniq | paste -sd '-' -)"
+        echo "${scope}-cases${cases_label}"
         return
     fi
-    if [ "${#TASK_IDS[@]}" -eq 1 ]; then
-        echo "task${TASK_IDS[0]}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-'
-        return
-    fi
-    if [ "${#TASK_IDS[@]}" -gt 1 ]; then
-        echo "tasks${#TASK_IDS[@]}"
-        return
-    fi
-    echo "all"
+    echo "$scope"
 }
 
 if [ -z "$RUN_ID_NAME" ]; then

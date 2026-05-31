@@ -157,7 +157,33 @@ class UniverAgentRunnerTest(unittest.TestCase):
         ):
             opt = parse_option(Path.cwd())
 
-        self.assertEqual(opt.run_id, "codex-verified400-first50-20260521-143000")
+        self.assertEqual(opt.run_id, "codex-codex-verified400-first50-20260521-143000")
+
+    def test_parse_option_includes_case_index_in_generated_run_id(self):
+        fake_now = datetime.datetime(2026, 5, 21, 14, 30, 0)
+
+        class FakeDateTime(datetime.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return fake_now
+
+        with patch.object(
+            sys,
+            "argv",
+            ["prog", "--agent", "codex", "--dataset", "all_data_912_v0.1", "--limit", "1", "--case-index", "1"],
+        ), patch.object(
+            cli.datetime,
+            "datetime",
+            FakeDateTime,
+        ):
+            opt = parse_option(Path.cwd())
+
+        self.assertEqual(opt.case_index, [1])
+        self.assertEqual(opt.run_id, "codex-codex-all912-first1-case1-20260521-143000")
+
+    def test_select_cases_filters_requested_case_indices(self):
+        self.assertEqual(cli.select_cases([1, 2, 3], [1]), [1])
+        self.assertEqual(cli.select_cases([1, 2, 3], [3, 1]), [1, 3])
 
     def test_codex_does_not_stream_agent_output_by_default(self):
         self.assertFalse(resolve_stream_agent_output("codex", False))
