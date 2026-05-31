@@ -14,6 +14,12 @@
 42930
 ```
 
+另有 1 个 task 属于题目异常数据与 golden 口径冲突：agent 对异常数据的处理合理，输出符合题意预期，但 golden 机械套用宏式字符串截取导致正式评测失败：
+
+```text
+486-17
+```
+
 正式 direct-golden 评测报告：
 
 ```text
@@ -196,6 +202,48 @@ fix-logs/2026-05-29-evaluation-golden-filename-fallback.md
 
 修复后，`discover_case_indices()` 在标准 task-id-specific 文件名找不到时，会回退到 task 目录内唯一的 `case_index_*_answer.xlsx` / `case_index_*_golden.xlsx`；`get_ground_truth_path()` 也做同类 fallback。验证结果中，`42930` 从 `test_case_results: []` 变为 `test_case_results: [1]`。
 
+### 486-17: 源范围混入重复表头，golden 机械截取异常文本
+
+题目要求把 `0yyyymmdd` 形式的日期数字从 `B2` 开始转换为 `yyyy mm dd`，无表头。检查范围：
+
+```text
+'Blad1'!B2:B130
+```
+
+源数据 `A2:A130` 中绝大多数行是 `020210120` 这类日期码，但 `A99:A101` 混入了重复表头文本：
+
+```text
+A99:A101 = Datum verzending
+```
+
+最新复核 run：
+
+```text
+codex-gpt-5-5-verified400-all-20260531-011308
+```
+
+agent 将 `A99:A101` 识别为非 `0yyyymmdd` 异常数据，并在对应 `B99:B101` 留空。这个处理符合题意中“numbers that represent dates”的语义，也符合用户对异常数据的合理预期。
+
+golden 则等价于对整段 `A2:A130` 机械应用宏式固定字符截取：
+
+```text
+Mid(value, 2, 4) & " " & Mid(value, 6, 2) & " " & Mid(value, 8, 2)
+```
+
+因此对 `Datum verzending` 生成：
+
+```text
+B99:B101 = atum  v er
+```
+
+正式评测仅比较 `answer_position` 内 `data_only=True` 的 `cell.value`，所以 output 与 golden 的唯一差异就是：
+
+```text
+B99:B101: output blank, golden "atum  v er"
+```
+
+该 case 应记录为题目异常数据 / golden 预期不合理问题，不应归因给 agent 或 `univer-cli`。如果非要为了提升评测通过率修，可以尝试在通用提示中提醒：对于“macro/公式式固定字符转换”任务，当 `answer_position` 覆盖整段源范围且题目未明确跳过异常值时，应考虑按宏逻辑逐单元格机械应用，或至少显式反证“跳过异常值”和“机械转换异常文本”两种解释。但这个方向有风险：它可能牺牲语义正确性，鼓励 agent 对明显异常数据产出无意义字符串，不能作为无条件通用规则。
+
 ## 候选修复方向
 
 评测层应优先修通用 parser 和路径发现逻辑，而不是对 task id 特判：
@@ -224,5 +272,6 @@ fix-logs/2026-05-29-evaluation-golden-filename-fallback.md
 
 - `130-9`、`283-32`、`49300`、`45944` 应按 `answer_position` 评测/数据问题处理。
 - `42930` 应按 golden 文件命名/路径发现数据问题处理；在包含 fallback 的当前评测版本中可重新纳入正常评测。
+- `486-17` 应按题目异常数据 / golden 预期不合理处理；agent 将重复表头留空是合理语义处理，不应作为 agent 或 CLI 错误计入。
 - 逐题分析这些 task 时，先做 direct-golden 或规范化范围复核。
 - 不应把 direct-golden 都失败或旧评测发现不到 case 的现象计入 agent prompt、`univer-cli` 或 workbook 编辑策略的真实退化。
