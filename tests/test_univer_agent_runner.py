@@ -451,6 +451,21 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("Do not use `--overwrite`", prompt)
         self.assertIn("rm -f <output.xlsx>", prompt)
 
+    def test_agent_prompt_requires_color_validation_before_writes(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Fill A1 with #E2EFD.",
+                "instruction_type": "Cell-Level Manipulation",
+                "answer_position": "A1",
+            }
+        )
+
+        self.assertIn("Validate every color string before calling any color-writing API", prompt)
+        self.assertIn("A malformed value such as `#E2EFD`", prompt)
+        self.assertIn("do not try to repair it by setting a new color", prompt)
+        self.assertIn("univer restore <input.univer>", prompt)
+
     def test_agent_prompt_describes_answer_position_as_review_region(self):
         prompt = build_agent_prompt(
             {
