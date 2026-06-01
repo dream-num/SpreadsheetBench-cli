@@ -505,12 +505,33 @@ class UniverAgentRunnerTest(unittest.TestCase):
             }
         )
 
-        self.assertIn("Complete the requested effect without unrelated additions", prompt)
+        self.assertIn("make the user's explicit instruction the highest-priority source of truth", prompt)
+        self.assertIn("minimum necessary set of workbook changes", prompt)
+        self.assertIn("Do not broaden, narrow, normalize, clean up, redesign, rename, delete, reorder", prompt)
         self.assertIn("required sorting, clearing, moving, deletion, or structural edits", prompt)
         self.assertIn("exact affected range boundaries", prompt)
         self.assertIn("row headers, column headers, section headers", prompt)
         self.assertIn("accidentally include or exclude row headers", prompt)
         self.assertIn("verify the first and last affected rows or columns", prompt)
+
+    def test_agent_prompt_requires_exploration_plan_and_evidence_review(self):
+        prompt = build_agent_prompt(
+            {
+                "id": "task-1",
+                "instruction": "Use the existing labels to fill B2:D5.",
+                "instruction_type": "Cell-Level Manipulation",
+                "answer_position": "B2:D5",
+            }
+        )
+
+        self.assertIn("Follow this seven-stage workflow", prompt)
+        self.assertIn("Use the fixed headings `Instruction summary:`, `Exploration plan:`", prompt)
+        self.assertIn("`Evidence review:`, `Implementation plan:`", prompt)
+        self.assertIn("Identify pronouns, references, labels, examples", prompt)
+        self.assertIn("Run targeted workbook exploration from the exploration plan", prompt)
+        self.assertIn("Prefer several small, focused inspections", prompt)
+        self.assertIn("Review whether the inspected evidence is sufficient", prompt)
+        self.assertIn("If evidence is insufficient", prompt)
 
     def test_agent_prompt_treats_examples_as_references(self):
         prompt = build_agent_prompt(
