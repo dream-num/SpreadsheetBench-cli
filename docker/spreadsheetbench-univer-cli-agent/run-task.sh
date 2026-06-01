@@ -32,22 +32,6 @@ fi
 
 mkdir -p /task/logs /task/work
 
-seed_sac_node_modules() {
-    local template="/home/node/.cache/spreadsheetbench-sac-node_modules"
-    if [ ! -d "$template" ]; then
-        return
-    fi
-
-    local workspace
-    for workspace in /task/cases/case_*/sac; do
-        if [ ! -d "$workspace" ] || [ -d "$workspace/node_modules" ]; then
-            continue
-        fi
-        mkdir -p "$workspace/node_modules"
-        cp -a "$template"/. "$workspace/node_modules"/
-    done
-}
-
 warm_univer_daemon() {
     local start_log="/task/logs/univer-daemon-start.log"
     local status_log="/task/logs/univer-daemon-status.json"
@@ -65,7 +49,7 @@ warm_univer_daemon() {
 
     : >"$warmup_log"
     local workbook
-    for workbook in /task/cases/case_*/sac/artifacts/sac.univer; do
+    for workbook in /task/cases/case_*/sac.univer; do
         if [ ! -e "$workbook" ]; then
             continue
         fi
@@ -76,7 +60,6 @@ warm_univer_daemon() {
     done
 }
 
-seed_sac_node_modules
 warm_univer_daemon
 
 if [ -n "$agent_command" ]; then

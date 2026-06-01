@@ -3,19 +3,10 @@ from typing import Dict, Iterable, Optional
 from .paths import task_id_text
 
 
-AGENT_PROMPT_TEMPLATE = """You are a spreadsheet expert helping a user complete a workbook editing request inside a Docker container.
+AGENT_PROMPT_TEMPLATE = """You are a spreadsheet expert completing a workbook editing request inside a Docker container.
 Follow /task/AGENTS.md before touching any workbook.
 
-The user provided one or more workbook cases. For each case, edit the workbook according to the request and create the required output.xlsx file.
-
-This prompt is only the dynamic task envelope. /task/AGENTS.md is the benchmark protocol for SaC-only mutation, evaluator semantics, Facade pitfalls, and final export discipline.
-
-The request contains these types of information:
-- instruction: The user's workbook editing request.
-- spreadsheet_path: The prepared SaC workspace and managed artifact paths you need to manipulate.
-- instruction_type: Cell-Level Manipulation or Sheet-Level Manipulation.
-- answer_position: The evaluator-facing target/check range for the final workbook state.
-- output_path: The required modified spreadsheet files.
+This prompt is only the dynamic task envelope. /task/AGENTS.md owns the static benchmark runtime contract.
 
 Request id: {task_id}
 
@@ -34,68 +25,56 @@ Request id: {task_id}
 ### output_path
 {output_lines}
 
-Benchmark task envelope:
-- Only use files under /task.
-- Treat the listed /task/cases/case_N/sac paths as prepared SaC workspaces for solving.
-- The listed managed artifacts are the workbook artifacts controlled by those SaC workspaces.
-- Create the required /task/outputs/case_N/output.xlsx file for every case.
-- Keep temporary scripts and intermediates under /task/work.
-- Solve every case independently.
-- Follow /task/AGENTS.md for SaC-only mutation, answer_position interpretation, readonly probes, and final export gates.
+For each case, edit only the prepared `.univer` package for that case and create the required `output.xlsx`.
 """
 
 
 def build_task_agents_md(cases: Iterable[int]) -> str:
     case_lines = "\n".join(
-        f"- case {case_index}: workspace `/task/cases/case_{case_index}/sac`, managed artifact `/task/cases/case_{case_index}/sac/artifacts/sac.univer`, output `/task/outputs/case_{case_index}/output.xlsx`"
+        f"- case {case_index}: package `/task/cases/case_{case_index}/sac.univer`, project `/task/cases/case_{case_index}/sac.univer/project`, output `/task/outputs/case_{case_index}/output.xlsx`"
         for case_index in cases
     )
     return f"""# Benchmark Workspace Contract
 
-This is a non-interactive workbook benchmark task. These instructions are the benchmark protocol.
-This file defines benchmark boundaries and required skill routing only. Detailed Univer CLI and SaC
-command syntax must come from the required local skills and `univer help`, not from this file.
+This file defines the SpreadsheetBench runtime contract. It does not replace the canonical Univer
+skills or `univer help`.
 
 ## Required Skill Route
 
-- Do not use a dedicated benchmark skill. This benchmark relies on this AGENTS.md plus the general
-  Univer skill stack below.
-- Before any workbook command or workbook reasoning, use the local `using-univer-cli` skill.
-- Use `univer-cli` for workbook-visible inspection, export, and CLI semantics.
-- For every SaC workbook behavior change, use these skills in order:
-  `writing-univer-plans`, `executing-univer-plans`, and
-  `test-driven-univer-spreadsheet-development`.
-- Use those skills to determine exact command syntax, Facade APIs, SaC TDD workflow, assertion shape,
-  verification repair loops, and export handoff behavior.
-- If any required skill is unavailable, stop and report the missing skill. Do not continue with direct
+- Before workbook reasoning or workbook commands, use `using-univer-cli`.
+- Use `univer-cli` for workbook-visible inspection, export, and CLI command semantics.
+- For SaC workbook behavior changes, route through `writing-univer-plans`,
+  `executing-univer-plans`, and `test-driven-univer-development`.
+- Exact Univer CLI syntax, project-local SaC workflow, SaC command order, Facade APIs, type constants,
+  range coordinate rules, assertion APIs, and verify-report repair details are owned by the required
+  skills and `univer help`.
+- If a required skill is unavailable, stop and report the missing skill. Do not continue with direct
   workbook libraries, package editing, or guessed SaC command syntax.
 
-## Prepared Workspace
+## Workspace And Paths
 
 {case_lines}
 
-- Each listed SaC workspace is already initialized.
-- Each `sac.config.ts` must stay in `mode: "adopted"` with `defaultWorkbook: "./artifacts/sac.univer"`.
-- The managed artifact already exists and already contains the baseline SaC ledger.
-- Raw `input.xlsx` and temporary `input.univer` files are runner intermediates, not solving sources.
-
-## Hard Rules
-
 - Use only files under `/task`.
-- Use the prepared SaC workspace as the only solving source for each case.
+- Each listed `.univer` package already contains `project/` source and the baseline SaC ledger.
+- The workbook package itself is the SaC workspace; package-local source lives under `project/`.
+- Raw `input.xlsx` files are runner intermediates, not solving sources.
+- Keep temporary scripts, scratch workbooks, and probe output under `/task/work`.
+- Solve every case independently.
+
+## Forbidden Inputs And Mutation Surfaces
+
 - Do not read, copy, import, parse, inspect, or modify raw input files if present.
 - Do not read hidden answers, golden workbooks, `answer.xlsx`, host checks, reports, or evaluation artifacts.
-- Do not initialize or reinitialize SaC workspaces, import raw workbook inputs, or change global SaC config.
-- Do not run dependency installation during normal solving. If the skill-guided SaC workflow proves
-  workspace dependencies are missing or invalid, make one offline retry inside that workspace, then
-  retry the same failing operation once.
-- Do not use direct runtime scripts, pipe-in writes, package edits, Python, openpyxl, zip tools, or Office libraries to mutate the final workbook.
-- Runtime scripts are allowed only for short readonly probes when SaC diagnostics or assertions need workbook-visible evidence.
-- If SaC cannot produce an artifact, fail the task rather than creating `output.xlsx` through direct workbook mutation.
-- Workbook inspection is for `.univer` or `.unv` packages. Do not inspect the exported `output.xlsx` except for the bounded export compatibility smoke check.
-- Do not rely on Python, openpyxl, zip tools, office libraries, or ad hoc Node scripts for final post-export checking.
-- Keep temporary scripts and probe output under `/task/work`.
-- Create exactly one required `/task/outputs/case_N/output.xlsx` per case.
+- Do not initialize or reinitialize SaC projects, import raw workbook inputs, or create legacy sidecar workspaces.
+- Do not run dependency installation during normal solving. The package-local project does not own a
+  package.json; use CLI-managed `project/types` and the shared toolchain.
+- Do not use direct runtime scripts, pipe-in writes, package edits, Python, openpyxl, zip tools, or
+  Office libraries to mutate the final workbook.
+- Runtime scripts are allowed only for short readonly probes when SaC diagnostics or assertions need
+  workbook-visible evidence.
+- Workbook inspection is for `.univer` or `.unv` packages. Do not inspect exported `output.xlsx`
+  except for the bounded export compatibility smoke check described below.
 
 ## Baseline Checkpoint
 
@@ -104,390 +83,138 @@ command syntax must come from the required local skills and `univer help`, not f
 - Do not edit it, add assertions to it, compact it, delete it, or use it as the task implementation pack.
 - Do not apply the baseline checkpoint as a pending migration. It is already represented in the managed artifact ledger.
 - Put all task changes in a new follow-up Migration Pack created through the required skill workflow.
-- If `SAC_VERIFY_TARGET_MISSING`, `SAC_UNMANAGED_ARTIFACT`, or a baseline checkpoint hash mismatch appears before your follow-up pack work, stop and report a runner/setup bug instead of repairing by applying or editing the checkpoint.
+- If `SAC_VERIFY_TARGET_MISSING`, `SAC_UNMANAGED_ARTIFACT`, or a baseline checkpoint hash mismatch
+  appears before follow-up pack work, stop and report a runner/setup bug.
 
-## Benchmark Workflow Shape
+## Evaluation Semantics
 
-For each case:
+- `answer_position` in the prompt is the final evaluator inspection window.
+- The evaluator compares stored or cached values from the final exported `.xlsx` using openpyxl `data_only=True`.
+- Formula text, styles, and formatting can still matter to the workbook task, but benchmark value
+  scoring reads final cached/stored values in `answer_position`.
+- Exact text, casing, whitespace, NBSP, blank-versus-zero, text-versus-number, dates, percentages,
+  currencies, identifiers, booleans, and error placeholders matter when workbook-visible.
+- Do not let `answer_position` suppress explicit instruction requirements outside that range.
+- Do not preserve cells immediately before `answer_position` as headers or examples unless the
+  instruction or workbook evidence says to preserve them.
+- For structural edits, reason about final workbook layout before interpreting `answer_position`;
+  inserted/deleted rows, moved tables, section headers, transposition, or reshaping can shift the
+  final evaluator window.
 
-1. Use the required skills before touching workbook content.
-2. Inspect the prepared artifact with bounded workbook-visible reads.
-3. Write a workspace plan under the prepared SaC workspace that passes the Plan Quality Gate below.
-4. Add plan-derived assertions for the follow-up pack before implementation; they must pass the
-   Assertion Anti-Self-Confirmation gate below.
-5. Implement only the follow-up pack work; leave the baseline checkpoint unchanged.
-6. Use the skill-guided SaC verification/report loop to repair failures.
-7. Export only after the changed follow-up pack has meaningful passed assertion evidence.
+## Planning Overlay
 
-## Plan Quality Gate
+- Follow the canonical skills for plan file shape and pack-by-pack workflow.
+- Classify nearby workbook ranges by role before editing: source data, target output, example/demo,
+  helper/control input, lookup/reference, existing output, and preserve-only area.
+- For simple bounded writes, formulas, formats, or copied cell models, keep the plan short: source,
+  target, actual write subrange, deterministic rule, stored model, assertions/probes, and preservation.
+- For sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, structural
+  changes, or multiple output columns, write a concise output contract before source changes.
+- Mark high-risk semantic decisions as `explicit`, `inferred`, or `underdetermined assumption`; never
+  present an underdetermined assumption as workbook-proven evidence.
+- Evidence must be discriminating: it must make at least one plausible interpretation unlikely, not
+  merely be compatible with the chosen interpretation.
 
-Before implementation, the plan must name the workbook roles it is relying on:
+## Benchmark Spreadsheet Rules
 
-- source ranges
-- target output ranges
-- example/demo ranges
-- helper/control or lookup ranges
-- preserve-only ranges
-- the actual write subrange when `answer_position` is only a broad inspection window
-
-For every high-risk decision, mark the evidence strength as one of:
-
-- `explicit`: directly stated by the instruction or by an existing workbook-visible target/example
-- `inferred`: supported by discriminating workbook-visible evidence
-- `underdetermined assumption`: no available evidence rules out another plausible interpretation
-
-High-risk decisions include source-to-target row mapping, sign-to-column mapping, sorting order,
-grouping/truncation order, formula-vs-static-value strategy, blank/zero/error policy, exact text
-policy, date/boolean/number type policy, section/header boundaries, and structural layout shifts.
-
-Do not start implementation from business convention, source-side sign patterns, adjacent-row
-arithmetic, or visual similarity alone. Those can be evidence inputs, but the plan must connect them
-to instruction wording, target labels, examples, existing output, or an explicit assumption.
-
-Before finalizing the plan, include an `Evidence sufficiency check` for output-affecting decisions.
-Use this shape:
-
-`Decision | Supporting inspected evidence | Plausible contrary evidence or missing probe | Action before implementation`
-
-If a decision still has missing discriminating evidence, run one targeted readonly probe for the
-missing range, boundary, duplicate key, cell model, formula, label, blank/error row, date type, or
-representative mapping before writing assertions or migration source.
-
-Then write a short `Plan review` that audits the evidence chain before editing. For the riskiest
-semantic decisions, list at least one plausible counter-interpretation and the inspected evidence
-that rules it out. If the evidence does not rule it out, keep the uncertainty visible as an
-`underdetermined assumption` and add an assertion or readonly probe that would expose the opposite
-interpretation.
-
-## Semantic Arbitration Gate
-
-Before writing assertions or migration source, add a concise decision table to the plan:
-
-`Chosen rule | Plausible wrong rule | Discriminating evidence | Assertion or readonly probe`
-
-This table is required for every high-risk semantic decision, especially:
-
-- sign-to-column mapping
-- singular/plural label wording
-- blank versus zero versus #N/A
-- duplicate lookup or matching keys, including first-match versus last-match versus aggregate policy
-- date-window inclusive boundary
-- structural answer_position interpretation
-- formula cached-value strategy
-- malformed color strings
-- exact text, casing, whitespace, punctuation, and NBSP preservation
-
-Use the following benchmark arbitration rules:
-
-- Do not infer debit/credit direction from business convention, source-side sign, or balance movement
-  alone. Prove the chosen sign-to-column rule from target labels, examples, instruction wording, or
-  explicitly record the remaining assumption and assert both sides of the split.
+- For lookup/match/join/fill tasks, verify key uniqueness or document duplicate-key policy before
+  implementation. Include duplicate-key assertion or readonly-probe evidence if duplicates are found.
+- For sorting combined with grouping, filtering, helper lists, or truncation, build the checked output
+  row order from final output wording first. Final answer/output range, `answer_position`, and named
+  target sort columns are high-priority evidence for row order in the checked output.
+- Treat phrases like "sort column H lowest to highest" in a multi-column output table as "sort full
+  output rows by column H" unless the instruction explicitly asks to rearrange only that column.
+- Keep row integrity by default; do not independently sort one output column away from paired columns
+  unless the instruction explicitly asks for column-only value rearrangement.
+- Helper lists, grouping, and source-order preservation define candidate rows and tie-breakers, but
+  they should not override an explicit final-output target-column sort.
 - Preserve workbook-visible label text when writing headers, categories, statuses, departments, names,
   and similar labels. Normalize labels only for matching unless the instruction explicitly asks to
   rename, clean, singularize, pluralize, or reformat the written label.
-- Distinguish instruction references from final written workbook values. When instruction text names a
-  label with different casing, spacing, punctuation, or singular/plural wording than the inspected
-  workbook, treat the instruction text as a reference to the workbook label unless workbook evidence
-  or explicit wording shows a rename/normalization intent. In the plan, state whether the task calls
-  for preserving the workbook-visible label, writing the instruction's literal string, or applying a
-  deliberate rename.
+- Do not infer debit/credit, in/out, or similar semantic direction from business convention,
+  source-side sign, balance movement, or category frequency alone. Prove it from target labels,
+  examples, instruction wording, or record the remaining assumption.
 - No-match outputs must be real blanks when workbook evidence calls for blanks. Do not write `#N/A`,
-  `n/a`, spaces, NBSPs, or display-only sentinels unless the instruction or target pattern requires
-  that exact value.
-- Existing formulas, examples, or preview cells that display `#N/A`, `n/a`, `-`, zero, or blank are
-  evidence, not authority. For no-match and missing-result policies, compare instruction wording,
-  target examples, current target cells, and lookup behavior. Assertions must include at least one
-  matched row and one unmatched or blank-result row when those cases can occur.
-- Example data, worked examples, existing output, and preview cells are reference evidence only, not
-  the final contract. If examples conflict with the instruction, actual workbook data structure,
-  field meaning, target-range format, or real data shape, prioritize explicit task information and the
-  inspected workbook data form. Treat an example as the writeback rule only when instruction wording
-  or workbook evidence clearly requires preserving that example pattern.
-- For lookup, match, join, categorization, and fill-down tasks, probe whether the chosen key or key
-  tuple is unique. If duplicate keys exist, explicitly choose first match, last match, aggregate,
-  priority-by-extra-column, or another tie-break rule from workbook evidence. Do not rely on `Map.set`
-  overwrite behavior, arbitrary object key order, or whichever duplicate row was inspected first.
-  Assertions or probes must cover at least one duplicate-key case when duplicates are present.
-- For formula-writing lookup or match tasks, decide the output row anchor before writing formulas.
-  Record whether each output row represents the left table row, the right/outside lookup row, or the
-  `answer_position` row itself. Do not assume the row containing the formula is anchored to the left
-  table just because the formula is on the same worksheet row. If the task says table rows and outside
-  cells do not correspond, or the output column sits beside outside input columns, probe that outside
-  input row as the likely output object and look back into the table by key.
+  `n/a`, spaces, NBSPs, display-only sentinels, or zero unless the instruction or target pattern
+  requires that exact value.
 - Existing values inside `answer_position` are evidence, not authority. When the instruction asks to
-  compute, fill, repair, replace, reshape, transpose, consolidate, or enter formulas into that range,
-  treat existing target values as examples or stale state until proven otherwise.
-- If existing target values conflict with the instruction-derived rule, compare both interpretations
-  in the plan and choose using instruction wording plus inspected source/target evidence. Assertions
-  must include a counterexample that would fail if the stale/example value were incorrectly preserved.
-- Date-window formulas and period logic must verify the first computed row, the row before and after
-  the boundary, one middle row, and the last row. State whether the window is inclusive or exclusive
-  and what happens before a full window exists.
-- For structural changes, decide final workbook layout before interpreting `answer_position`; inserted,
-  deleted, moved, transposed, or reshaped areas can shift the evaluator-facing cells.
-- Normalize malformed or shorthand colors to valid `#RRGGBB` or a safe `rgb(r, g, b)` form before
-  applying styles. Do not pass malformed hex, incomplete hex, named colors, or ambiguous color text
-  directly to workbook style APIs.
-- A passing assertion that would also pass for the plausible wrong rule is not evidence. Strengthen
-  the assertion or add a readonly probe that would fail for the wrong rule before implementing.
+  compute, fill, repair, replace, reshape, transpose, or enter formulas, treat existing target values
+  as examples or stale state until proven otherwise.
 
-## No Unrequested Normalization
+## Assertion Overlay
 
-Default to exact workbook-visible preservation unless the instruction explicitly asks to clean,
-normalize, summarize, or reformat.
+- Assertions must be plan-derived and must distinguish the chosen rule from a plausible wrong rule,
+  not merely confirm whatever the migration wrote.
+- Cover evaluator-facing cells inside `answer_position`.
+- Cover at least one source-to-target mapping when data is transformed, sorted, joined, copied, or reshaped.
+- Cover first/middle/last or boundary rows for large ranges.
+- Cover duplicate-key, no-match, missing-result, or tie-break rows when relevant.
+- Cover type-sensitive cells by stored value model when display text can mislead: date, boolean,
+  blank, true zero, text-number, identifier, formula, percentage, currency, and exact text.
+- Cover preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
+  ranges that must not be changed.
+- A verify result with zero assertions, all skipped packs, or an unchecked changed pack is not a pass.
 
-Do not silently change casing, whitespace, NBSP, punctuation, comma spacing, pluralization,
-identifiers, text-vs-number type, boolean type, date serial/date text intent, blanks, zeroes, or
-error placeholders because the changed value looks cleaner, more natural, or more conventional.
+## Formula And Stored Value Risk
 
-If normalization appears necessary, record the instruction phrase or workbook evidence that requires
-it in the plan and cover the decision with an assertion or readonly probe.
+- If formulas are required, preserve or write formulas and prove exported stored/cached values will
+  match the intended result.
+- If formulas are not required and cached values cannot be confidently guaranteed, prefer writing
+  evaluator-needed stored values directly.
+- For uncertain formula families, run one targeted compatibility probe in the workbook runtime or a
+  scratch workbook under `/task/work`, then inspect recalculated `f`, `v`, and `t` cell-model evidence.
+- Do not rely on manually supplied cached `v` next to `f` as proof that formula export will score.
 
-## Evaluator-Facing Cell Model Gate
+## Type And API Lookup Budget
 
-Before writing assertions or migration source, write an evaluator-facing cell model contract for
-`answer_position`.
-
-For each output column or range, decide and record the expected stored value model:
-
-- blank cell
-- text or force-text identifier
-- number
-- date/time as Excel serial value plus number format
-- percentage or currency as numeric value plus number format
-- boolean cell
-- formula cell plus evaluator-visible stored/cached value
-
-Display text is not enough evidence for this decision. Carefully distinguish stored cell value,
-number format, and display text:
-
-- Stored cell value is the evaluator-facing data.
-- Number format is style metadata that controls display; it does not change the stored cell value.
-- Display text is an application-visible rendering of value plus format, not an independent value to
-  copy or reverse-engineer blindly.
-
-`inspect`, `pipe out`, `getValues()`, and preview text may show formatted values, but they do not
-prove the stored value type, number format, formula model, rich text, or force-text state.
-
-For source-to-target aggregation, transformation, fill, lookup, or reshaping tasks, use source cells
-to understand input meaning, but inspect the target column, nearby target examples, or existing
-output cells before choosing the written `v`, `t`, and number format. If target examples store
-numbers and rely on number formats to display blanks, hyphens, percentages, currencies, or other
-special display text, write the corresponding stored value and preserve or reuse the target number
-format. Do not write the display text itself unless instruction wording or inspected target cell
-models explicitly require real text.
-
-When instruction wording and workbook evidence conflict, apply this display-vs-stored arbitration:
-
-- Phrases such as `show`, `display`, `appear as`, `shown as`, or `instead of showing` normally describe
-  presentation. They are not enough by themselves to turn a numeric, blank, date, percentage, currency,
-  or formula result into stored text.
-- If target evidence stores a numeric/blank/date/formula value and uses number format or style to show
-  a placeholder such as `-`, blank text, percent signs, currency symbols, or rounded text, preserve that
-  stored model and reproduce the presentation through number format or style.
-- Choose literal text only when the instruction explicitly asks to write/enter/store text, or when
-  inspected target cell models for the same role store literal text.
-- If the plan chooses literal text for a display-like token, record the exact instruction phrase or
-  inspected target cell model that proves text is required, and add an assertion/probe for the contrary
-  numeric/blank/formatted interpretation.
-
-When type or format matters, use targeted readonly Facade probes against the managed `.univer`
-artifact to inspect complete cell models with `getCellDatas()` and number formats. Keep probes short
-and under `/task/work`.
-
-Hard rules for evaluator-facing output:
-
-- Do not write date-looking display strings such as `2-Sep-22` or `16-Nov-20` when the target pattern
-  expects a real date value. Write the Excel date serial as a number and preserve or set the date
-  number format.
-- Do not write `"TRUE"` or `"FALSE"` strings when the target pattern expects booleans. Write boolean
-  cells.
-- Do not turn real zeroes into blanks. Blank-vs-zero policy must be decided from instruction wording
-  and workbook evidence, then asserted with at least one true-zero row and one blank row when relevant.
-- Do not turn numeric-looking identifiers, codes, phone numbers, ZIP/postal codes, or hyphenated text
-  into numbers or dates. Use force-text when semantics require text.
-- For copy, reorder, sort, transpose, extract, or move tasks, preserve full cell models by default
-  unless the instruction clearly asks for value-only output. Copying display values is not enough when
-  dates, booleans, formulas, rich text, identifiers, percentages, currencies, or formats are involved.
-  Prefer `getCellDatas()` -> deep clone -> `clearContent()` -> `setValues()` or an equivalent
-  model-preserving workbook operation for moved/copied cells.
-- For date-like copy or transfer tasks, do not infer the output type from visible date text such as
-  `1-Aug`. Probe the source and target cell models and number formats. If the source is a real date
-  value or the target pattern expects real dates, write a date serial/value with a date number format;
-  only write literal date text when instruction wording or workbook-visible target evidence explicitly
-  requires text.
-- For formula tasks, choose whether the benchmark needs formulas, stored values, or both. If formulas
-  are used, verify that exported evaluator-visible stored values will match the intended result.
-
-Assertions or readonly probes must include at least one type-sensitive cell when relevant: date,
-boolean, blank, zero, text-number, identifier, percentage, currency, formula, and exact text.
-When target display text can be produced by number format, assertions or probes must include both
-the stored model (`v`, `t`) and the resolved number format or display for at least one representative
-cell.
-
-## Type-Sensitive Write Rules
-
-Use explicit cell data for type-sensitive writes. Dates, booleans, numbers, text, force-text
-identifiers, formulas, percentages, currencies, blanks, and copied cells must not be written as
-ambiguous display strings.
-
-- Do not use bare JavaScript values for evaluator-facing type-sensitive output. Do not write `setValues([["2-2", 123, true]])`; write explicit cell data with `v`, `t`, `f`, and required number format/style fields.
-- Do not use formatted display text, rounded display text, or `getValues()` output as a substitute
-  for a source or target cell model. If a display requirement changes how a value should appear, satisfy
-  that through the chosen number format or style unless the instruction explicitly changes the stored
-  value or formula semantics.
-- Date outputs should be numeric Excel date serials with a date number format, unless the instruction
-  or target pattern explicitly requires literal date text.
-- Copying a formatted date cell by display string is a type change. When copying date cells, deep-clone
-  the full cell model or write an explicit numeric date model plus number format, then verify the
-  stored model rather than only the displayed text.
-- Boolean outputs should be boolean cells, not text labels.
-- Text identifiers that must not auto-convert should use force-text semantics.
-- When replacing an existing range, call `clearContent()` before writing the replacement matrix so old
-  formulas, rich text, custom data, or merged cell data do not survive accidentally.
-- Copy, reorder, transpose, extract, and move tasks should use `getCellDatas()` and deep-cloned cell
-  models by default when source value type, formula, formatting, rich text, or custom data may matter.
-
-## Known Facade Footguns
-
-These benchmark-visible Facade details are important enough to keep in this contract even though most
-API details belong to the required skills:
-
-- Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based start row/column arguments.
-  `numRows` and `numColumns` are counts, not end indexes.
-- `sheet.getLastRow()` and `sheet.getLastColumn()` return 0-based last used indexes.
-- Extend the sheet before creating an out-of-bounds range. Far-right or far-down target ranges fail
-  immediately if the range object is created before the sheet is expanded.
-- `setValues()` merges object cell data into existing cells; it does not automatically clear old
-  values, formulas, rich text, styles, or custom data.
-
-## Assertion Anti-Self-Confirmation
-
-Assertions must not only confirm that the migration wrote what the plan said. For each high-risk
-decision, include assertion or readonly-probe evidence that would distinguish the chosen rule from a plausible wrong rule.
-
-At minimum, cover these when relevant:
-
-- evaluator-facing cells inside `answer_position`
-- at least one source-to-target mapping
-- first/middle/last or boundary rows for large ranges
-- duplicate-key, no-match, missing-result, or tie-break rows when the task uses lookup/match/join logic
-- a blank, true zero, error, date, boolean, text-number, identifier, formula, percentage/currency,
-  or exact-text edge case, checked by stored value model when display text can mislead
-- preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
-  ranges that must not be changed
-
-If an assertion only mirrors migration output and would also pass for a plausible wrong plan, it is
-not meaningful evidence.
-
-## Formula/Data-Only Risk
-
-The evaluator compares stored values from the final `.xlsx` with openpyxl `data_only=True`.
-Formula text can be workbook-correct but still fail benchmark value scoring if the exported workbook
-does not contain the expected stored/cached values.
-
-If the instruction requires formulas, preserve or write formulas and also explain how final stored
-values will be evaluator-visible after SaC apply and export. If the instruction does not require
-formulas and cached formula values cannot be confidently guaranteed, prefer writing the
-evaluator-needed stored values directly.
-
-Formula cells still follow the stored value / number format / display text split. Preserve or rebuild
-the formula semantics with `f` or formula APIs, use number format for display requirements, and verify
-the formula cell model with `getCellDatas()` when exported cached values matter. Do not use a
-display-rendered value as proof that the formula cell's stored/cache model is correct.
-
-## SaC Type And API Lookup
-
-- For Facade/SaC type lookup, use the current workspace's managed type entry: `/task/cases/case_N/sac/types`.
-- The workspace type entry is created by SaC initialization and resolves inside the container to
-  `$UNIVER_HOME/sac/types/<hash>`.
-- If global type assets are needed, read only `$UNIVER_HOME/sac/types` or the workspace-local `types`
-  entry, and restrict searches to `*.d.ts`.
-- Safe lookup pattern: `rg "setFormula|class FRange" /task/cases/case_N/sac/types -g '*.d.ts'`.
+- For Facade/SaC type lookup, use the current package project's managed type entry:
+  `/task/cases/case_N/sac.univer/project/types`.
+- Safe lookup pattern: `rg "setFormula|class FRange" /task/cases/case_N/sac.univer/project/types -g '*.d.ts'`.
 - Do not run broad `rg`, `sed`, `cat`, `find`, or file reads under `/usr/local/lib/node_modules/univer-cli`.
 - Do not inspect CLI bundle or implementation paths such as `chunks/`, `internal/`,
   `view/browser/assets/`, or `vendor*.js` for Facade/SaC APIs.
-- Do not infer Facade APIs from CLI implementation bundles. Use `types/*.d.ts`, `univer help`,
-  and the required skills.
+- Do not infer Facade APIs from CLI implementation bundles. Use `types/*.d.ts`, `univer help`, and
+  the required skills.
 
 ## Time And Error Budget
 
 - Treat the agent timeout as a hard budget. A clear early failure is better than an unbounded repair loop.
-- Run only the commands needed to reach the next gate: plan, assertion, verify, apply, verify, export.
+- Run only commands needed to reach the next gate: plan, assertion, verify, apply, verify, export.
 - Do not repeat a failed command without changing the specific source or configuration named by the error.
 - If two consecutive attempts fail with the same setup error class and no new evidence, stop with that blocker.
-- Keep readonly probes short and targeted. Do not run broad workbook diffs, full-workbook dumps, or exploratory post-export checks.
-- `SAC_VERIFY_TARGET_MISSING` or `SAC_UNMANAGED_ARTIFACT` before follow-up pack work is a runner/setup bug in this benchmark, not a signal to apply the baseline checkpoint.
-- `SAC_TYPECHECK_FAILED`: fix the named TypeScript/import/API issue once from the diagnostic. If the same diagnostic repeats, change approach once or stop with the typecheck blocker.
-- `SAC_APPLIED_PACK_HASH_MISMATCH`: do not keep editing an already-applied pack. Prefer a new follow-up Migration Pack. If the follow-up also hits a hash mismatch, stop.
+- Keep readonly probes short and targeted. Do not run broad workbook diffs, full-workbook dumps, or
+  exploratory post-export checks.
+- `SAC_VERIFY_TARGET_MISSING` or `SAC_UNMANAGED_ARTIFACT` before follow-up pack work is a runner/setup bug.
+- `SAC_TYPECHECK_FAILED`: fix the named TypeScript/import/API issue once from the diagnostic. If the
+  same diagnostic repeats, change approach once or stop with the typecheck blocker.
+- `SAC_APPLIED_PACK_HASH_MISMATCH`: do not keep editing an already-applied pack. Prefer a new follow-up Migration Pack.
 - `SAC_ARTIFACT_DRIFT`: do not enter an open-ended rollback/apply/rebuild loop. Classify whether the
   previous failure was an assertion expectation issue, migration source issue, or ledger/setup issue.
-  If recovery is needed, use the documented SaC recovery path once; if rebuild is required inside the
-  benchmark container, set `TMPDIR=/task/work/tmp` to avoid cross-device package transactions. If
-  recovery still fails, stop and report the blocker.
-- For failed SaC verification, inspect the report before changing source. If failures are assertion
-  representation issues such as `null` versus `""` for blank cells or display strings versus stored
-  numbers, repair the assertions or cell-model contract first instead of rolling back the artifact.
-- `SAC_EMPTY_MIGRATION_PACK` or `SAC_PACK_FILE_INVALID`: fix the pack manifest/source once from the diagnostic. If the same pack remains invalid, stop with the pack-structure blocker.
-- `ERR_WORKBOOK_PACKAGE_TRANSACTION_FAILED` with `Code too long`: stop and report the SaC/package transaction limit. Do not retry with a larger generated code block.
+- `SAC_EMPTY_MIGRATION_PACK` or `SAC_PACK_FILE_INVALID`: fix the pack manifest/source once from the
+  diagnostic. If the same pack remains invalid, stop with the pack-structure blocker.
+- `ERR_WORKBOOK_PACKAGE_TRANSACTION_FAILED` with `Code too long`: stop and report the SaC/package
+  transaction limit. Do not retry with a larger generated code block.
 
-## Benchmark Evaluation Contract
-
-- `answer_position` in the prompt is the final evaluator inspection window.
-- The evaluator compares stored values from the final `.xlsx` with openpyxl `data_only=True`.
-- Formula text, styles, and formatting can still matter to the workbook task, but benchmark value scoring reads final cached/stored values in `answer_position`.
-- Exact text, casing, whitespace, NBSP, blank-versus-zero, text-versus-number, dates, percentages, currencies, identifiers, and error placeholders matter when workbook-visible.
-- Classify nearby workbook ranges by role before editing: source data, target output, example/demo, helper/control input, lookup/reference, existing output, and preserve-only area.
-- For large or structural `answer_position` ranges, verify representative first, middle, and last cells plus boundary rows and plausible wrong interpretations.
-- Do not let `answer_position` suppress explicit instruction requirements outside that range.
-- Do not preserve cells immediately before `answer_position` as headers or examples unless the instruction or workbook evidence says to preserve them.
-- For structural edits, reason about the final workbook layout before interpreting `answer_position`; inserted/deleted rows, moved tables, section headers, transposition, or reshaping can shift the final evaluator window.
-- For sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, or multiple output columns, write a concise output contract before source changes.
-- For lookup/match/join/fill tasks, verify key uniqueness or document duplicate-key policy before
-  implementation. Include a duplicate-key assertion or readonly probe if duplicates are found.
-- When sorting combines with grouping/filtering/truncation, sort the source range first in the final-layout model, then derive each group's output order from that final source order unless the instruction names a separate intra-group sort key.
-- When sorting instructions conflict, build the evaluator-facing output-order contract from final output wording first: final answer/output range/answer_position plus named target sort columns are high-priority evidence for the order of rows in the checked output.
-- Treat phrases like "sort column H lowest to highest" in a multi-column output table as "sort full output rows by column H" unless the instruction explicitly asks to reorder only the cells in that one column independently.
-- Keep row integrity by default; do not independently sort one output column away from paired columns unless the instruction explicitly asks for column-only value rearrangement.
-- Helper lists, grouping, and source-order preservation define candidate rows and tie-breakers, but they should not override an explicit final-output target-column sort.
-- Evidence must be discriminating evidence: it must make at least one plausible interpretation unlikely, not merely be compatible with the chosen interpretation.
-- Mark high-risk semantic decisions as `explicit`, `inferred`, or `underdetermined assumption`; never present an underdetermined assumption as workbook-proven evidence.
-- Separate observed workbook facts from semantic labels. Source-side sign patterns, balances, or category frequencies do not by themselves prove target labels such as debit/credit or in/out.
-- For structural changes or data reshaping, verify at least three mappings after the final layout is determined: first target cell, one middle target cell, and last target cell.
-
-## Skill-Owned Details
-
-- Exact Univer CLI syntax, SaC command order, Facade APIs, type constants, rich text builders,
-  copy/preserve behavior, range coordinate rules, and assertion APIs are owned by the required skills.
-- If a CLI command or API is unfamiliar, consult the relevant skill and command help before running it.
-- Do not invent command argument order or Facade methods from memory.
-
-## Passing Gate
+## Passing And Export Stop Gate
 
 Before exporting:
 
 - The relevant skill-guided SaC verification status is `passed`.
 - `checkedPackCount > 0`.
-- The changed follow-up pack has assertion evidence.
-- The changed follow-up pack has evaluator-facing cell model evidence for every relevant date,
-  boolean, blank/zero, text-number, formula, percentage/currency, or copied-cell preservation risk.
-- If export could change evaluator-facing stored values or types, the plan includes a bounded export
-  compatibility smoke check for `answer_position`.
-- A verify result with zero assertions, all skipped packs, or a zero-assertion, all-skipped, or unchecked changed-pack state is not a pass.
+- The changed follow-up pack has assertion evidence and evaluator-facing cell model evidence for
+  relevant date, boolean, blank/zero, text-number, formula, percentage/currency, or copied-cell risks.
 - Readonly probes are auxiliary evidence only.
 - No hidden answer, host evaluation artifact, or raw input file was used.
 
-## Export Stop Gate
-
-When case `N` passes the Passing Gate, export the managed artifact to exactly
+When case `N` passes the gate, export the managed artifact to exactly
 `/task/outputs/case_N/output.xlsx` once, confirm the file is non-empty, then stop immediately unless
 the plan requires the bounded export compatibility smoke check.
 
-For that smoke check only: import it into a temporary `.univer` under `/task/work`, inspect only
-`answer_position` or the specific type-sensitive cells named in the plan,
-and do not mutate, re-export, diff broad ranges, read hidden artifacts, or use Python/openpyxl/zip
-tools. If the smoke check reveals an export-only value/type problem, report that blocker rather than
-silently producing a second export.
+For that smoke check only: import the exported file into a temporary `.univer` under `/task/work`,
+inspect only `answer_position` or the specific type-sensitive cells named in the plan, and do not
+mutate, re-export, diff broad ranges, read hidden artifacts, or use Python/openpyxl/zip tools. If the
+smoke check reveals an export-only value/type problem, report that blocker rather than silently
+producing a second export.
 """
 
 
@@ -499,8 +226,8 @@ def build_agent_prompt(
     case_lines = "\n".join(
         "\n".join(
             [
-                f"- /task/cases/case_{case_index}/sac: prepared SaC workspace for case {case_index}.",
-                f"  Managed artifact: /task/cases/case_{case_index}/sac/artifacts/sac.univer",
+                f"- /task/cases/case_{case_index}/sac.univer: prepared package-local SaC project for case {case_index}.",
+                f"  Project source: /task/cases/case_{case_index}/sac.univer/project",
             ]
         )
         for case_index in case_list

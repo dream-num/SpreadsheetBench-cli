@@ -41,9 +41,9 @@ from `/task`, and `/task/AGENTS.md` is the only benchmark instruction file:
 /task
   AGENTS.md
   prompt.md
-  cases/case_1/sac/sac.config.ts
-  cases/case_1/sac/artifacts/sac.univer
-  cases/case_1/sac/migrations/
+  cases/case_1/sac.univer/
+  cases/case_1/sac.univer/project/univer.config.ts
+  cases/case_1/sac.univer/project/migrations/
   outputs/case_1/
   logs/
   work/

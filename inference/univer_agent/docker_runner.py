@@ -72,21 +72,6 @@ def copy_path(source: Path, target: Path) -> None:
         shutil.copy2(source, target)
 
 
-def write_adopted_sac_config(workspace_path: Path) -> None:
-    (workspace_path / "sac.config.ts").write_text(
-        'export default {\n'
-        '  source: {\n'
-        '    migrationsDir: "./migrations"\n'
-        '  },\n'
-        '  artifacts: {\n'
-        '    mode: "adopted",\n'
-        '    defaultWorkbook: "./artifacts/sac.univer"\n'
-        '  }\n'
-        '};\n',
-        encoding="utf-8",
-    )
-
-
 def task_container_path(container_task_dir: Path, path: Path) -> str:
     return "/task/" + path.relative_to(container_task_dir).as_posix()
 
@@ -94,12 +79,16 @@ def task_container_path(container_task_dir: Path, path: Path) -> str:
 def prepare_sac_workspace(
     config: RunnerConfig,
     container_task_dir: Path,
-    input_univer_path: Path,
-    workspace_path: Path,
+    input_xlsx_path: Path,
+    package_path: Path,
 ) -> None:
-    input_container_path = task_container_path(container_task_dir, input_univer_path)
-    workspace_container_path = task_container_path(container_task_dir, workspace_path)
-    script = f"univer sac init {shlex.quote(workspace_container_path)} --from {shlex.quote(input_container_path)}"
+    remove_existing_path(package_path)
+    input_container_path = task_container_path(container_task_dir, input_xlsx_path)
+    package_container_path = task_container_path(container_task_dir, package_path)
+    script = (
+        f"univer import {shlex.quote(input_container_path)} "
+        f"{shlex.quote(package_container_path)} --with-project"
+    )
     run_workspace_setup_command(
         [
             config.docker_bin,
@@ -114,10 +103,6 @@ def prepare_sac_workspace(
             script,
         ]
     )
-    artifact_path = workspace_path / "artifacts" / "sac.univer"
-    artifact_path.parent.mkdir(parents=True, exist_ok=True)
-    copy_path(input_univer_path, artifact_path)
-    write_adopted_sac_config(workspace_path)
 
 
 def prepare_docker_task_workspace(
@@ -146,11 +131,8 @@ def prepare_docker_task_workspace(
         output_dir.mkdir(parents=True, exist_ok=True)
         copied_input = case_dir / "input.xlsx"
         shutil.copy2(source_input, copied_input)
-        input_univer = case_dir / "input.univer"
-        import_xlsx_to_univer(copied_input, input_univer)
-        prepare_sac_workspace(config, container_task_dir, input_univer, case_dir / "sac")
+        prepare_sac_workspace(config, container_task_dir, copied_input, case_dir / "sac.univer")
         remove_existing_path(copied_input)
-        remove_existing_path(input_univer)
 
     (container_task_dir / "AGENTS.md").write_text(build_task_agents_md(case_list), encoding="utf-8")
     prompt_path = container_task_dir / "prompt.md"
