@@ -29,6 +29,7 @@
 ## agent理解问题，可尝试通过特定提升词修复（4）
 - **469-9（已处理）**：通过率:2/5。原因：题目要求把 Column C 金额拆到 H Debits 和 I Credits，写绝对值，非适用格留空，检查 H1:I10。本次 agent 用 Balance 列反证正负号含义：正数金额后余额下降、负数金额后余额上升，所以判定正数为 debit、负数为 credit；只写 H1:I10。过程仅有 inspect --json 不支持的小卡点，改用 range inspect/run 完成。openpyxl 按评测逻辑对比 output/golden H1:I10 通过；历史失败是 agent 反向理解正负号，本次通过反证检查避免。
 - **80-42（已处理）**：通过率:0/5。原因：agent 发现 Consolidate_ALL!A2:L3999 已有 Jack/Henry/Richard 合并数据后，误判为无需追加，只扩展到 8000 行并保持 A4000:L8000 为空；golden 按 first available blank rows 从第 4000 行再次追加同一批源数据到第 7997 行。未见 SDK/CLI 或评测异常，核心是追加语义被理解成去重/已完成检查。
+- **49036（已处理）**：通过率:0/5。原因：output 的 Dashboard!B8 是数值 0.6666666666666666 + 自定义格式 0% "WIN RATE"，显示为 67% WIN RATE；golden data_only=True 值是文本 66.67% WIN RATE，公式为 TEXT(...,"0.00%")&" WIN RATE"。题目同时要求不改变 number format，示例又写 67% WIN RATE，还提到 .00 decimal，与 golden 的文本化两位小数目标冲突；不是 CLI/SDK bug。
 - **170-13**：通过率:3/5。原因：output/golden 在 Sheet1!A1:A50、Sheet2!A1:E20 完全一致，但 Sheet3!A1:A50 有 49 处值差异。agent 按 Sheet2 表头顺序成组输出，并把现有 Sheet3 示例顺序当成强证据；golden/题意实际要求按 Sheet1 Entry 行顺序逐条匹配并展开到最后一行。运行无超时、导出成功，不是评测程序或 CLI 问题。
 - **45944**：通过率:0/5。原因：非评测程序误报，按 evaluation.py 的 data_only=True 值比较可复现失败。G4:G6 一致；但 output 的 G11:G13/G20:G22 为 TRUE, TRUE, FALSE，golden 为 TRUE, FALSE, TRUE。agent 把 G 列理解成左侧表 A:B 当前行去外部 D:E 查人名并比较日期；golden/题意实际是外部 D:E 当前行的人名和日期去左侧 Table1 查对应 START_DATE 再比较。公式方向/归属理解错，不是 CLI 或评测口径问题。
 
