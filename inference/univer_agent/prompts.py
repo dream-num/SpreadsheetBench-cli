@@ -59,6 +59,16 @@ Rules:
 - Do not trim or normalize meaningful text that is being copied, preserved, joined, or used as an output label, including headers, IDs, codes, quoted literal output, and source labels. If instruction wording names categories or labels that correspond to inspected source labels but differs only by case, spacing, pluralization, or similar wording, treat the instruction text as a reference for matching and write the inspected source label exactly, unless the instruction clearly asks to display the instruction literal or rename the label. Existing target examples may guide layout and separators, but they are not permission to trim, recase, singularize, pluralize, or otherwise rewrite exact source labels; partial or prefilled target examples may be stale. If exact text may matter, inspect and record the stored value, including leading/trailing spaces.
 - In `Decision plan:`, record any trim/preserve decision for output text and identify which exact inspected cell supplies each display label. In `Verification report:`, verify at least one whitespace-sensitive sample by stored value, length, or JSON representation, not only visible preview.
 
+#### For append, insert, and consolidation tasks
+- When the instruction explicitly asks to append, insert, or consolidate data into blank rows, existing target data is only evidence for layout, formatting, and boundaries; it is not a reason to skip the requested write.
+- Do not treat the task as deduplication, idempotent update, or "already done" unless the instruction explicitly says to avoid duplicates, only fill missing rows, or update existing rows.
+- Verify the first newly written row, the last newly written row, and the boundary row just outside the write range.
+
+#### For signed values and semantic polarity
+- When positive/negative values drive business meaning, such as debit/credit, inflow/outflow, gain/loss, increase/decrease, or balance changes, do not assume a universal sign convention.
+- Infer the local convention from workbook evidence: headers, labels, examples, formulas, existing outputs, totals, running balances, and both positive and negative samples when available.
+- If a balance or total exists, use it to verify polarity, then record the exact evidence and chosen convention in `Decision plan:` and `Decision review:`.
+
 #### For VBA, macro, formula-repair, lookup, and fill-down tasks
 - For VBA, macro, formula-repair, `INDEX`/`MATCH`, lookup, or fill-down tasks, implement the workbook-visible result or repaired formula behavior; do not place code text in cells unless the user explicitly asks for code text.
 - When such tasks mention special outputs such as missing values, empty matches, `N/A`, `#N/A`, `0`, or blanks, decide whether each one is literal display text, an error/fallback for a missing key, or the natural result of a formula over an existing empty source cell. Treat an empty source cell that is successfully found as different from a key/header that is not found.
