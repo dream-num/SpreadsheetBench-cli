@@ -508,13 +508,17 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("make the user's explicit instruction the highest-priority source of truth", prompt)
         self.assertIn("minimum necessary set of workbook changes", prompt)
         self.assertIn("Do not broaden, narrow, normalize, clean up, redesign, rename, delete, reorder", prompt)
+        self.assertIn("Carry forward every explicit constraint from `Task brief:`", prompt)
+        self.assertIn("do not drop or reinterpret an explicit sorting", prompt)
+        self.assertIn("state the competing interpretations", prompt)
+        self.assertIn("verify the chosen effect directly", prompt)
         self.assertIn("required sorting, clearing, moving, deletion, or structural edits", prompt)
         self.assertIn("exact affected range boundaries", prompt)
         self.assertIn("row headers, column headers, section headers", prompt)
         self.assertIn("accidentally include or exclude row headers", prompt)
         self.assertIn("verify the first and last affected rows or columns", prompt)
 
-    def test_agent_prompt_requires_exploration_plan_and_evidence_review(self):
+    def test_agent_prompt_requires_concrete_workflow_artifacts(self):
         prompt = build_agent_prompt(
             {
                 "id": "task-1",
@@ -524,14 +528,21 @@ class UniverAgentRunnerTest(unittest.TestCase):
             }
         )
 
-        self.assertIn("Follow this seven-stage workflow", prompt)
-        self.assertIn("Use the fixed headings `Instruction summary:`, `Exploration plan:`", prompt)
-        self.assertIn("`Evidence review:`, `Implementation plan:`", prompt)
-        self.assertIn("Identify pronouns, references, labels, examples", prompt)
-        self.assertIn("Run targeted workbook exploration from the exploration plan", prompt)
-        self.assertIn("Prefer several small, focused inspections", prompt)
-        self.assertIn("Review whether the inspected evidence is sufficient", prompt)
-        self.assertIn("If evidence is insufficient", prompt)
+        self.assertIn("Follow this six-stage workflow", prompt)
+        self.assertIn("fixed headings `Task brief:`, `Inspection evidence:`, `Decision plan:`", prompt)
+        self.assertIn("`Decision review:`", prompt)
+        self.assertIn("`Verification report:`", prompt)
+        self.assertIn("`User goal:` one concrete sentence", prompt)
+        self.assertIn("`Explicit constraints:` actual constraints from the instruction", prompt)
+        self.assertIn("`References to resolve:` pronouns, labels, examples", prompt)
+        self.assertIn("record inspected evidence as short bullets or a small table", prompt)
+        self.assertIn("Resolve every item from `References to resolve`", prompt)
+        self.assertIn("`Rules:` concrete mapping, sorting, filtering", prompt)
+        self.assertIn("`Decisions to review:` a compact table", prompt)
+        self.assertIn("strictly review every row from `Decisions to review` before editing", prompt)
+        self.assertIn("mark `REJECT` if the decision is supported only by a convenient sample", prompt)
+        self.assertIn("do not implement; run the targeted inspection", prompt)
+        self.assertIn("If evidence is missing or ambiguous", prompt)
 
     def test_agent_prompt_treats_examples_as_references(self):
         prompt = build_agent_prompt(
@@ -545,6 +556,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         self.assertIn("Examples in the instruction or workbook are references", prompt)
         self.assertIn("not answers to copy mechanically", prompt)
+        self.assertIn("do not use an example block as the final values when source ranges can be inspected", prompt)
         self.assertIn("actual instruction and workbook contents", prompt)
 
     def test_run_task_invokes_docker_with_task_mount_and_env_file_then_collects_outputs(self):
