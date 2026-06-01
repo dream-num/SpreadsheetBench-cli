@@ -1,0 +1,381 @@
+{
+  "generated_at": "2026-06-01",
+  "dataset": "spreadsheetbench_verified_400",
+  "agent": "codex",
+  "model": "gpt-5.5",
+  "workers": 18,
+  "agent_timeout_seconds": 480,
+  "matrix_sheet": "codex-gpt-5.5-verified400",
+  "stable_rule": "最近连续 6 次实际运行为 PASS；NOT_RUN 不计入；评测 bug 130-9/283-32/49300 排除",
+  "runs": [
+    {
+      "round": "stab1",
+      "run_id": "codex-gpt-5-5-verified400-allwrong42-exstable6-exevalbug-w18-timeout480-stab1-20260601-173357",
+      "report_path": "report/codex-gpt-5-5-verified400-allwrong42-exstable6-exevalbug-w18-timeout480-stab1-20260601-173357.json",
+      "eval_path": "outputs/eval_univer_agent_gpt-5.5_codex-gpt-5-5-verified400-allwrong42-exstable6-exevalbug-w18-timeout480-stab1-20260601-173357.json",
+      "matrix_column": "AI",
+      "matrix_header": "allwrong42-exstable6-exevalbug-w18-timeout480-stab1-20260601-173357",
+      "selected_tasks": 42,
+      "status_counts": {
+        "PASS": 14,
+        "FAIL": 28,
+        "TIMEOUT": 0,
+        "ERROR": 0,
+        "NOT_RUN": 0
+      },
+      "timeout_task_ids": [],
+      "matrix_counts": {
+        "PASS": 14,
+        "FAIL": 28,
+        "NOT_RUN": 70
+      },
+      "accuracy": 0.3333333333333333
+    },
+    {
+      "round": "stab2",
+      "run_id": "codex-gpt-5-5-verified400-allwrong41-exstable6-exevalbug-w18-timeout480-stab2-20260601-174543",
+      "report_path": "report/codex-gpt-5-5-verified400-allwrong41-exstable6-exevalbug-w18-timeout480-stab2-20260601-174543.json",
+      "eval_path": "outputs/eval_univer_agent_gpt-5.5_codex-gpt-5-5-verified400-allwrong41-exstable6-exevalbug-w18-timeout480-stab2-20260601-174543.json",
+      "matrix_column": "AJ",
+      "matrix_header": "allwrong41-exstable6-exevalbug-w18-timeout480-stab2-20260601-174543",
+      "selected_tasks": 41,
+      "status_counts": {
+        "PASS": 14,
+        "FAIL": 22,
+        "TIMEOUT": 5,
+        "ERROR": 0,
+        "NOT_RUN": 0
+      },
+      "timeout_task_ids": [
+        "80-42",
+        "170-13",
+        "13284",
+        "32023",
+        "50193"
+      ],
+      "matrix_counts": {
+        "PASS": 14,
+        "FAIL": 27,
+        "NOT_RUN": 71
+      },
+      "accuracy": 0.34146341463414637
+    },
+    {
+      "round": "stab3",
+      "run_id": "codex-gpt-5-5-verified400-allwrong38-exstable6-exevalbug-w18-timeout480-stab3-20260601-195149",
+      "report_path": "report/codex-gpt-5-5-verified400-allwrong38-exstable6-exevalbug-w18-timeout480-stab3-20260601-195149.json",
+      "eval_path": "outputs/eval_univer_agent_gpt-5.5_codex-gpt-5-5-verified400-allwrong38-exstable6-exevalbug-w18-timeout480-stab3-20260601-195149.json",
+      "matrix_column": "AK",
+      "matrix_header": "allwrong38-exstable6-exevalbug-w18-timeout480-stab3-20260601-195149",
+      "selected_tasks": 38,
+      "status_counts": {
+        "PASS": 13,
+        "FAIL": 25,
+        "TIMEOUT": 0,
+        "ERROR": 0,
+        "NOT_RUN": 0
+      },
+      "timeout_task_ids": [],
+      "matrix_counts": {
+        "PASS": 13,
+        "FAIL": 25,
+        "NOT_RUN": 74
+      },
+      "accuracy": 0.34210526315789475
+    }
+  ],
+  "stability_across_stab1_stab3": {
+    "triple_counts": {
+      "FAIL->FAIL->FAIL": 21,
+      "FAIL->FAIL->PASS": 4,
+      "FAIL->PASS->FAIL": 1,
+      "FAIL->PASS->PASS": 2,
+      "PASS->FAIL->FAIL": 1,
+      "PASS->FAIL->PASS": 1,
+      "PASS->NOT_RUN->NOT_RUN": 1,
+      "PASS->PASS->FAIL": 2,
+      "PASS->PASS->NOT_RUN": 3,
+      "PASS->PASS->PASS": 6
+    },
+    "changed_between_stab2_stab3": [
+      {
+        "task_id": "80-42",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "469-9",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "5835",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "32023",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "42216",
+        "stab2": "PASS",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "53161",
+        "stab2": "PASS",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "33157",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "58949",
+        "stab2": "PASS",
+        "stab3": "NOT_RUN"
+      },
+      {
+        "task_id": "230-16",
+        "stab2": "PASS",
+        "stab3": "NOT_RUN"
+      },
+      {
+        "task_id": "53383",
+        "stab2": "PASS",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "43657",
+        "stab2": "PASS",
+        "stab3": "NOT_RUN"
+      }
+    ],
+    "changed_across_stab1_stab3": [
+      {
+        "task_id": "80-42",
+        "stab1": "FAIL",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "469-9",
+        "stab1": "PASS",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "5835",
+        "stab1": "FAIL",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "32023",
+        "stab1": "FAIL",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "37900",
+        "stab1": "FAIL",
+        "stab2": "PASS",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "42216",
+        "stab1": "PASS",
+        "stab2": "PASS",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "48643",
+        "stab1": "FAIL",
+        "stab2": "PASS",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "53161",
+        "stab1": "FAIL",
+        "stab2": "PASS",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "55427",
+        "stab1": "PASS",
+        "stab2": "NOT_RUN",
+        "stab3": "NOT_RUN"
+      },
+      {
+        "task_id": "56953",
+        "stab1": "PASS",
+        "stab2": "FAIL",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "33157",
+        "stab1": "FAIL",
+        "stab2": "FAIL",
+        "stab3": "PASS"
+      },
+      {
+        "task_id": "58949",
+        "stab1": "PASS",
+        "stab2": "PASS",
+        "stab3": "NOT_RUN"
+      },
+      {
+        "task_id": "230-16",
+        "stab1": "PASS",
+        "stab2": "PASS",
+        "stab3": "NOT_RUN"
+      },
+      {
+        "task_id": "53383",
+        "stab1": "PASS",
+        "stab2": "PASS",
+        "stab3": "FAIL"
+      },
+      {
+        "task_id": "43657",
+        "stab1": "PASS",
+        "stab2": "PASS",
+        "stab3": "NOT_RUN"
+      }
+    ]
+  },
+  "after_stab3": {
+    "stable_pass6_count": 76,
+    "next_default_run_count": 33,
+    "stable_pass6_tasks": [
+      "23-24",
+      "41-47",
+      "142-19",
+      "177-6",
+      "203-15",
+      "262-17",
+      "387-16",
+      "398-14",
+      "414-20",
+      "477-45",
+      "496-34",
+      "534-26",
+      "535-20",
+      "1925",
+      "3002",
+      "7665",
+      "14240",
+      "31202",
+      "32093",
+      "33722",
+      "35742",
+      "37462",
+      "38074",
+      "42930",
+      "43213",
+      "44628",
+      "46897",
+      "48975",
+      "48983",
+      "50768",
+      "50952",
+      "51090",
+      "51680",
+      "52541",
+      "52575",
+      "54085",
+      "54717",
+      "55060",
+      "55427",
+      "55965",
+      "55977",
+      "56378",
+      "56419",
+      "57989",
+      "58499",
+      "157-4",
+      "208-20",
+      "409-45",
+      "448-11",
+      "34033",
+      "38537",
+      "54638",
+      "15387",
+      "45300",
+      "395-36",
+      "402-43",
+      "49667",
+      "9448",
+      "17111",
+      "50971",
+      "58949",
+      "45707",
+      "45937",
+      "56427",
+      "57612",
+      "48969",
+      "54675",
+      "59595",
+      "408-5",
+      "230-16",
+      "48527",
+      "59196",
+      "58942",
+      "38985",
+      "43657",
+      "59129"
+    ],
+    "next_default_run_tasks": [
+      "22-47",
+      "80-42",
+      "118-50",
+      "146-49",
+      "469-9",
+      "486-17",
+      "524-31",
+      "3911",
+      "5835",
+      "13284",
+      "32023",
+      "37900",
+      "42216",
+      "43436",
+      "44017",
+      "45738",
+      "45944",
+      "48643",
+      "49036",
+      "50193",
+      "50486",
+      "52305",
+      "53161",
+      "54590",
+      "54667",
+      "56786",
+      "56915",
+      "56953",
+      "59884",
+      "33157",
+      "41978",
+      "170-13",
+      "53383"
+    ]
+  },
+  "server_clone_check": {
+    "clone_path": "tmp/wrong-report-matrix-server-check-stability-stab3-20260601.univer",
+    "synced_rev": 436,
+    "headers": [
+      "allwrong42-exstable6-exevalbug-w18-timeout480-stab1-20260601-173357",
+      "allwrong41-exstable6-exevalbug-w18-timeout480-stab2-20260601-174543",
+      "allwrong38-exstable6-exevalbug-w18-timeout480-stab3-20260601-195149"
+    ],
+    "row2": [
+      "F:28，NR:70",
+      "F:27，NR:71",
+      "F:25，NR:74"
+    ]
+  }
+}
