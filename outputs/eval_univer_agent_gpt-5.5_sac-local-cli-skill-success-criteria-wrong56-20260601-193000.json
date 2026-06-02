@@ -1,0 +1,506 @@
+[
+    {
+        "id": "22-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "51-12",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": "269-44",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "283-32",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "408-5",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "80-42",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "118-50",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "130-9",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "146-49",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "177-6",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "203-15",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "230-16",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "188-39",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "486-17",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "496-34",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": "534-26",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 37900,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 40478,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 48643,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 48969,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 48983,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 49036,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 49300,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 50193,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 52807,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 54590,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 3002,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 3911,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 4714,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 5835,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 6239,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 13284,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 17111,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 32023,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 32093,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 33157,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 35742,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 35747,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 41978,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 42216,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 43436,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 45738,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 45944,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 50486,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 51680,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 52305,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 54667,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 55427,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 58949,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 59196,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 59595,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            1
+        ],
+        "soft_restriction": 1.0,
+        "hard_restriction": 1
+    },
+    {
+        "id": 44017,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 56786,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 56915,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 56953,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    },
+    {
+        "id": 59884,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    }
+]

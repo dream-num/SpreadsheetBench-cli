@@ -1,0 +1,11 @@
+[
+    {
+        "id": "22-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+            0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+    }
+]

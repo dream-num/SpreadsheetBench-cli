@@ -500,9 +500,17 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("Helper lists, grouping, and source-order preservation", agents_md)
         self.assertIn("Do not infer debit/credit", agents_md)
         self.assertIn("Preserve workbook-visible label text when writing headers", agents_md)
+        self.assertIn("write that exact workbook token", agents_md)
+        self.assertIn("Prompt prose casing is weaker evidence than an existing workbook token", agents_md)
+        self.assertIn("do not silently trim, collapse, insert, or", agents_md)
+        self.assertIn("For discontiguous `answer_position` windows", agents_md)
         self.assertIn("No-match outputs must be real blanks when workbook evidence calls for blanks", agents_md)
         self.assertIn("Existing values inside `answer_position` are evidence, not authority", agents_md)
         self.assertIn("existing target values", agents_md)
+        self.assertIn("name one plausible wrong output", agents_md)
+        self.assertIn("cover at least one evaluator-facing cell in each separate", agents_md)
+        self.assertIn("Cover exact stored text for casing", agents_md)
+        self.assertIn("Cover precision-sensitive outputs", agents_md)
         self.assertIn("`SAC_ARTIFACT_DRIFT`: do not enter an open-ended rollback/apply/rebuild loop", agents_md)
 
     def test_task_agents_md_contains_migrated_benchmark_hard_gates(self):

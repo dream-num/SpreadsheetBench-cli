@@ -1,0 +1,62 @@
+{
+  "accuracy": 0.0,
+  "correct_case_count": 0,
+  "error_case_count": 1,
+  "timeout_case_count": 0,
+  "total_case_count": 1,
+  "run": {
+    "summary_path": ".runs/univer-agent/tmp-sac-fastpath-local-49667-20260530-211424/summary.json",
+    "metadata": {
+      "run_id": "tmp-sac-fastpath-local-49667-20260530-211424",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 5,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-05-30T21:14:24",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-05-30T21:24:41"
+    },
+    "total_task_count": 1,
+    "ok_task_count": 0,
+    "error_task_count": 1,
+    "timeout_task_count": 0,
+    "tasks": [
+      {
+        "id": "49667",
+        "status": "error",
+        "error": "Missing container output: /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/tmp-sac-fastpath-local-49667-20260530-211424/49667/task/outputs/case_1/output.xlsx"
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_tmp-sac-fastpath-local-49667-20260530-211424.json",
+    "accuracy": 0.0,
+    "correct_case_count": 0,
+    "error_case_count": 1,
+    "timeout_case_count": 0,
+    "total_case_count": 1,
+    "results": [
+      {
+        "id": 49667,
+        "instruction_type": "Cell-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      }
+    ]
+  }
+}

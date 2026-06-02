@@ -1,0 +1,62 @@
+{
+  "accuracy": 0.0,
+  "correct_case_count": 0,
+  "error_case_count": 1,
+  "timeout_case_count": 0,
+  "total_case_count": 1,
+  "run": {
+    "summary_path": ".runs/univer-agent/sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-project-workspace-20260601-165114/summary.json",
+    "metadata": {
+      "run_id": "sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-project-workspace-20260601-165114",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 10,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-06-01T16:53:14",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-06-01T16:53:22"
+    },
+    "total_task_count": 1,
+    "ok_task_count": 0,
+    "error_task_count": 1,
+    "timeout_task_count": 0,
+    "tasks": [
+      {
+        "id": "22-47",
+        "status": "error",
+        "error": "Failed to prepare SaC workspace with `docker run --rm --entrypoint sh -v /Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-project-workspace-20260601-165114/22-47/task:/task spreadsheetbench-univer-cli-agent-local -lc 'univer sac rebuild /task/cases/case_1/sac.univer --force'`: ERROR ERR_WORKBOOK_PACKAGE_TRANSACTION_FAILED\n\nWorkbook package transaction failed for /task/cases/case_1/sac.univer: ENOENT: no such file or directory, open '/task/cases/case_1/sac.univer/project/univer.config.ts'\n\nUsage:\n  univer new <package.univer> --with-project\n  univer sac migration create <slug> <package.univer>\n  univer sac apply <package.univer> [--no-commit]\n  univer sac verify <package.univer>\n  univer sac rebuild <package.univer> [--force]\n\nTry:\n  univer new ./model.univer --with-project\n  univer sac apply ./model.univer\n\nTrace ID: 99b7086f121c65fc1c94d1e1e13295ac"
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-project-workspace-20260601-165114.json",
+    "accuracy": 0.0,
+    "correct_case_count": 0,
+    "error_case_count": 1,
+    "timeout_case_count": 0,
+    "total_case_count": 1,
+    "results": [
+      {
+        "id": "22-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      }
+    ]
+  }
+}

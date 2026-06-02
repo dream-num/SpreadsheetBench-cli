@@ -1,0 +1,69 @@
+{
+  "accuracy": 0.0,
+  "correct_case_count": 0,
+  "error_case_count": 1,
+  "timeout_case_count": 0,
+  "total_case_count": 1,
+  "run": {
+    "summary_path": ".runs/univer-agent/sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-import-with-project-20260601-165923/summary.json",
+    "metadata": {
+      "run_id": "sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-import-with-project-20260601-165923",
+      "dataset": "spreadsheetbench_verified_400",
+      "dataset_path": "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400",
+      "setting": "univer_agent",
+      "model": "gpt-5.5",
+      "agent": "codex",
+      "agent_command": false,
+      "cases": [
+        1
+      ],
+      "run_root": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent",
+      "stream_agent_output": false,
+      "workers": 10,
+      "docker_bin": "docker",
+      "docker_image": "spreadsheetbench-univer-cli-agent-local",
+      "docker_container": "spreadsheetbench-cli-<run-id>-<task-id>",
+      "env_file": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.env.codex",
+      "started_at": "2026-06-01T16:59:31",
+      "cwd": "/Users/morris/Developer/univer/SpreadsheetBench-cli",
+      "finished_at": "2026-06-01T17:10:53"
+    },
+    "total_task_count": 1,
+    "ok_task_count": 1,
+    "error_task_count": 0,
+    "timeout_task_count": 0,
+    "tasks": [
+      {
+        "id": "22-47",
+        "status": "ok",
+        "workspace": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-import-with-project-20260601-165923/22-47",
+        "task_dir": "/Users/morris/Developer/univer/SpreadsheetBench-cli/.runs/univer-agent/sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-import-with-project-20260601-165923/22-47/task",
+        "outputs": [
+          "/Users/morris/Developer/univer/SpreadsheetBench-cli/data/spreadsheetbench_verified_400/outputs/univer_agent_gpt-5.5/1_22-47_output.xlsx"
+        ],
+        "started_at": "2026-06-01T16:59:31",
+        "finished_at": "2026-06-01T17:10:53",
+        "duration_seconds": 681.605
+      }
+    ]
+  },
+  "evaluate": {
+    "report_path": "outputs/eval_univer_agent_gpt-5.5_sac-local-cli-skill-gpt-5-5-medium-verified400-task22-47-import-with-project-20260601-165923.json",
+    "accuracy": 0.0,
+    "correct_case_count": 0,
+    "error_case_count": 1,
+    "timeout_case_count": 0,
+    "total_case_count": 1,
+    "results": [
+      {
+        "id": "22-47",
+        "instruction_type": "Sheet-Level Manipulation",
+        "test_case_results": [
+          0
+        ],
+        "soft_restriction": 0.0,
+        "hard_restriction": 0
+      }
+    ]
+  }
+}

@@ -131,6 +131,13 @@ skills or `univer help`.
 - Preserve workbook-visible label text when writing headers, categories, statuses, departments, names,
   and similar labels. Normalize labels only for matching unless the instruction explicitly asks to
   rename, clean, singularize, pluralize, or reformat the written label.
+- If a target label already appears in workbook-visible headers, categories, statuses, examples, or
+  nearby output patterns, write that exact workbook token, including casing, punctuation, and spacing.
+  Prompt prose casing is weaker evidence than an existing workbook token unless the instruction
+  explicitly asks to recase or reword the output.
+- For list, joined-string, copied-text, and label outputs, do not silently trim, collapse, insert, or
+  prettify whitespace. Preserve source-token whitespace exactly unless the instruction explicitly
+  asks to trim, normalize, or reformat text.
 - Do not infer debit/credit, in/out, or similar semantic direction from business convention,
   source-side sign, balance movement, or category frequency alone. Prove it from target labels,
   examples, instruction wording, or record the remaining assumption.
@@ -140,17 +147,28 @@ skills or `univer help`.
 - Existing values inside `answer_position` are evidence, not authority. When the instruction asks to
   compute, fill, repair, replace, reshape, transpose, or enter formulas, treat existing target values
   as examples or stale state until proven otherwise.
+- For discontiguous `answer_position` windows, preserve the row anchor and meaning of each window
+  separately. Do not infer that later windows share the first window's source row, lookup row, or
+  example row unless workbook evidence proves that relationship.
 
 ## Assertion Overlay
 
 - Assertions must be plan-derived and must distinguish the chosen rule from a plausible wrong rule,
   not merely confirm whatever the migration wrote.
+- For every high-risk semantic decision in the plan, name one plausible wrong output and include at
+  least one assertion or readonly probe that would reject that wrong interpretation.
 - Cover evaluator-facing cells inside `answer_position`.
+- For discontiguous `answer_position`, cover at least one evaluator-facing cell in each separate
+  window and document that window's row anchor.
 - Cover at least one source-to-target mapping when data is transformed, sorted, joined, copied, or reshaped.
 - Cover first/middle/last or boundary rows for large ranges.
 - Cover duplicate-key, no-match, missing-result, or tie-break rows when relevant.
 - Cover type-sensitive cells by stored value model when display text can mislead: date, boolean,
   blank, true zero, text-number, identifier, formula, percentage, currency, and exact text.
+- Cover exact stored text for casing, punctuation, whitespace, NBSP, suffix/prefix text, and joined
+  labels when those values appear in evaluator-facing cells.
+- Cover precision-sensitive outputs with the final evaluator-facing value or string, not a rounded or
+  display-pretty approximation, unless that approximation is explicitly required.
 - Cover preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
   ranges that must not be changed.
 - A verify result with zero assertions, all skipped packs, or an unchecked changed pack is not a pass.
