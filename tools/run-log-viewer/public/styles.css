@@ -110,6 +110,17 @@ body {
   color: #1f2937;
 }
 
+.translatableText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+  color: #1f2937;
+}
+
+.messageText {
+  font-size: 13px;
+}
+
 .commandLine {
   margin-bottom: 10px;
 }

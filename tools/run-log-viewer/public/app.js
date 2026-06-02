@@ -99,6 +99,19 @@
     );
   }
 
+  function classNames(...values) {
+    return values.filter(Boolean).join(" ");
+  }
+
+  function TranslatableText({ text, className }) {
+    return e("div", { className: classNames("translatableText", className), translate: "yes" }, text || "");
+  }
+
+  function TextBlock({ text, translateMode, className }) {
+    if (translateMode) return e(TranslatableText, { text, className });
+    return e("pre", { className: classNames("codeBlock", className) }, text || "");
+  }
+
   function HomePage() {
     const { loading, error, data } = useAsync(() => fetchJson("/api/home"), []);
     const [query, setQuery] = React.useState("");
@@ -245,20 +258,26 @@
     );
   }
 
-  function QuestionPanel({ task }) {
+  function QuestionPanel({ task, translateMode }) {
     const sections = task.promptSections || {};
     return e(
       Space,
       { direction: "vertical", className: "fullWidth", size: 12 },
       e(Alert, { type: "info", showIcon: true, message: "题目上下文", description: "先理解题目和答案位置，再查看时间线与命令。" }),
-      e(Card, { title: "任务要求" }, e(Paragraph, null, sections.instruction || "未提取到任务要求。")),
+      e(
+        Card,
+        { title: "任务要求" },
+        translateMode
+          ? e(TranslatableText, { text: sections.instruction || "未提取到任务要求。" })
+          : e(Paragraph, null, sections.instruction || "未提取到任务要求。"),
+      ),
       e(Card, { title: "答案位置" }, e(Text, { code: true }, sections.answer_position || "无")),
       e(Card, { title: "输出路径" }, e("pre", { className: "codeBlock" }, sections.output_path || "无")),
-      e(Collapse, { items: [{ key: "prompt", label: "完整 prompt.md", children: e("pre", { className: "codeBlock" }, task.prompt || "") }] }),
+      e(Collapse, { items: [{ key: "prompt", label: "完整 prompt.md", children: e(TextBlock, { text: task.prompt || "", translateMode }) }] }),
     );
   }
 
-  function TimelinePanel({ eventLog }) {
+  function TimelinePanel({ eventLog, translateMode }) {
     const [query, setQuery] = React.useState("");
     const [mode, setMode] = React.useState("all");
     if (!eventLog) return e(Empty, { description: "未找到 JSONL 事件日志" });
@@ -275,7 +294,11 @@
       if (item.type === "agent_message") {
         return {
           color: "blue",
-          children: e(Card, { size: "small", title: `Agent 消息 ${index + 1}` }, e("pre", { className: "messageBlock" }, item.text || "")),
+          children: e(
+            Card,
+            { size: "small", title: `Agent 消息 ${index + 1}` },
+            translateMode ? e(TranslatableText, { text: item.text || "", className: "messageText" }) : e("pre", { className: "messageBlock" }, item.text || ""),
+          ),
         };
       }
       if (item.type === "file_change") {
@@ -382,6 +405,7 @@
   function TaskPage({ runId, taskId }) {
     const params = new URLSearchParams(window.location.search);
     const reportFile = params.get("report");
+    const [translateMode, setTranslateMode] = React.useState(false);
     const taskState = useAsync(() => fetchJson(`/api/runs/${encodeURIComponent(runId)}/tasks/${encodeURIComponent(taskId)}`), [runId, taskId]);
     const reportState = useAsync(() => (reportFile ? fetchJson(`/api/reports/${encodeURIComponent(reportFile)}`) : Promise.resolve(null)), [reportFile]);
     if (taskState.loading || reportState.loading) return e(LoadingState);
@@ -404,17 +428,21 @@
         { key: "outputs", label: "输出文件", children: task.outputFiles?.length || 0 },
         { key: "changes", label: "文件变更", children: fileChanges.length },
       ] }) ) },
-      { key: "question", label: "题目", children: e(QuestionPanel, { task }) },
-      { key: "timeline", label: e(Badge, { count: task.eventLog?.failedCommandCount || 0, offset: [8, -2] }, "时间线"), children: e(TimelinePanel, { eventLog: task.eventLog }) },
+      { key: "question", label: "题目", children: e(QuestionPanel, { task, translateMode }) },
+      { key: "timeline", label: e(Badge, { count: task.eventLog?.failedCommandCount || 0, offset: [8, -2] }, "时间线"), children: e(TimelinePanel, { eventLog: task.eventLog, translateMode }) },
       { key: "commands", label: "命令", children: e(CommandsPanel, { eventLog: task.eventLog }) },
       { key: "files", label: "工作文件", children: e(WorkFilesPanel, { files: task.workFiles }) },
-      { key: "final", label: "最终回复", children: e("pre", { className: "codeBlock" }, task.finalMessage || "") },
+      { key: "final", label: "最终回复", children: e(TextBlock, { text: task.finalMessage || "", translateMode }) },
       { key: "raw", label: "原始数据", children: e("pre", { className: "codeBlock" }, JSON.stringify({ timing: task.timing, eventLog: task.eventLog, workFiles: task.workFiles, outputFiles: task.outputFiles }, null, 2)) },
     ];
     return e(
       "div",
       null,
-      e(PageHeader, { title: `${runId} / ${taskId}`, subtitle: "用于人工分析题目和 agent 解题过程的工作区" }),
+      e(PageHeader, {
+        title: `${runId} / ${taskId}`,
+        subtitle: "用于人工分析题目和 agent 解题过程的工作区",
+        extra: e(Checkbox, { checked: translateMode, onChange: (event) => setTranslateMode(event.target.checked) }, "可翻译模式"),
+      }),
       e(
         "div",
         { className: "taskGrid" },

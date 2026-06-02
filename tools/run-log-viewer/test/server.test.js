@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -228,4 +228,14 @@ test("app shell hosts the AntD frontend while APIs provide data", async () => {
   assert.match(appShellHtml(), /dayjs/);
   assert.match(appShellHtml(), /SpreadsheetBench 运行日志查看器/);
   assert.equal((await readRunSummary(root, "run-1")).runId, "run-1");
+});
+
+test("task frontend exposes translation-friendly natural-language rendering only", async () => {
+  const appJs = await readFile(path.join(import.meta.dirname, "..", "public", "app.js"), "utf8");
+
+  assert.match(appJs, /function TranslatableText/);
+  assert.match(appJs, /translateMode/);
+  assert.match(appJs, /QuestionPanel, \{ task, translateMode \}/);
+  assert.match(appJs, /TimelinePanel, \{ eventLog: task\.eventLog, translateMode \}/);
+  assert.doesNotMatch(appJs, /CommandsPanel, \{ eventLog: task\.eventLog, translateMode \}/);
 });
