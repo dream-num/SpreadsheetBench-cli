@@ -667,12 +667,13 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 calls.append((args, cwd, capture_output, text))
                 if args[:3] == ["docker", "run", "--rm"]:
                     self.assertFalse((package_path / "stale.txt").exists())
-                    (package_path / "project").mkdir(parents=True, exist_ok=True)
-                    (package_path / "project" / "univer.config.ts").write_text(
-                        'export default { spreadsheet: { source: { migrationsDir: "./migrations" } } };\n',
+                    package_path.mkdir(parents=True, exist_ok=True)
+                    (package_path / "univer.config.ts").write_text(
+                        'export default { sac: { source: { migrationsDir: "./migrations" } } };\n',
                         encoding="utf-8",
                     )
-                    (package_path / "manifest.json").write_text("imported", encoding="utf-8")
+                    (package_path / "internal").mkdir(parents=True, exist_ok=True)
+                    (package_path / "internal" / "manifest.json").write_text("imported", encoding="utf-8")
                 return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
 
             with patch("inference.univer_agent.docker_runner.subprocess.run", side_effect=fake_run):
@@ -684,15 +685,14 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("--entrypoint", command)
             self.assertIn(config.docker_image, command)
             self.assertIn(
-                "univer import /task/cases/case_1/input.xlsx /task/cases/case_1/sac.univer --with-project",
+                "univer config set experimental.sac true >/dev/null && univer import /task/cases/case_1/input.xlsx /task/cases/case_1/sac.univer",
                 command,
             )
             self.assertNotIn("univer sac rebuild", command)
-            self.assertNotIn("univer config set", command)
             self.assertNotIn(["pnpm", "install"], [call[0] for call in calls])
-            config_text = (package_path / "project" / "univer.config.ts").read_text(encoding="utf-8")
+            config_text = (package_path / "univer.config.ts").read_text(encoding="utf-8")
             self.assertIn("migrationsDir", config_text)
-            self.assertEqual((package_path / "manifest.json").read_text(encoding="utf-8"), "imported")
+            self.assertEqual((package_path / "internal" / "manifest.json").read_text(encoding="utf-8"), "imported")
             self.assertFalse((package_path / "AGENTS.md").exists())
 
     def test_agent_docker_images_preheat_sac_dependency_cache(self):
@@ -701,7 +701,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         for content in [dockerfile, local_builder]:
             self.assertIn("pnpm", content)
-            self.assertIn('univer new "$tmp/sac-cache.univer" --with-project', content)
+            self.assertIn('univer new "$tmp/sac-cache.univer"', content)
+            self.assertNotIn("--with-project", content)
             self.assertNotIn("univer sac init", content)
             self.assertNotIn('if [ -f "$tmp/sac/package.json" ]', content)
             self.assertNotIn("pnpm install --prefer-offline", content)

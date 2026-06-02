@@ -86,8 +86,8 @@ def prepare_sac_workspace(
     input_container_path = task_container_path(container_task_dir, input_xlsx_path)
     package_container_path = task_container_path(container_task_dir, package_path)
     script = (
-        f"univer import {shlex.quote(input_container_path)} "
-        f"{shlex.quote(package_container_path)} --with-project"
+        "univer config set experimental.sac true >/dev/null"
+        f" && univer import {shlex.quote(input_container_path)} {shlex.quote(package_container_path)}"
     )
     run_workspace_setup_command(
         [
