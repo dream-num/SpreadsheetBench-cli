@@ -16,7 +16,7 @@
 
 - **53161**：通过率:1/5。原因：agent 发现直接按 Agent Categories + Agent Schedule 计算会得到小计数，但因下方 EXAMPLE RESULT 与其冲突，选择把 F36:AE43 示例结果复制到 F22:AE29。openpyxl 按评测口径比对，F22:AE29 有 205 个值不一致，例如 F22 output=6、golden=1。golden 使用 SUMPRODUCT 按每个时间段内排班 agent 是否属于 category 计数，示例块明显误导。不是评测或 CLI bug。
 
-## agent理解问题，可尝试通过特定提升词修复（4）
+## agent理解问题，可尝试通过特定提升词修复（3/4）
 - **469-9（已处理）**：通过率:2/5。原因：题目要求把 Column C 金额拆到 H Debits 和 I Credits，写绝对值，非适用格留空，检查 H1:I10。本次 agent 用 Balance 列反证正负号含义：正数金额后余额下降、负数金额后余额上升，所以判定正数为 debit、负数为 credit；只写 H1:I10。过程仅有 inspect --json 不支持的小卡点，改用 range inspect/run 完成。openpyxl 按评测逻辑对比 output/golden H1:I10 通过；历史失败是 agent 反向理解正负号，本次通过反证检查避免。
 - **80-42（已处理）**：通过率:0/5。原因：agent 发现 Consolidate_ALL!A2:L3999 已有 Jack/Henry/Richard 合并数据后，误判为无需追加，只扩展到 8000 行并保持 A4000:L8000 为空；golden 按 first available blank rows 从第 4000 行再次追加同一批源数据到第 7997 行。未见 SDK/CLI 或评测异常，核心是追加语义被理解成去重/已完成检查。
 - **49036（已处理）**：通过率:0/5。原因：output 的 Dashboard!B8 是数值 0.6666666666666666 + 自定义格式 0% "WIN RATE"，显示为 67% WIN RATE；golden data_only=True 值是文本 66.67% WIN RATE，公式为 TEXT(...,"0.00%")&" WIN RATE"。题目同时要求不改变 number format，示例又写 67% WIN RATE，还提到 .00 decimal，与 golden 的文本化两位小数目标冲突；不是 CLI/SDK bug。
@@ -31,12 +31,13 @@
 - **59884**：通过率:0/5。原因：根因仍是 sdk issue#330：univer import 后 G2:H5 array formula 计算缓存从 Excel/golden 的 0,0;1,3;2,4;3,5 变成 1,3;2,4;3,5;空,0，agent 基于这个错误可见状态把 a,b,c 写到 I2:K2，导致 I2:O5 相比 golden 整体上移一行。矩阵备注和 issue/59884-array-formula-roundtrip-cache-pollution.md 一致。
 
 
-## 大小写，单复数，空格，NA，空白，0等(10)
+## 大小写，单复数，空格，NA，空白，0等(8)
 - **42216**：通过率:3/5。原因：最新 PASS，openpyxl 按 data_only=True 对比 B20:B339 无差异。agent 正确把 April 插入 Group A 后按最终布局解释 answer_position，填充 A20:B339，April/blank 写 0，NA 写文本 NA。历史结构变更 answer_position 修复仍相关，但最近 r1 FAIL 是题面同时说 NA 留空/留 NA，agent 选空白导致少数 NA 不一致。
 - **53383**：通过率:2/5。原因：最新 PASS，openpyxl(data_only=True) 对比 worksheet2!C3:C6 与 golden 完全一致：Matched / Not Matched / Matched / Matched。过程有可恢复 Sheet not found：先误查 worksheet1，随后按实际 sheet 名 worksheet 1 重试成功。历史大小写问题这次不再复现：agent 读取示例 worksheet2!C3:C4，采用 Matched/Not Matched，而不是题面小写 matched/not matched。
 - **54667**：通过率:0/5。原因：最新 run 执行 OK、评测 FAIL。agent 额外加入 E<>"" 防空白匹配，导致 G6:G58 导出为空；golden 公式无该 guard，空白 D=E 时返回空 M 并缓存为 0:00。目标区无动态数组/FILTER，导出成功且非空样本缓存正常，不是 SDK/CLI 导出问题。
 - **203-15**：通过率:4/5。原因：题干列举 allowance 为单数，但源数据/golden 使用 Transport/Other/Social Allowances 复数；历史失败来自 agent 按题干归一化。最新 run 保留源 H 列原文，Output Required!A1:M3 按 data_only=True 与 golden 完全一致；日志命令均成功，161.63s 完成，无 CLI/API 过程问题。
 - **51680**：通过率:4/5。原因：最新 PASS，openpyxl 按 data_only=True 比 G2:G14 与 golden 全部一致。历史问题是 agent 曾把表头 C1="Green " trim 成 "Green"，导致拼接文本少尾随空格；本次日志明确检查 C1 JSON 值并保留尾随空格，G3/G6/G13/G14 均写成 Green , ...。未见命令误用、导出失败、越界、缺依赖或超时；output 静态字符串 vs golden 公式不影响评测。
+- **209-30**：通过率:3/5。原因：题目要求是 VBA 场景里的“remove the last three characters”。输入 Data to Import!C2:C6066 都是字符串 DY8 3NQ，golden 是严格去掉最后 3 个字符后的 DY8 ， 保留末尾空格。最新失败输出写成了 DY8，把后缀前的分隔空格也 trim 掉了
 - **230-16**：通过率:5/5。原因：最新 run 评测通过，openpyxl 对比 output/golden 的 Before!A1:A12 全部一致。历史失败点是拆分文本时把 event_type="BUSINESS" 前的分隔空格留在 A 列，golden 期望删除分隔空格；本次 agent 明确把边界空格当 delimiter 删除，A2:A9 写纯时间戳，B2:B9 写 event_type="BUSINESS"。不是 CLI/SDK 或评测问题。
 - **55427**：通过率:5/5。原因：最新 PASS，openpyxl(data_only=True) 对 Compiled and located schools da!B2:B1461 比 output/golden 差异为 0；输出包含 1312 个数字、106 个 #N/A、42 个空白，和 golden 一致。agent 正确识别 L 邮编有前导空格，使用 MATCH(TRIM(Lrow),...)，只填 B2:B1419，保留 B1420:B1461 为空。历史 #N/A vs 空仍是有效根因，但最新没有 IF(TRIM(L)="","",...) 包装，B160 已为 #N/A。
 
