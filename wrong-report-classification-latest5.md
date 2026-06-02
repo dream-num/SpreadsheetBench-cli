@@ -3,16 +3,13 @@
 数据源：`wrong-report-matrix.univer` 的 `codex-gpt-5.5-verified400!A1:AI114`，通过 `univer run` + `getCellDatas()` 读取。最近 5 次通过率从最右侧报告列向左取最近 5 个实际 `PASS/FAIL`，跳过 `NOT_RUN`。
 
 
-## 题目/示例问题，不应该修复（7）
-- **13284**：通过率:0/5。原因：题面明确要求只考虑 Streets!C 和 Streets!D 都有值的行；agent 按此排除了空 End 行，Base!E5/E8/E10/E13/E16 为空。golden 却把这些源表空 End 行改成有效范围（如 9999 或单点范围），期望返回 Sonia/Mariza/Marcy/Carlos/Fontana，与题面冲突。运行完成，docker returncode 0，不是 CLI 执行问题。
-- **43436**：通过率:0/5。原因：prompt 明确写 not closed before the first day of the month and not created after the last day，agent 按月区间重叠口径写公式；golden 按月末仍 open 口径，要求 closed date 为空或晚于月末。output I2:K6 与 golden 差异来自题目文字内在冲突，不是 CLI/SDK 或评测程序异常。
+## 题目/示例问题，不应该修复（1）
 - **44017**：通过率:0/5。原因：golden 与题面/input 不一致：题面明确说基准在 W、frequency 是月间隔，input 中 Semi=6/Quarterly=3；golden 却按 Q:AB 月度旧率列计算，并把 Semi/Quarterly 的缓存值变成 2/4。评测只读 data_only=True 缓存值，导致 AD14:AO42 有 298/348 个等价值差异；不是 CLI/SDK 问题，也不适合通用提示修复。
 
-## 题目/示例数据问题，可尝试通过特定提升词修复，但价值很低（7）
+## 题目/示例数据问题，可尝试通过特定提升词修复，但价值很低（5）
 
 - **22-47**：通过率:1/5。原因：题目一方面要求按 J 列 helper 顺序优先、组内保持源顺序、未列入 J 的保持源顺序，并去空/表头/重复；末句又要求最终输出 G:H 且 sort only column H lowest to highest。agent 识别冲突后选择保留 NAME/REF 行配对和 helper 顺序，没有按 H 升序排。golden 的 F2:H10 实际按 H/REF 数值升序排列，agent 输出按 helper 优先顺序，导致判分范围值不一致。
 - **146-49**：通过率:0/5。原因：output 与 golden 在 Sheet1!G1:H65 的 65 行全部不一致，但集合在交换两列后完全一致；agent 输出为 vowelWord, sWord，例如 ALEXINE/ALEXINS，golden 要 sWord, vowelWord，例如 ALEXINS/ALEXINE。初始表 G1:H1 又给了 KAGOULE/KAGOULS 这种 vowelWord, sWord 示例，误导 agent 采用了与 golden 相反的列方向；无 CLI/SDK 异常，耗时 173s，正常导出。
-- **37900**：通过率:0/5。原因：最新 run 正常产出但评测失败：output E5 按 E4=2025-10-24 的月份匹配到 2024-10-01，缓存值 5000；golden E5 为 =LOOKUP(E4,Table1[])，data_only=True 为 2000，即取日期表中最后一个不大于当前日期的值。题目只说 based on current day date，但示例表只有 2024 每月首日，未明确要求近似查找/最近历史日期/同月匹配；agent 无 CLI/导出问题，是含糊数据下选了另一种语义。
 - **32023**：通过率:0/5。原因：题面和 answer_position 都指向 B2:B17，但 golden 实际保留 B2:B3 为空、从员工行 B4 开始写公式，且完整 golden 还写到 B19；最新 output 按题面从 B2:B17 写公式，评测口径下仅 B2/B3 多出 C78，B4:B17 与 golden 一致。根因是题目/标注边界冲突叠加 agent 未优先按可见员工行结构对齐。
 - **45738**：通过率:0/5。原因：E6:AB25 按 data_only=True 只差 L13：output=1160，golden=0。L13 对应半年度债券，D13=2023-02-01，L4=2022-08-31；agent 用月末/DATEDIF 口径判断距到期月末 6 个月，应付利息。golden 用 YEARFRAC(L$4,EOMONTH($D13,0))*12 口径，8/31 到 2/28 不算整 6 个月而期望 0；init 里 L13 原值和示例公式区域还支持 1160。
 - **56786**：通过率:0/5。原因：golden 在 C4:C200 期望 Table 结构化公式，滚动 365 天平均包含当前行及同日期所有行；agent 根据示例 AVERAGE(B24:B69) 判断为只平均当前行之前的数据，C4 留空、C5 起整体少纳入当前行，导致 197 个判分单元格值均不一致。属于题目/示例与 golden 口径歧义。
