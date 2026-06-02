@@ -28,7 +28,6 @@
 - **80-42（已处理）**：通过率:0/5。原因：agent 发现 Consolidate_ALL!A2:L3999 已有 Jack/Henry/Richard 合并数据后，误判为无需追加，只扩展到 8000 行并保持 A4000:L8000 为空；golden 按 first available blank rows 从第 4000 行再次追加同一批源数据到第 7997 行。未见 SDK/CLI 或评测异常，核心是追加语义被理解成去重/已完成检查。
 - **49036（已处理）**：通过率:0/5。原因：output 的 Dashboard!B8 是数值 0.6666666666666666 + 自定义格式 0% "WIN RATE"，显示为 67% WIN RATE；golden data_only=True 值是文本 66.67% WIN RATE，公式为 TEXT(...,"0.00%")&" WIN RATE"。题目同时要求不改变 number format，示例又写 67% WIN RATE，还提到 .00 decimal，与 golden 的文本化两位小数目标冲突；不是 CLI/SDK bug。
 - **170-13**：通过率:3/5。原因：output/golden 在 Sheet1!A1:A50、Sheet2!A1:E20 完全一致，但 Sheet3!A1:A50 有 49 处值差异。agent 按 Sheet2 表头顺序成组输出，并把现有 Sheet3 示例顺序当成强证据；golden/题意实际要求按 Sheet1 Entry 行顺序逐条匹配并展开到最后一行。运行无超时、导出成功，不是评测程序或 CLI 问题。
-- **45944**：通过率:0/5。原因：非评测程序误报，按 evaluation.py 的 data_only=True 值比较可复现失败。G4:G6 一致；但 output 的 G11:G13/G20:G22 为 TRUE, TRUE, FALSE，golden 为 TRUE, FALSE, TRUE。agent 把 G 列理解成左侧表 A:B 当前行去外部 D:E 查人名并比较日期；golden/题意实际是外部 D:E 当前行的人名和日期去左侧 Table1 查对应 START_DATE 再比较。公式方向/归属理解错，不是 CLI 或评测口径问题。
 
 ## sdk/CLI bug, 因修复问题后再看（6）
 
@@ -37,11 +36,6 @@
 - **33157**：通过率:1/5。原因：runner ok，未超时；仅 K3 关键值不一致：output 空，golden Activity 1。sdk issue#324/import 后 Sheet1!C3 公式计算值为空仍是根因：.univer 中 C3 保留公式但值为 ""，导致 J3 算成 0，agent 信任该状态后把 K3 留空；原始/golden xlsx 的 C3/J3 在 data_only=True 下均为 2009-01-16。
 - **41978**：通过率:0/5。原因：agent 在 .univer 内部已正确写入并验证 Cumulative!I2:I11 = 0,0,0,2,0,0,1,26,9,2，golden data_only 同值。失败发生在最终 univer export 后：output.xlsx 中 I2:I11 全为 None，连 B1/G1 也为空，sheet1.xml 为 185 个 row、0 个 cell；init/golden 均为 1849 个 cell。与 issue #320 的 import-export 丢 cell 节点现象一致。
 - **59884**：通过率:0/5。原因：根因仍是 sdk issue#330：univer import 后 G2:H5 array formula 计算缓存从 Excel/golden 的 0,0;1,3;2,4;3,5 变成 1,3;2,4;3,5;空,0，agent 基于这个错误可见状态把 a,b,c 写到 I2:K2，导致 I2:O5 相比 golden 整体上移一行。矩阵备注和 issue/59884-array-formula-roundtrip-cache-pollution.md 一致。
-
-## 其它问题（2）
-
-- **32093**：通过率:4/5。原因：最新 run PASS，openpyxl(data_only=True) 对比 F2:F15 与 golden 完全一致。agent 正确识别 C:E 0 个新员工返回 B、1 个返回该新员工、多个返回 ERROR，并验证 row 6 多新员工示例和边界 F16。日志未见导出失败、CLI 参数误用、越界、缺依赖或超时；公式文本与 golden 不同但值语义一致，正式评测不比较公式文本。
-- **59595**：通过率:4/5。原因：最新 PASS，docker 正常退出且未超时；agent 按题意只改 Sheet1!C4:C19，写入滚动 7 天 inclusive 的 SUMIFS 公式并导出。openpyxl 按 data_only=True 对比 C4:C19 全部一致；公式文本仅条件顺序不同，不影响判分。日志未发现 Unknown argument、范围越界、导出失败、缺依赖等过程问题；当前无可复现失败根因。
 
 
 ## 大小写，单复数，空格，NA，空白，0等(10)
