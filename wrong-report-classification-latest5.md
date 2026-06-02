@@ -32,7 +32,6 @@
 
 
 ## 大小写，单复数，空格，NA，空白，0等(10)
-- **5835**：通过率:0/5。原因：golden 在 C3:C19 使用 SUMIFS(I:I,G:G,Bx,H:H,Ax)，data_only=True 下空源值/无匹配应为 0；agent 改写为静态值，并把空源值或无匹配行清成空白，导致 C6:C14、C17 与 golden 不一致。属于空白与 0 语义判断问题。
 - **42216**：通过率:3/5。原因：最新 PASS，openpyxl 按 data_only=True 对比 B20:B339 无差异。agent 正确把 April 插入 Group A 后按最终布局解释 answer_position，填充 A20:B339，April/blank 写 0，NA 写文本 NA。历史结构变更 answer_position 修复仍相关，但最近 r1 FAIL 是题面同时说 NA 留空/留 NA，agent 选空白导致少数 NA 不一致。
 - **53383**：通过率:2/5。原因：最新 PASS，openpyxl(data_only=True) 对比 worksheet2!C3:C6 与 golden 完全一致：Matched / Not Matched / Matched / Matched。过程有可恢复 Sheet not found：先误查 worksheet1，随后按实际 sheet 名 worksheet 1 重试成功。历史大小写问题这次不再复现：agent 读取示例 worksheet2!C3:C4，采用 Matched/Not Matched，而不是题面小写 matched/not matched。
 - **54667**：通过率:0/5。原因：最新 run 执行 OK、评测 FAIL。agent 额外加入 E<>"" 防空白匹配，导致 G6:G58 导出为空；golden 公式无该 guard，空白 D=E 时返回空 M 并缓存为 0:00。目标区无动态数组/FILTER，导出成功且非空样本缓存正常，不是 SDK/CLI 导出问题。
