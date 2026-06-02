@@ -82,8 +82,11 @@ Four sequential stability runs:
 | `tmp-codex-gpt-5-5-verified400-strict-char-marker-split-v2-stab2-20260602-202700` | PASS | PASS | both `diff_count=0` |
 | `tmp-codex-gpt-5-5-verified400-strict-char-marker-split-v2-stab3-20260602-202858` | PASS | PASS | both `diff_count=0` |
 | `tmp-codex-gpt-5-5-verified400-strict-char-marker-split-v2-stab4-20260602-203045` | PASS | PASS | both `diff_count=0` |
+| `tmp-codex-gpt-5-5-verified400-strict-char-marker-split-v2-stab5-20260602-205043` | PASS | PASS | both `diff_count=0` |
+| `tmp-codex-gpt-5-5-verified400-strict-char-marker-split-v2-stab6-20260602-205309` | PASS | PASS | both `diff_count=0` |
+| `tmp-codex-gpt-5-5-verified400-strict-char-marker-split-v2-stab7-20260602-205446` | PASS | PASS | both `diff_count=0` |
 
-Observed values in all v2 stability runs:
+Observed values in all seven v2 stability runs:
 
 - `209-30`: `Data to Import!C2` and `C6066` are stored as `"DY8 "` length 4.
 - `230-16`: `Before!A2` is stored as `"2020-02-21 09:58:34.595555"` length 26, `Before!A9` is `"2020-02-23 14:40:10.431"` length 23, and `Before!B2:B9` contains `event_type="BUSINESS"`.
