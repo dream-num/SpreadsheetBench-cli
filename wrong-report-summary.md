@@ -8,7 +8,7 @@
 ## 数据集问题，应该报issue，详见evaluation-dataset-quality-bugs.md（1）
 - **42930**: golden 文件名 id 错位导致旧评测发现不到 case.
 
-## 题目/示例问题，不应该修复（6）
+## 题目/示例问题，不应该修复（7）
 
 - **50486**：通过率:从未通过。原因：prompt 明确要求显示 Chep/Loscam；agent 日志中识别大小写冲突后按题面写入 Chep/Chep/Loscam/Loscam，答案为 CHEP/CHEP/LOSCAM/LOSCAM，差异仅大小写。
 - **13284**：通过率:从未通过。原因：题面明确要求只考虑 `Streets!C` 和 `Streets!D` 都有值的行；agent 按此排除了空 End 行，`Base!E5/E8/E10/E13/E16` 为空。答案却把这些源表空 End 行改成有效范围（如 9999 或单点范围），期望返回 Sonia/Mariza/Marcy/Carlos/Fontana，与题面冲突。
@@ -16,10 +16,12 @@
 - **486-17**：通过率:从未通过。原因：output 与 golden 在 Blad1!B2:B130 仅 3 处不一致：源数据 A99:A101 混入重复表头 Datum verzending，agent 将其视为非 0yyyymmdd 日期值并在 B99:B101 留空；golden 按宏式固定字符截取，期望 atum  v er。agent的处理方式我觉得更加友好。
 - **48643**：通过率:低。原因：agent只做最小修改，在公式扩展时只填充了有实际数据的区域，agent做法也没有问题.
 - **56953**：通过率:极低，原因：题面与表格数据存在歧义：题面明确说 row 2 为表头、下方为 numerical values，但表格数据有二级表头，答案文件是保留了二级表头。但agent大多数情况下遵循题目要求，没有保留二级表头。题目描述问题。
+- **524-31**：通过率:极低，原因：题目答案文件问题: 以 E7 为例，golden XML 中是 VLOOKUP 公式，重算应为 #N/A 错误，但缓存值为空；agent 根据题目要求修复公式后导出，导出文件有计算结果，为#N/A错误，和答案文件不匹配。
 
-## 题目/示例问题，极低修复价值(2)
+## 题目/示例问题，极低修复价值(3)
 - **52305**：通过率:从未通过。原因：表格数据误导，题目要求按两项 criteria：Name + time range 计数，但表内 I3=155、K3=Reg 和 first three criteria 表述误导 agent 额外加入 Destination/Type，答案公式只按 Name + MOD(Time,1) 计数。
 - **43436**：通过率:从未通过。原因：题面同时写“by the end of each month”和“not closed before the first day of the month”，两者口径冲突；答案按月末仍 open，agent 常按月内曾 open 统计。
+- **48983**：原因：0vs空白，题目要求使用 INDEX/MATCH 公式将数据从一个表格传输到另一个表格，对于源表格不存在项（空白），答案期望0，agent是空白，和源数据更匹配，我觉得更合理。
 
 ## 题目/示例问题，低修复价值(2)
 - **37900**：通过率:不稳定。原因：题目只说根据 current day's date 返回值，但源表没有对应匹配项，题目也未说明匹配规则；agent 选择同月返回 5000 不能算错，答案使用vlookup模糊匹配。
