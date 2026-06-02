@@ -21,5 +21,6 @@
 - **52305**：通过率:从未通过。原因：表格数据误导，题目要求按两项 criteria：Name + time range 计数，但表内 I3=155、K3=Reg 和 first three criteria 表述误导 agent 额外加入 Destination/Type，答案公式只按 Name + MOD(Time,1) 计数。
 - **43436**：通过率:从未通过。原因：题面同时写“by the end of each month”和“not closed before the first day of the month”，两者口径冲突；答案按月末仍 open，agent 常按月内曾 open 统计。
 
-## 题目/示例问题，低修复价值(1)
+## 题目/示例问题，低修复价值(2)
 - **37900**：通过率:不稳定。原因：题目只说根据 current day's date 返回值，但源表没有对应匹配项，题目也未说明匹配规则；agent 选择同月返回 5000 不能算错，答案使用vlookup模糊匹配。
+- **44017**：通过率:从未通过。原因：题面明确说 base rate 在 W、frequency 是 months between waves；答案用 Q:AB 逐月历史费率作基准，并按 SUM 累加涨幅。agent 按题面理解有依据，检查了原 AD14 示例公式，但未采用。

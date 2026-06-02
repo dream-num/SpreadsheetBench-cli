@@ -2,10 +2,6 @@
 
 数据源：`wrong-report-matrix.univer` 的 `codex-gpt-5.5-verified400!A1:AI114`，通过 `univer run` + `getCellDatas()` 读取。最近 5 次通过率从最右侧报告列向左取最近 5 个实际 `PASS/FAIL`，跳过 `NOT_RUN`。
 
-
-## 题目/示例问题，不应该修复（1）
-- **44017**：通过率:0/5。原因：golden 与题面/input 不一致：题面明确说基准在 W、frequency 是月间隔，input 中 Semi=6/Quarterly=3；golden 却按 Q:AB 月度旧率列计算，并把 Semi/Quarterly 的缓存值变成 2/4。评测只读 data_only=True 缓存值，导致 AD14:AO42 有 298/348 个等价值差异；不是 CLI/SDK 问题，也不适合通用提示修复。
-
 ## 题目/示例数据问题，可尝试通过特定提升词修复，但价值很低（5）
 
 - **22-47**：通过率:1/5。原因：题目一方面要求按 J 列 helper 顺序优先、组内保持源顺序、未列入 J 的保持源顺序，并去空/表头/重复；末句又要求最终输出 G:H 且 sort only column H lowest to highest。agent 识别冲突后选择保留 NAME/REF 行配对和 helper 顺序，没有按 H 升序排。golden 的 F2:H10 实际按 H/REF 数值升序排列，agent 输出按 helper 优先顺序，导致判分范围值不一致。
@@ -14,7 +10,7 @@
 - **45738**：通过率:0/5。原因：E6:AB25 按 data_only=True 只差 L13：output=1160，golden=0。L13 对应半年度债券，D13=2023-02-01，L4=2022-08-31；agent 用月末/DATEDIF 口径判断距到期月末 6 个月，应付利息。golden 用 YEARFRAC(L$4,EOMONTH($D13,0))*12 口径，8/31 到 2/28 不算整 6 个月而期望 0；init 里 L13 原值和示例公式区域还支持 1160。
 - **56786**：通过率:0/5。原因：golden 在 C4:C200 期望 Table 结构化公式，滚动 365 天平均包含当前行及同日期所有行；agent 根据示例 AVERAGE(B24:B69) 判断为只平均当前行之前的数据，C4 留空、C5 起整体少纳入当前行，导致 197 个判分单元格值均不一致。属于题目/示例与 golden 口径歧义。
 
-## 题目/示例数据问题，可尝试通过特定提升词修复，价值中（4）
+## 题目/示例数据问题，可尝试通过特定提升词修复，价值中（2）
 
 - **118-50**：通过率:0/5。原因：题目要求排序 A 列，并在 C/D 输出第五字母移到首位后仍能匹配到词表中单词的词对；初始 C1:D1 示例与列含义/目标起始行有干扰。agent 把所有指定后缀词都机械转换并从 C2 开始输出，只按自生成结果验证。评测按 C2:D5000 比较，golden 实际只有 12 个有效词对写在 C1:D12，因此 C2 起期望 11 行而 output 有 967 行，首格即 RABEAING/ABEARING vs TAVERING/AVERTING。
 
@@ -41,6 +37,8 @@
 - **524-31**：通过率:0/5。原因：E1:E53 仅 7 个无匹配交易不一致：output 写入文本 #N/A，golden 在这些格保留 VLOOKUP 公式但 data_only=True 缓存值为 None。题目未说明无匹配项应写空白、错误值还是文本；agent 分类映射本身基本正确，失败主要来自 golden/评测口径对未匹配值的歧义。
 - **53383**：通过率:2/5。原因：最新 PASS，openpyxl(data_only=True) 对比 worksheet2!C3:C6 与 golden 完全一致：Matched / Not Matched / Matched / Matched。过程有可恢复 Sheet not found：先误查 worksheet1，随后按实际 sheet 名 worksheet 1 重试成功。历史大小写问题这次不再复现：agent 读取示例 worksheet2!C3:C4，采用 Matched/Not Matched，而不是题面小写 matched/not matched。
 - **54667**：通过率:0/5。原因：最新 run 执行 OK、评测 FAIL。agent 额外加入 E<>"" 防空白匹配，导致 G6:G58 导出为空；golden 公式无该 guard，空白 D=E 时返回空 M 并缓存为 0:00。目标区无动态数组/FILTER，导出成功且非空样本缓存正常，不是 SDK/CLI 导出问题。
+
+
 - **203-15**：通过率:4/5。原因：题干列举 allowance 为单数，但源数据/golden 使用 Transport/Other/Social Allowances 复数；历史失败来自 agent 按题干归一化。最新 run 保留源 H 列原文，Output Required!A1:M3 按 data_only=True 与 golden 完全一致；日志命令均成功，161.63s 完成，无 CLI/API 过程问题。
 - **48983**：通过率:4/5。原因：最新 PASS；openpyxl 对比 M6:S11 的 data_only=True 与公式均和 golden 一致。历史失败形态仍相关：早期 agent 过度解释空白源格，给 INDEX/MATCH 加 IF/IFERROR 包装，把源空白返回值从裸公式的 0 改成空白；最新日志明确不加 wrapper，M6 等空白源格按裸 INDEX/MATCH 返回 0，因此通过。不是评测/数据集问题，也不是 CLI bug。
 - **51680**：通过率:4/5。原因：最新 PASS，openpyxl 按 data_only=True 比 G2:G14 与 golden 全部一致。历史问题是 agent 曾把表头 C1="Green " trim 成 "Green"，导致拼接文本少尾随空格；本次日志明确检查 C1 JSON 值并保留尾随空格，G3/G6/G13/G14 均写成 Green , ...。未见命令误用、导出失败、越界、缺依赖或超时；output 静态字符串 vs golden 公式不影响评测。
