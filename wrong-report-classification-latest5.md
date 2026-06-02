@@ -36,8 +36,6 @@
 - **42216**：通过率:3/5。原因：最新 PASS，openpyxl 按 data_only=True 对比 B20:B339 无差异。agent 正确把 April 插入 Group A 后按最终布局解释 answer_position，填充 A20:B339，April/blank 写 0，NA 写文本 NA。历史结构变更 answer_position 修复仍相关，但最近 r1 FAIL 是题面同时说 NA 留空/留 NA，agent 选空白导致少数 NA 不一致。
 - **53383**：通过率:2/5。原因：最新 PASS，openpyxl(data_only=True) 对比 worksheet2!C3:C6 与 golden 完全一致：Matched / Not Matched / Matched / Matched。过程有可恢复 Sheet not found：先误查 worksheet1，随后按实际 sheet 名 worksheet 1 重试成功。历史大小写问题这次不再复现：agent 读取示例 worksheet2!C3:C4，采用 Matched/Not Matched，而不是题面小写 matched/not matched。
 - **54667**：通过率:0/5。原因：最新 run 执行 OK、评测 FAIL。agent 额外加入 E<>"" 防空白匹配，导致 G6:G58 导出为空；golden 公式无该 guard，空白 D=E 时返回空 M 并缓存为 0:00。目标区无动态数组/FILTER，导出成功且非空样本缓存正常，不是 SDK/CLI 导出问题。
-
-
 - **203-15**：通过率:4/5。原因：题干列举 allowance 为单数，但源数据/golden 使用 Transport/Other/Social Allowances 复数；历史失败来自 agent 按题干归一化。最新 run 保留源 H 列原文，Output Required!A1:M3 按 data_only=True 与 golden 完全一致；日志命令均成功，161.63s 完成，无 CLI/API 过程问题。
 - **51680**：通过率:4/5。原因：最新 PASS，openpyxl 按 data_only=True 比 G2:G14 与 golden 全部一致。历史问题是 agent 曾把表头 C1="Green " trim 成 "Green"，导致拼接文本少尾随空格；本次日志明确检查 C1 JSON 值并保留尾随空格，G3/G6/G13/G14 均写成 Green , ...。未见命令误用、导出失败、越界、缺依赖或超时；output 静态字符串 vs golden 公式不影响评测。
 - **230-16**：通过率:5/5。原因：最新 run 评测通过，openpyxl 对比 output/golden 的 Before!A1:A12 全部一致。历史失败点是拆分文本时把 event_type="BUSINESS" 前的分隔空格留在 A 列，golden 期望删除分隔空格；本次 agent 明确把边界空格当 delimiter 删除，A2:A9 写纯时间戳，B2:B9 写 event_type="BUSINESS"。不是 CLI/SDK 或评测问题。
@@ -46,10 +44,10 @@
 
 ## 公式（#N/A与空白，0问题）
 
-- 58032：根据要求新编写公式，匹配查找任务，未明确说明特殊值，表格中没有公式，答案期望空白，使用iferror包装#N/A
+- 58032：根据要求编写公式，匹配查找任务，未明确说明匹配不到的值如何处理，答案使用iferror包装#N/A，期望空白，agent没有使用iferror包装，是#N/A.
 - 58949：题目问题，用户开始说使用vba，明确填充‘N/A'，后面说设置公式，公式数据输出结果可能为空字符串，把agent搞混了，表格没有公式，答案期望空字符串。
-- 55427: 修复现有index/match公式，表格中有公式与#N/A，答案期望#N/A.
+- 55427: 修复现有index/match公式，表格中有公式与#N/A，答案期望#N/A，目前题目通过.
 - 5835: 根据要求新编写公式，未明确说明特殊值，表格中没有公式，示例数据有数字，0，空白，答案是sumif函数，期望0.
 - 48983: 0vs空白，题目要求使用 INDEX/MATCH 公式将数据从一个表格传输到另一个表格，对于源表格不存在项（空白），答案期望0，agent是空白，和源数据更匹配，我觉得更合理。
-- 524-31: 公式修复类任务，答案文件有问题，
-- 56915：0与空白，但因表格结构引起
+- 524-31: #n/a vs 空白 公式修复类任务，答案文件未计算，缓存值是是空白，但计算后应该是#N/A. agent实际也是#N/A，但因为答案文件不对，失败。
+- 56915：0与空白，但因表格结构引起。
