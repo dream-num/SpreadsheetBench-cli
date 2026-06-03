@@ -20,6 +20,7 @@ tmp
 .runs
 .worktree
 
+wrong-report-matrix.univer/
 
 codex-auth.json
 codex-config.toml
