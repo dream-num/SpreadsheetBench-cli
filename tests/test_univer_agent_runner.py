@@ -101,16 +101,22 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         return FakeProcess()
 
-    def fake_import_xlsx_to_univer(self, input_path, output_path):
-        output_path.mkdir(parents=True)
-        (output_path / "manifest.json").write_text(f"imported {input_path.name}", encoding="utf-8")
-
-    def fake_prepare_sac_workspace(self, config, container_task_dir, input_xlsx_path, package_path):
-        package_path.mkdir(parents=True)
-        (package_path / "project" / "migrations").mkdir(parents=True)
-        (package_path / "project" / "types").mkdir()
-        (package_path / "project" / "univer.config.ts").write_text(
-            'export default { spreadsheet: { source: { migrationsDir: "./migrations" } } };\n',
+    def fake_prepare_sac_workspace(self, config, container_task_dir, input_xlsx_path, workbook_path):
+        workbook_path.parent.mkdir(parents=True, exist_ok=True)
+        workbook_path.write_bytes(b"univer")
+        sidecar_path = workbook_path.parent / f".{workbook_path.name}.sac"
+        (sidecar_path / "migrations" / "20260608000000-import-baseline").mkdir(parents=True)
+        (sidecar_path / "inspect-scripts").mkdir()
+        (sidecar_path / "inspect-tools").mkdir()
+        (sidecar_path / "inspect-tools" / "tools.json").write_text('{"tools":[]}\n', encoding="utf-8")
+        (sidecar_path / "inspect-tools" / "units.js").write_text(
+            "async function inspectUnitsTool() { return { units: [] }; }\n",
+            encoding="utf-8",
+        )
+        (sidecar_path / "types").mkdir()
+        (sidecar_path / "AGENTS.md").write_text("sidecar instructions\n", encoding="utf-8")
+        (sidecar_path / "migrations" / "20260608000000-import-baseline" / "pack.ts").write_text(
+            "export const pack = { id: '20260608000000-import-baseline', appliesAfter: null };\n",
             encoding="utf-8",
         )
 
@@ -345,9 +351,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
             config = self.make_config(tmp_path, dataset_path)
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
@@ -358,12 +361,14 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertFalse((task_root / "cases" / "case_2" / "input.xlsx").exists())
             self.assertFalse((task_root / "cases" / "case_1" / "input.univer").exists())
             self.assertFalse((task_root / "cases" / "case_2" / "input.univer").exists())
-            self.assertTrue((task_root / "cases" / "case_1" / "sac.univer" / "project" / "univer.config.ts").is_file())
-            self.assertTrue((task_root / "cases" / "case_2" / "sac.univer" / "project" / "univer.config.ts").is_file())
-            self.assertTrue((task_root / "cases" / "case_1" / "sac.univer" / "project" / "migrations").is_dir())
-            self.assertTrue((task_root / "cases" / "case_2" / "sac.univer" / "project" / "migrations").is_dir())
+            self.assertTrue((task_root / "cases" / "case_1" / "workbook.univer").is_file())
+            self.assertTrue((task_root / "cases" / "case_2" / "workbook.univer").is_file())
+            self.assertTrue((task_root / "cases" / "case_1" / ".workbook.univer.sac" / "migrations").is_dir())
+            self.assertTrue((task_root / "cases" / "case_2" / ".workbook.univer.sac" / "migrations").is_dir())
+            self.assertTrue((task_root / "cases" / "case_1" / ".workbook.univer.sac" / "types").is_dir())
+            self.assertTrue((task_root / "cases" / "case_2" / ".workbook.univer.sac" / "types").is_dir())
             self.assertTrue((task_root / "AGENTS.md").is_file())
-            self.assertFalse((task_root / "cases" / "case_1" / "sac.univer" / "AGENTS.md").exists())
+            self.assertTrue((task_root / "cases" / "case_1" / ".workbook.univer.sac" / "AGENTS.md").exists())
             self.assertTrue((task_root / "prompt.md").is_file())
             prompt_text = (task_root / "prompt.md").read_text(encoding="utf-8")
             agents_text = (task_root / "AGENTS.md").read_text(encoding="utf-8")
@@ -378,8 +383,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertNotIn("host checks", prompt_text)
             self.assertNotIn("pre-imported workbook", prompt_text)
             self.assertNotIn("xlsx` inputs have already been imported to `.univer", prompt_text)
-            self.assertIn("/task/cases/case_1/sac.univer: prepared package-local SaC project", prompt_text)
-            self.assertIn("/task/cases/case_1/sac.univer/project", prompt_text)
+            self.assertIn("/task/cases/case_1/workbook.univer: prepared target univerfile", prompt_text)
+            self.assertIn("/task/cases/case_1/.workbook.univer.sac", prompt_text)
             self.assertIn("Benchmark Workspace Contract", agents_text)
             self.assertNotIn("benchmarking-univer-cli", agents_text)
             self.assertIn("using-univer-cli", agents_text)
@@ -387,9 +392,10 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("executing-univer-plans", agents_text)
             self.assertIn("test-driven-univer-development", agents_text)
             self.assertIn("Exact Univer CLI syntax", agents_text)
-            self.assertIn("workbook package itself is the SaC workspace", agents_text)
+            self.assertIn("`.univer` container/unit identity", agents_text)
+            self.assertIn("target `.univer` remains the durable workbook state", agents_text)
             self.assertIn("Do not initialize or reinitialize SaC projects", agents_text)
-            self.assertIn("`*-materialize-current` is baseline checkpoint source", agents_text)
+            self.assertIn("runner-created baseline pack", agents_text)
             self.assertIn("SAC_VERIFY_TARGET_MISSING", agents_text)
             self.assertIn("openpyxl `data_only=True`", agents_text)
             self.assertNotIn("Do not run `univer sac init --from` again", prompt_text)
@@ -416,7 +422,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
         prompt = build_agent_prompt(task, [1])
 
         self.assertIn("Follow /task/AGENTS.md", prompt)
-        self.assertIn("prepared package-local SaC project", prompt)
+        self.assertIn("prepared target univerfile", prompt)
+        self.assertIn("Hidden sidecar", prompt)
         self.assertNotIn("benchmarking-univer-cli", prompt)
         self.assertNotIn("skill: use-univer-cli", prompt)
         self.assertNotIn("univer-plan", prompt)
@@ -478,11 +485,26 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("## Evaluation Semantics", agents_md)
         self.assertIn("openpyxl `data_only=True`", agents_md)
         self.assertIn("answer_position", agents_md)
-        self.assertIn("/task/cases/case_1/sac.univer", agents_md)
-        self.assertIn("/task/cases/case_2/sac.univer", agents_md)
+        self.assertIn("## Univerfile Unit Evidence", agents_md)
+        self.assertIn("target `.univer` container", agents_md)
+        self.assertIn("localUnitId", agents_md)
+        self.assertIn("managed `inspect-tools/tools.json`", agents_md)
+        self.assertIn("`sheet-overview.js`", agents_md)
+        self.assertIn("`sheet-search.js`", agents_md)
+        self.assertIn("`sheet-range.js`", agents_md)
+        self.assertIn("They do not decide task semantics", agents_md)
+        self.assertIn("custom `inspect-scripts/*.js` probes short", agents_md)
+        self.assertIn("/task/cases/case_1/workbook.univer", agents_md)
+        self.assertIn("/task/cases/case_1/.workbook.univer.sac", agents_md)
+        self.assertIn("/task/cases/case_2/workbook.univer", agents_md)
+        self.assertIn("/task/cases/case_2/.workbook.univer.sac", agents_md)
         self.assertIn("## Planning Overlay", agents_md)
         self.assertIn("actual write subrange", agents_md)
         self.assertIn("Evidence must be discriminating", agents_md)
+        self.assertIn("inventory the target", agents_md)
+        self.assertIn("schema before writing success criteria", agents_md)
+        self.assertIn("summary/footer rows", agents_md)
+        self.assertIn("Inspect both the head and tail", agents_md)
         self.assertIn("## Assertion Overlay", agents_md)
         self.assertIn("distinguish the chosen rule from a plausible wrong rule", agents_md)
         self.assertIn("## Formula And Stored Value Risk", agents_md)
@@ -506,9 +528,16 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("For discontiguous `answer_position` windows", agents_md)
         self.assertIn("No-match outputs must be real blanks when workbook evidence calls for blanks", agents_md)
         self.assertIn("Existing values inside `answer_position` are evidence, not authority", agents_md)
+        self.assertIn("Existing target labels or formulas such as `TOTAL`, `SUBTOTAL`, `SUM(...)`", agents_md)
+        self.assertIn("Treat \"clear existing data before ...\" as an execution boundary", agents_md)
+        self.assertIn("infer the full", agents_md)
+        self.assertIn("workbook pattern", agents_md)
+        self.assertIn("Extra rows in an", agents_md)
         self.assertIn("existing target values", agents_md)
         self.assertIn("name one plausible wrong output", agents_md)
         self.assertIn("cover at least one evaluator-facing cell in each separate", agents_md)
+        self.assertIn("cover the last body row, each", agents_md)
+        self.assertIn("summary/footer label", agents_md)
         self.assertIn("Cover exact stored text for casing", agents_md)
         self.assertIn("Cover precision-sensitive outputs", agents_md)
         self.assertIn("`SAC_ARTIFACT_DRIFT`: do not enter an open-ended rollback/apply/rebuild loop", agents_md)
@@ -519,8 +548,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
         agents_md = build_task_agents_md([1])
 
         self.assertIn("Do not run dependency installation during normal solving", agents_md)
-        self.assertIn("The package-local project does not own a", agents_md)
-        self.assertIn("use CLI-managed `project/types` and the shared toolchain", agents_md)
+        self.assertIn("The hidden sidecar does not own a", agents_md)
+        self.assertIn("use CLI-managed sidecar `types/` and the shared toolchain", agents_md)
         self.assertIn("Do not inspect exported `output.xlsx`", agents_md)
         self.assertIn("import the exported file into a temporary `.univer` under `/task/work`", agents_md)
         self.assertIn("Run only commands needed to reach the next gate", agents_md)
@@ -543,10 +572,30 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("test-driven-univer-development", agents_md)
         self.assertIn("Exact Univer CLI syntax", agents_md)
         self.assertIn("owned by the required", agents_md)
-        self.assertIn("project-local SaC workflow", agents_md)
+        self.assertIn("hidden-sidecar SaC workflow", agents_md)
         self.assertIn("assertion APIs", agents_md)
+        self.assertIn("inspect tool usage", agents_md)
         self.assertNotIn("Do not write `setValues([[\"2-2\", 123, true]])`", agents_md)
         self.assertNotIn("Numeric `sheet.getRange(row, column, numRows, numColumns)` uses 0-based", agents_md)
+        self.assertNotIn('getWorkbook("workbook")', agents_md)
+
+    def test_task_agents_md_prefers_managed_inspect_tools_without_losing_benchmark_overlay(self):
+        from inference.univer_agent.prompts import build_task_agents_md
+
+        agents_md = build_task_agents_md([1])
+
+        self.assertIn("## Univerfile Unit Evidence", agents_md)
+        self.assertIn("Prefer managed inspect tools plus params files", agents_md)
+        self.assertIn("Custom sidecar inspect scripts are allowed only as short readonly escape hatches", agents_md)
+        self.assertIn("Do not hand-write common range", agents_md)
+        self.assertIn("when a managed tool already covers them", agents_md)
+        self.assertIn("## Evaluation Semantics", agents_md)
+        self.assertIn("answer_position", agents_md)
+        self.assertIn("openpyxl `data_only=True`", agents_md)
+        self.assertIn("/task/outputs/case_N/output.xlsx", agents_md)
+        self.assertNotIn("univer inspect workbook", agents_md)
+        self.assertNotIn("univer inspect range", agents_md)
+        self.assertNotIn("sheet.getRange(\"A1:D20\").getDisplayValues()", agents_md)
 
     def test_task_agents_md_restricts_sac_type_lookup_to_workspace_types(self):
         from inference.univer_agent.prompts import build_task_agents_md
@@ -554,8 +603,8 @@ class UniverAgentRunnerTest(unittest.TestCase):
         agents_md = build_task_agents_md([1])
 
         self.assertIn("## Type And API Lookup Budget", agents_md)
-        self.assertIn("/task/cases/case_N/sac.univer/project/types", agents_md)
-        self.assertIn("rg \"setFormula|class FRange\" /task/cases/case_N/sac.univer/project/types -g '*.d.ts'", agents_md)
+        self.assertIn("/task/cases/case_N/.workbook.univer.sac/types", agents_md)
+        self.assertIn("rg \"setFormula|class FRange\" /task/cases/case_N/.workbook.univer.sac/types -g '*.d.ts'", agents_md)
         self.assertIn(
             "Do not run broad `rg`, `sed`, `cat`, `find`, or file reads under `/usr/local/lib/node_modules/univer-cli`",
             agents_md,
@@ -647,7 +696,7 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertNotIn("explicit`, `inferred`, or `underdetermined assumption", prompt)
         self.assertNotIn("Do not present an underdetermined assumption as workbook-proven evidence", prompt)
 
-    def test_prepare_sac_workspace_initializes_adopted_workspace_with_local_baseline(self):
+    def test_prepare_sac_workspace_imports_workbook_and_hidden_sidecar(self):
         from inference.univer_agent.docker_runner import prepare_sac_workspace
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -655,29 +704,35 @@ class UniverAgentRunnerTest(unittest.TestCase):
             config = self.make_config(tmp_path, tmp_path / "data")
             container_task_dir = tmp_path / "run" / "task"
             input_xlsx = container_task_dir / "cases" / "case_1" / "input.xlsx"
-            package_path = container_task_dir / "cases" / "case_1" / "sac.univer"
+            workbook_path = container_task_dir / "cases" / "case_1" / "workbook.univer"
+            sidecar_path = container_task_dir / "cases" / "case_1" / ".workbook.univer.sac"
             input_xlsx.parent.mkdir(parents=True)
             input_xlsx.write_bytes(b"xlsx")
-            package_path.mkdir(parents=True)
-            (package_path / "stale.txt").write_text("stale", encoding="utf-8")
+            workbook_path.write_text("stale workbook", encoding="utf-8")
+            (sidecar_path / "migrations").mkdir(parents=True)
+            (sidecar_path / "stale.txt").write_text("stale", encoding="utf-8")
 
             calls = []
 
             def fake_run(args, cwd=None, capture_output=False, text=False):
                 calls.append((args, cwd, capture_output, text))
                 if args[:3] == ["docker", "run", "--rm"]:
-                    self.assertFalse((package_path / "stale.txt").exists())
-                    package_path.mkdir(parents=True, exist_ok=True)
-                    (package_path / "univer.config.ts").write_text(
-                        'export default { sac: { source: { migrationsDir: "./migrations" } } };\n',
+                    self.assertFalse(workbook_path.exists())
+                    self.assertFalse(sidecar_path.exists())
+                    workbook_path.write_bytes(b"univer")
+                    (sidecar_path / "migrations" / "20260608000000-import-baseline").mkdir(parents=True)
+                    (sidecar_path / "inspect-scripts").mkdir()
+                    (sidecar_path / "inspect-tools").mkdir()
+                    (sidecar_path / "inspect-tools" / "tools.json").write_text('{"tools":[]}\n', encoding="utf-8")
+                    (sidecar_path / "inspect-tools" / "units.js").write_text(
+                        "async function inspectUnitsTool() { return { units: [] }; }\n",
                         encoding="utf-8",
                     )
-                    (package_path / "internal").mkdir(parents=True, exist_ok=True)
-                    (package_path / "internal" / "manifest.json").write_text("imported", encoding="utf-8")
+                    (sidecar_path / "types").mkdir()
                 return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
 
             with patch("inference.univer_agent.docker_runner.subprocess.run", side_effect=fake_run):
-                prepare_sac_workspace(config, container_task_dir, input_xlsx, package_path)
+                prepare_sac_workspace(config, container_task_dir, input_xlsx, workbook_path)
 
             self.assertEqual(len(calls), 1)
             command = calls[0][0]
@@ -685,15 +740,18 @@ class UniverAgentRunnerTest(unittest.TestCase):
             self.assertIn("--entrypoint", command)
             self.assertIn(config.docker_image, command)
             self.assertIn(
-                "univer config set experimental.sac true >/dev/null && univer import /task/cases/case_1/input.xlsx /task/cases/case_1/sac.univer",
+                "univer import --file /task/cases/case_1/input.xlsx /task/cases/case_1/workbook.univer --json",
                 command,
             )
-            self.assertNotIn("univer sac rebuild", command)
+            self.assertNotIn("experimental.sac", command)
+            self.assertNotIn("univer sac init", command)
             self.assertNotIn(["pnpm", "install"], [call[0] for call in calls])
-            config_text = (package_path / "univer.config.ts").read_text(encoding="utf-8")
-            self.assertIn("migrationsDir", config_text)
-            self.assertEqual((package_path / "internal" / "manifest.json").read_text(encoding="utf-8"), "imported")
-            self.assertFalse((package_path / "AGENTS.md").exists())
+            self.assertTrue(workbook_path.is_file())
+            self.assertTrue((sidecar_path / "migrations").is_dir())
+            self.assertTrue((sidecar_path / "inspect-scripts").is_dir())
+            self.assertTrue((sidecar_path / "inspect-tools" / "tools.json").is_file())
+            self.assertTrue((sidecar_path / "inspect-tools" / "units.js").is_file())
+            self.assertTrue((sidecar_path / "types").is_dir())
 
     def test_agent_docker_images_preheat_sac_dependency_cache(self):
         dockerfile = Path("docker/spreadsheetbench-univer-cli-agent/Dockerfile").read_text(encoding="utf-8")
@@ -701,9 +759,15 @@ class UniverAgentRunnerTest(unittest.TestCase):
 
         for content in [dockerfile, local_builder]:
             self.assertIn("pnpm", content)
-            self.assertIn('univer new "$tmp/sac-cache.univer"', content)
+            self.assertIn("sac-cache.csv", content)
+            self.assertIn('univer import --file "$tmp/sac-cache.csv" "$tmp/sac-cache.univer" --json', content)
+            self.assertIn('univer inspect "$tmp/sac-cache.univer" --script "$tmp/.sac-cache.univer.sac/inspect-tools/units.js" --params "$tmp/inspect.params.json"', content)
+            self.assertIn('univer sac migration create Warmup "$tmp/sac-cache.univer"', content)
             self.assertNotIn("--with-project", content)
             self.assertNotIn("univer sac init", content)
+            self.assertNotIn('univer new "$tmp/sac-cache.univer"', content)
+            self.assertNotIn("experimental.sac", content)
+            self.assertNotIn("univer inspect workbook", content)
             self.assertNotIn('if [ -f "$tmp/sac/package.json" ]', content)
             self.assertNotIn("pnpm install --prefer-offline", content)
             self.assertIn("sac-cache.univer", content)
@@ -771,7 +835,9 @@ class UniverAgentRunnerTest(unittest.TestCase):
         self.assertIn("warm_univer_daemon", run_task_script)
         self.assertIn("univer daemon start", run_task_script)
         self.assertIn("univer daemon status --json", run_task_script)
-        self.assertIn("univer inspect workbook", run_task_script)
+        self.assertIn('/task/cases/case_*/workbook.univer', run_task_script)
+        self.assertIn('univer inspect "$workbook" --script "$tool" --params "$params"', run_task_script)
+        self.assertNotIn("univer inspect workbook", run_task_script)
         self.assertIn("/task/logs/univer-daemon-start.log", run_task_script)
         self.assertIn("/task/logs/univer-daemon-status.json", run_task_script)
         self.assertIn("/task/logs/univer-daemon-warmup.log", run_task_script)
@@ -807,9 +873,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 return self.make_fake_process(stdout="ok\n")
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
@@ -848,9 +911,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 run_id="Claude-Smoke-20260521-1930",
             )
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
@@ -873,9 +933,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 docker_image="spreadsheetbench-univer-cli-agent-sac",
             )
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
@@ -913,9 +970,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 return self.make_fake_process(stdout="ok\n")
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
@@ -940,9 +994,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
             config = self.make_config(tmp_path, dataset_path, env_file=env_file)
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
@@ -969,9 +1020,6 @@ class UniverAgentRunnerTest(unittest.TestCase):
                 return self.make_fake_process(stdout="ok\n")
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ), patch("inference.univer_agent.docker_runner.subprocess.Popen", side_effect=fake_popen):
@@ -1015,9 +1063,6 @@ model_reasoning_effort = "medium"
             config = self.make_config(tmp_path, dataset_path)
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ), patch(
@@ -1033,9 +1078,6 @@ model_reasoning_effort = "medium"
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
             config = self.make_config(tmp_path, dataset_path, agent_timeout=5)
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
@@ -1079,9 +1121,6 @@ model_reasoning_effort = "medium"
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
             config = self.make_config(tmp_path, dataset_path, agent_timeout=30)
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
@@ -1154,24 +1193,21 @@ model_reasoning_effort = "medium"
             dataset_path, task = self.make_dataset(tmp_path, cases=(1,))
             config = self.make_config(tmp_path, dataset_path, agent_timeout=30)
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ):
                 workspace = prepare_docker_task_workspace(config, task, [1])
 
             stderr_text = (
-                "diff --git a/cases/case_1/sac.univer/project/plans/plan.md b/cases/case_1/sac.univer/project/plans/plan.md\n"
+                "diff --git a/cases/case_1/.workbook.univer.sac/plans/plan.md b/cases/case_1/.workbook.univer.sac/plans/plan.md\n"
                 "index 0000000..1111111 100644\n"
-                "--- a/cases/case_1/sac.univer/project/plans/plan.md\n"
-                "+++ b/cases/case_1/sac.univer/project/plans/plan.md\n"
+                "--- a/cases/case_1/.workbook.univer.sac/plans/plan.md\n"
+                "+++ b/cases/case_1/.workbook.univer.sac/plans/plan.md\n"
                 "@@ -1 +1 @@\n"
                 "-old plan line\n"
                 "+new plan line\n"
                 "exec\n"
-                "/bin/sh -lc 'univer sac verify /task/cases/case_1/sac.univer --json' in /task\n"
+                "/bin/sh -lc 'univer sac verify /task/cases/case_1/workbook.univer --json' in /task\n"
                 " succeeded in 12ms:\n"
                 "{\"success\":true}\n"
             )
@@ -1205,9 +1241,6 @@ model_reasoning_effort = "medium"
                 raise RuntimeError("docker failed")
 
             with patch(
-                "inference.univer_agent.docker_runner.import_xlsx_to_univer",
-                side_effect=self.fake_import_xlsx_to_univer,
-            ), patch(
                 "inference.univer_agent.docker_runner.prepare_sac_workspace",
                 side_effect=self.fake_prepare_sac_workspace,
             ), patch(

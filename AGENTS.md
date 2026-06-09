@@ -47,7 +47,7 @@
 
 只有用户明确要求“记录到矩阵”、“更新备注”、“写入 `wrong-report-matrix.univer`”或同等含义时，才允许把调查结论写入 `wrong-report-matrix.univer`。写入前应说明要写入的 sheet、单元格/范围和原因；未得到明确要求时，即使已经确认新根因，也只在对话中报告结论。用户要求按最新失败清理备注时，只保留最新报告列为 `FAIL` 的行的备注，最新报告列为 `PASS` 或 `NOT_RUN` 的行备注清空。
 
-需要找当前最新错题、稳定错题、偶发错题或未调查候选时，优先用 `univer inspect workbook wrong-report-matrix.univer` 确认 sheet 和 used range，再用 `univer pipe out wrong-report-matrix.univer --range '<sheet>!A1:ZZ1000' --format tsv` 或 `univer inspect range` 读取可见表格。
+需要找当前最新错题、稳定错题、偶发错题或未调查候选时，优先读取 `report/*.json`、`outputs/eval_*` 和 `wrong-report-matrix.univer` 的可见表格证据。读取矩阵时使用当前 `univer inspect <file.univer> --file <sidecar>/inspect-scripts/<probe>.js` sidecar inspect surface；不要使用旧的 `univer inspect workbook`、`univer inspect range` 或其它已移除命令语法。
 
 判断“未调查 / 未记录”时，以 `.univer` 中对应 sheet 的历史失败 task 行为准：第 3 行以后有 `task_id`，且 `备注` 列为空的 task，才作为新的逐题分析候选；不要求最新报告列仍为 `FAIL`。已有备注的问题不要重复归因给 agent；如果新 run 中同一 task 出现不同失败形态，需要明确说明“不同于备注列已知问题”的新证据。
 
@@ -67,7 +67,7 @@
 
 ## 创建 GitHub univer-cli issue
 
-- 向 `dream-num/univer-cli` 或本地 `/Users/otime/project/univer-cli` 对应上游仓库创建 GitHub issue 前，必须先把拟创建的目标仓库、标题、正文、标签和附件/复现文件说明发给用户确认。
+- 向 `dream-num/univer-cli` 或本地 `/Users/morris/Developer/univer/univer-cli` 对应上游仓库创建 GitHub issue 前，必须先把拟创建的目标仓库、标题、正文、标签和附件/复现文件说明发给用户确认。
 - 未经用户明确确认，不要执行 `gh issue create`，也不要用其它工具或 API 创建上游 issue。
 - issue 标题和正文主体默认使用中文；除非用户明确要求英文，不要改用英文撰写上游 issue。
 - issue 正文应独立且聚焦 issue 本身，优先写：问题描述、实际表现、期望表现、最小复现步骤、已验证的根因线索和影响范围；不要把 SpreadsheetBench 运行分析写成正文主线。

@@ -49,14 +49,28 @@ warm_univer_daemon() {
 
     : >"$warmup_log"
     local workbook
-    for workbook in /task/cases/case_*/sac.univer; do
+    for workbook in /task/cases/case_*/workbook.univer; do
         if [ ! -e "$workbook" ]; then
             continue
         fi
-        if ! univer inspect workbook "$workbook" >>"$warmup_log" 2>&1; then
+        local case_dir
+        local sidecar
+        local params
+        local tool
+        case_dir="$(dirname "$workbook")"
+        sidecar="$case_dir/.$(basename "$workbook").sac"
+        tool="$sidecar/inspect-tools/units.js"
+        params="/task/work/$(basename "$case_dir")-inspect-warmup.params.json"
+        if [ ! -f "$tool" ]; then
+            echo "missing sidecar inspect tool for $workbook: $tool" >&2
+            exit 2
+        fi
+        printf '%s\n' '{}' >"$params"
+        if ! univer inspect "$workbook" --script "$tool" --params "$params" >>"$warmup_log" 2>&1; then
             cat "$warmup_log" >&2
             exit 2
         fi
+        rm -f "$params"
     done
 }
 

@@ -25,13 +25,13 @@ Request id: {task_id}
 ### output_path
 {output_lines}
 
-For each case, edit only the prepared `.univer` package for that case and create the required `output.xlsx`.
+For each case, edit only the prepared target `.univer` file through its hidden SaC sidecar and create the required `output.xlsx`.
 """
 
 
 def build_task_agents_md(cases: Iterable[int]) -> str:
     case_lines = "\n".join(
-        f"- case {case_index}: package `/task/cases/case_{case_index}/sac.univer`, project `/task/cases/case_{case_index}/sac.univer/project`, output `/task/outputs/case_{case_index}/output.xlsx`"
+        f"- case {case_index}: workbook `/task/cases/case_{case_index}/workbook.univer`, sidecar `/task/cases/case_{case_index}/.workbook.univer.sac`, output `/task/outputs/case_{case_index}/output.xlsx`"
         for case_index in cases
     )
     return f"""# Benchmark Workspace Contract
@@ -45,9 +45,9 @@ skills or `univer help`.
 - Use `univer-cli` for workbook-visible inspection, export, and CLI command semantics.
 - For SaC workbook behavior changes, route through `writing-univer-plans`,
   `executing-univer-plans`, and `test-driven-univer-development`.
-- Exact Univer CLI syntax, project-local SaC workflow, SaC command order, Facade APIs, type constants,
-  range coordinate rules, assertion APIs, and verify-report repair details are owned by the required
-  skills and `univer help`.
+- Exact Univer CLI syntax, `.univer` container/unit identity, hidden-sidecar SaC workflow, managed
+  inspect tool usage, Facade APIs, type constants, range coordinate rules, assertion APIs, and
+  verify-report repair details are owned by the required skills and `univer help`.
 - If a required skill is unavailable, stop and report the missing skill. Do not continue with direct
   workbook libraries, package editing, or guessed SaC command syntax.
 
@@ -56,8 +56,9 @@ skills or `univer help`.
 {case_lines}
 
 - Use only files under `/task`.
-- Each listed `.univer` package already contains `project/` source and the baseline SaC ledger.
-- The workbook package itself is the SaC workspace; package-local source lives under `project/`.
+- Each listed `workbook.univer` is the target `.univer` container imported from the input artifact.
+- Each listed hidden sidecar is the SaC authoring surface created by Univer CLI.
+- The target `.univer` remains the durable workbook state; migration source lives under the hidden sidecar.
 - Raw `input.xlsx` files are runner intermediates, not solving sources.
 - Keep temporary scripts, scratch workbooks, and probe output under `/task/work`.
 - Solve every case independently.
@@ -66,22 +67,24 @@ skills or `univer help`.
 
 - Do not read, copy, import, parse, inspect, or modify raw input files if present.
 - Do not read hidden answers, golden workbooks, `answer.xlsx`, host checks, reports, or evaluation artifacts.
-- Do not initialize or reinitialize SaC projects, import raw workbook inputs, or create legacy sidecar workspaces.
-- Do not run dependency installation during normal solving. The package-local project does not own a
-  package.json; use CLI-managed `project/types` and the shared toolchain.
-- Do not use direct runtime scripts, pipe-in writes, package edits, Python, openpyxl, zip tools, or
+- Do not initialize or reinitialize SaC projects, import raw workbook inputs, create legacy visible
+  sidecar workspaces, or guess paths by appending `.sac` to the target.
+- Do not run dependency installation during normal solving. The hidden sidecar does not own a
+  package.json; use CLI-managed sidecar `types/` and the shared toolchain.
+- Do not use ad hoc mutating runtime scripts, pipe-in writes, package edits, Python, openpyxl, zip tools, or
   Office libraries to mutate the final workbook.
-- Runtime scripts are allowed only for short readonly probes when SaC diagnostics or assertions need
-  workbook-visible evidence.
-- Workbook inspection is for `.univer` or `.unv` packages. Do not inspect exported `output.xlsx`
+- Prefer sidecar managed inspect tools for readonly workbook evidence when they are available.
+- Custom sidecar inspect scripts are allowed only as short readonly escape hatches when managed tools
+  cannot expose the evidence needed for SaC diagnostics, planning, or assertions.
+- Workbook inspection is for `.univer` targets through public Univer CLI evidence surfaces. Do not inspect exported `output.xlsx`
   except for the bounded export compatibility smoke check described below.
 
 ## Baseline Checkpoint
 
-- `*-materialize-current` is baseline checkpoint source created from the input artifact.
-- Treat the baseline checkpoint as read-only.
+- The runner-created baseline pack is created from the input artifact and has `appliesAfter: null`.
+- Treat the baseline pack as read-only.
 - Do not edit it, add assertions to it, compact it, delete it, or use it as the task implementation pack.
-- Do not apply the baseline checkpoint as a pending migration. It is already represented in the managed artifact ledger.
+- Do not apply the baseline pack as a pending migration. It is already represented in the target-owned applied ledger.
 - Put all task changes in a new follow-up Migration Pack created through the required skill workflow.
 - If `SAC_VERIFY_TARGET_MISSING`, `SAC_UNMANAGED_ARTIFACT`, or a baseline checkpoint hash mismatch
   appears before follow-up pack work, stop and report a runner/setup bug.
@@ -101,11 +104,38 @@ skills or `univer help`.
   inserted/deleted rows, moved tables, section headers, transposition, or reshaping can shift the
   final evaluator window.
 
+## Univerfile Unit Evidence
+
+- Treat each case `workbook.univer` as a target `.univer` container. The target path is the file
+  identity; unit-specific reads or mutations need the relevant discovered `localUnitId`.
+- Discover units and capability hints through the canonical skills, `univer help`, sidecar docs, and
+  managed `inspect-tools/tools.json` when present. Do not assume a default workbook unit id.
+- Prefer managed inspect tools plus params files for common readonly evidence: `units.js`,
+  `sheet-overview.js`, `sheet-search.js`, `sheet-range.js`, `sheet-neighborhood.js`, and
+  `sheet-formulas.js` when those tools exist in the case sidecar.
+- Managed inspect command shape is `univer inspect <workbook.univer> --script <sidecar>/inspect-tools/<tool>.js --params <params.json>`.
+  Params must be ordinary JSON object tool inputs such as `localUnitId`, `sheetName`, `rangeA1`,
+  `query`, and `include`; never include hidden answers, golden workbook paths, evaluator reports, or
+  scoring metadata in params.
+- Store params, scratch probe output, and temporary evidence files under `/task/work` unless a
+  tool-specific sidecar doc says otherwise.
+- Inspect tools and readonly probes report facts such as coordinates, values, formulas, number
+  formats, samples, warnings, and truncation. They do not decide task semantics. Record decisions
+  such as source range, target schema, total/footer preservation, formula strategy, and blank-tail
+  boundaries in success criteria, plans, assertions, or migration source.
+- If managed tools are unavailable or insufficient, keep custom `inspect-scripts/*.js` probes short,
+  readonly, sidecar-local, and limited to the missing evidence. Do not hand-write common range,
+  search, formula, overview, or neighborhood Facade probes when a managed tool already covers them.
+
 ## Planning Overlay
 
 - Follow the canonical skills for plan file shape and pack-by-pack workflow.
 - Classify nearby workbook ranges by role before editing: source data, target output, example/demo,
   helper/control input, lookup/reference, existing output, and preserve-only area.
+- For report, aggregate, summarize, split, rebuild, or consolidation tasks, inventory the target
+  schema before writing success criteria: headers, body rows, summary/footer rows, spacer columns,
+  formulas, number formats, and true blank tails. Inspect both the head and tail of each relevant
+  `answer_position` window when the output is large or discontiguous.
 - For simple bounded writes, formulas, formats, or copied cell models, keep the plan short: source,
   target, actual write subrange, deterministic rule, stored model, assertions/probes, and preservation.
 - For sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, structural
@@ -147,6 +177,19 @@ skills or `univer help`.
 - Existing values inside `answer_position` are evidence, not authority. When the instruction asks to
   compute, fill, repair, replace, reshape, transpose, or enter formulas, treat existing target values
   as examples or stale state until proven otherwise.
+- Existing target labels or formulas such as `TOTAL`, `SUBTOTAL`, `SUM(...)`, section headers, and
+  report footers are schema evidence, not ordinary stale data. If the final plan deletes or blanks
+  them, cite explicit instruction or workbook evidence that the schema should be removed; otherwise
+  rebuild, move, or recompute the footer after replacing stale body rows.
+- Treat "clear existing data before ..." as an execution boundary, not a final-state rule. The final
+  workbook still needs any headers, footers, formulas, formats, and blank tails required by the
+  instruction and reusable target template.
+- When the prompt says an existing area is an example, mostly correct, or a template, infer the full
+  workbook pattern from it: body rows, total/footer rows, spacer columns, formulas, and formats. Do
+  not copy only the item rows while discarding summary structure without evidence.
+- Reconcile target-window height with source-derived output counts. Extra rows in an
+  `answer_position` block must be classified as footer/summary rows, section rows, or blank tail
+  before assertions may expect blanks.
 - For discontiguous `answer_position` windows, preserve the row anchor and meaning of each window
   separately. Do not infer that later windows share the first window's source row, lookup row, or
   example row unless workbook evidence proves that relationship.
@@ -162,6 +205,9 @@ skills or `univer help`.
   window and document that window's row anchor.
 - Cover at least one source-to-target mapping when data is transformed, sorted, joined, copied, or reshaped.
 - Cover first/middle/last or boundary rows for large ranges.
+- For aggregate, summarize, report, split, or rebuild tasks, cover the last body row, each
+  summary/footer label, the footer amount/formula or stored value, and the first true blank tail row
+  when such rows exist in the target schema or `answer_position` window.
 - Cover duplicate-key, no-match, missing-result, or tie-break rows when relevant.
 - Cover type-sensitive cells by stored value model when display text can mislead: date, boolean,
   blank, true zero, text-number, identifier, formula, percentage, currency, and exact text.
@@ -185,9 +231,9 @@ skills or `univer help`.
 
 ## Type And API Lookup Budget
 
-- For Facade/SaC type lookup, use the current package project's managed type entry:
-  `/task/cases/case_N/sac.univer/project/types`.
-- Safe lookup pattern: `rg "setFormula|class FRange" /task/cases/case_N/sac.univer/project/types -g '*.d.ts'`.
+- For Facade/SaC type lookup, use the current hidden sidecar's managed type entry:
+  `/task/cases/case_N/.workbook.univer.sac/types`.
+- Safe lookup pattern: `rg "setFormula|class FRange" /task/cases/case_N/.workbook.univer.sac/types -g '*.d.ts'`.
 - Do not run broad `rg`, `sed`, `cat`, `find`, or file reads under `/usr/local/lib/node_modules/univer-cli`.
 - Do not inspect CLI bundle or implementation paths such as `chunks/`, `internal/`,
   `view/browser/assets/`, or `vendor*.js` for Facade/SaC APIs.
@@ -244,8 +290,8 @@ def build_agent_prompt(
     case_lines = "\n".join(
         "\n".join(
             [
-                f"- /task/cases/case_{case_index}/sac.univer: prepared package-local SaC project for case {case_index}.",
-                f"  Project source: /task/cases/case_{case_index}/sac.univer/project",
+                f"- /task/cases/case_{case_index}/workbook.univer: prepared target univerfile for case {case_index}.",
+                f"  Hidden sidecar: /task/cases/case_{case_index}/.workbook.univer.sac",
             ]
         )
         for case_index in case_list

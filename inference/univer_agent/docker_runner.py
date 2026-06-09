@@ -32,21 +32,6 @@ def remove_existing_path(path: Path) -> None:
         path.unlink()
 
 
-def import_xlsx_to_univer(input_path: Path, output_path: Path) -> None:
-    result = subprocess.run(
-        ["univer", "import", str(input_path), str(output_path)],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        detail = (result.stderr or result.stdout or "").strip()
-        if detail:
-            raise RunnerError(f"Failed to pre-import workbook {input_path}: {detail}")
-        raise RunnerError(f"Failed to pre-import workbook {input_path}: exit {result.returncode}")
-    if not output_path.exists():
-        raise RunnerError(f"Pre-import did not create workbook: {output_path}")
-
-
 def run_workspace_setup_command(args: List[str], *, cwd: Optional[Path] = None) -> None:
     result = subprocess.run(
         args,
@@ -76,18 +61,24 @@ def task_container_path(container_task_dir: Path, path: Path) -> str:
     return "/task/" + path.relative_to(container_task_dir).as_posix()
 
 
+def hidden_sidecar_path(workbook_path: Path) -> Path:
+    return workbook_path.parent / f".{workbook_path.name}.sac"
+
+
 def prepare_sac_workspace(
     config: RunnerConfig,
     container_task_dir: Path,
     input_xlsx_path: Path,
-    package_path: Path,
+    workbook_path: Path,
 ) -> None:
-    remove_existing_path(package_path)
+    sidecar_path = hidden_sidecar_path(workbook_path)
+    remove_existing_path(workbook_path)
+    remove_existing_path(sidecar_path)
     input_container_path = task_container_path(container_task_dir, input_xlsx_path)
-    package_container_path = task_container_path(container_task_dir, package_path)
+    workbook_container_path = task_container_path(container_task_dir, workbook_path)
     script = (
-        "univer config set experimental.sac true >/dev/null"
-        f" && univer import {shlex.quote(input_container_path)} {shlex.quote(package_container_path)}"
+        f"univer import --file {shlex.quote(input_container_path)} "
+        f"{shlex.quote(workbook_container_path)} --json"
     )
     run_workspace_setup_command(
         [
@@ -103,6 +94,10 @@ def prepare_sac_workspace(
             script,
         ]
     )
+    if not workbook_path.is_file():
+        raise RunnerError(f"Prepared workbook was not created: {workbook_path}")
+    if not sidecar_path.is_dir():
+        raise RunnerError(f"Prepared hidden SaC sidecar was not created: {sidecar_path}")
 
 
 def prepare_docker_task_workspace(
@@ -131,7 +126,7 @@ def prepare_docker_task_workspace(
         output_dir.mkdir(parents=True, exist_ok=True)
         copied_input = case_dir / "input.xlsx"
         shutil.copy2(source_input, copied_input)
-        prepare_sac_workspace(config, container_task_dir, copied_input, case_dir / "sac.univer")
+        prepare_sac_workspace(config, container_task_dir, copied_input, case_dir / "workbook.univer")
         remove_existing_path(copied_input)
 
     (container_task_dir / "AGENTS.md").write_text(build_task_agents_md(case_list), encoding="utf-8")

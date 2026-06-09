@@ -8,7 +8,7 @@ Build:
 bash scripts/build_agent_docker.sh
 ```
 
-Build with a local `/Users/otime/project/univer-cli` checkout instead of `univer-cli@latest`:
+Build with a local `/Users/morris/Developer/univer/univer-cli` checkout instead of `univer-cli@latest`:
 
 ```bash
 bash scripts/build_agent_docker_from_local_univer_cli.sh
@@ -26,8 +26,8 @@ For SaC experiments, use a separate tag:
 
 ```bash
 bash scripts/build_agent_docker_from_local_univer_cli.sh \
-  --repo /Users/otime/project/univer-cli \
-  --tag spreadsheetbench-univer-cli-agent-sac
+  --repo /Users/morris/Developer/univer/univer-cli \
+  --tag spreadsheetbench-univer-cli-agent-local
 ```
 
 This local build script runs `pnpm build` in the checkout, packs `apps/cli/dist`,
@@ -41,9 +41,11 @@ from `/task`, and `/task/AGENTS.md` is the only benchmark instruction file:
 /task
   AGENTS.md
   prompt.md
-  cases/case_1/sac.univer/
-  cases/case_1/sac.univer/project/univer.config.ts
-  cases/case_1/sac.univer/project/migrations/
+  cases/case_1/workbook.univer
+  cases/case_1/.workbook.univer.sac/
+  cases/case_1/.workbook.univer.sac/inspect-scripts/
+  cases/case_1/.workbook.univer.sac/migrations/
+  cases/case_1/.workbook.univer.sac/types/
   outputs/case_1/
   logs/
   work/
@@ -57,4 +59,4 @@ The container must write:
 
 Agent configuration is provided at runtime by read-only mounts. For Codex, mount auth and config files to `/home/node/.codex/auth.json` and `/home/node/.codex/config.toml`. For Claude, mount settings to `/home/node/.claude/settings.json`. Secrets are not baked into the image and are not copied into `/task`.
 
-The image intentionally does not include Python or workbook parsing libraries. Agents should follow `/task/AGENTS.md` and use the prepared SaC workspaces plus installed Univer CLI tooling inside `/task`.
+The image intentionally does not include Python or workbook parsing libraries. Agents should follow `/task/AGENTS.md` and use the prepared target univerfiles, hidden sidecars, and installed Univer CLI tooling inside `/task`.
