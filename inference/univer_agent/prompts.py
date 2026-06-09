@@ -113,6 +113,10 @@ skills or `univer help`.
 - Prefer managed inspect tools plus params files for common readonly evidence: `units.js`,
   `sheet-overview.js`, `sheet-search.js`, `sheet-range.js`, `sheet-neighborhood.js`, and
   `sheet-formulas.js` when those tools exist in the case sidecar.
+- Prefer managed `normalizedValues` for ordinary labels, copied text, matching, grouping, and
+  evaluator-facing write decisions. Request `rawValues`, `displayValues`, or `cellData` only when the
+  task explicitly depends on exact storage text, multi-line cell contents, rich cell data, or
+  export/debug evidence.
 - Managed inspect command shape is `univer inspect <workbook.univer> --script <sidecar>/inspect-tools/<tool>.js --params <params.json>`.
   Params must be ordinary JSON object tool inputs such as `localUnitId`, `sheetName`, `rangeA1`,
   `query`, and `include`; never include hidden answers, golden workbook paths, evaluator reports, or
@@ -132,10 +136,12 @@ skills or `univer help`.
 - Follow the canonical skills for plan file shape and pack-by-pack workflow.
 - Classify nearby workbook ranges by role before editing: source data, target output, example/demo,
   helper/control input, lookup/reference, existing output, and preserve-only area.
-- For report, aggregate, summarize, split, rebuild, or consolidation tasks, inventory the target
-  schema before writing success criteria: headers, body rows, summary/footer rows, spacer columns,
-  formulas, number formats, and true blank tails. Inspect both the head and tail of each relevant
-  `answer_position` window when the output is large or discontiguous.
+- For report, aggregate, summarize, split, rebuild, or consolidation tasks, inventory enough target
+  schema before locking the plan and assertions: headers, body rows, summary/footer rows, spacer
+  columns, formulas, number formats, and true blank tails. Inspect both the head and tail of each
+  relevant `answer_position` window when the output is large or discontiguous. Inspect managed
+  overview `regions` when available so side-by-side tables, uneven table heights, and
+  region-specific footer evidence are not hidden by one sheet-level sample.
 - For simple bounded writes, formulas, formats, or copied cell models, keep the plan short: source,
   target, actual write subrange, deterministic rule, stored model, assertions/probes, and preservation.
 - For sorting, filtering, grouping, matching, consolidation, dynamic ranges, formulas, structural
@@ -165,9 +171,11 @@ skills or `univer help`.
   nearby output patterns, write that exact workbook token, including casing, punctuation, and spacing.
   Prompt prose casing is weaker evidence than an existing workbook token unless the instruction
   explicitly asks to recase or reword the output.
-- For list, joined-string, copied-text, and label outputs, do not silently trim, collapse, insert, or
-  prettify whitespace. Preserve source-token whitespace exactly unless the instruction explicitly
-  asks to trim, normalize, or reformat text.
+- For list, joined-string, copied-text, and label outputs, use normalized inspect evidence for the
+  written evaluator-facing text unless the task explicitly requires exact storage text or multi-line
+  cell content. Do not silently rename, recase, singularize, pluralize, or reformat workbook-visible
+  labels; normalize labels only for matching unless the instruction requires writing the normalized
+  form.
 - Do not infer debit/credit, in/out, or similar semantic direction from business convention,
   source-side sign, balance movement, or category frequency alone. Prove it from target labels,
   examples, instruction wording, or record the remaining assumption.
@@ -178,15 +186,16 @@ skills or `univer help`.
   compute, fill, repair, replace, reshape, transpose, or enter formulas, treat existing target values
   as examples or stale state until proven otherwise.
 - Existing target labels or formulas such as `TOTAL`, `SUBTOTAL`, `SUM(...)`, section headers, and
-  report footers are schema evidence, not ordinary stale data. If the final plan deletes or blanks
-  them, cite explicit instruction or workbook evidence that the schema should be removed; otherwise
-  rebuild, move, or recompute the footer after replacing stale body rows.
+  report footers are schema evidence, not ordinary stale data. Decide whether the final workbook
+  should rebuild, move, recompute, preserve, or remove that structure from instruction wording and
+  workbook evidence rather than from stale body rows or a convenient target window.
 - Treat "clear existing data before ..." as an execution boundary, not a final-state rule. The final
   workbook still needs any headers, footers, formulas, formats, and blank tails required by the
   instruction and reusable target template.
-- When the prompt says an existing area is an example, mostly correct, or a template, infer the full
-  workbook pattern from it: body rows, total/footer rows, spacer columns, formulas, and formats. Do
-  not copy only the item rows while discarding summary structure without evidence.
+- When the prompt says an existing area is an example, mostly correct, or a template, treat the full
+  workbook pattern as evidence: body rows, total/footer rows, spacer columns, formulas, and formats
+  may all matter. Decide which pieces are reusable schema, stale examples, or irrelevant before
+  copying or discarding them.
 - Reconcile target-window height with source-derived output counts. Extra rows in an
   `answer_position` block must be classified as footer/summary rows, section rows, or blank tail
   before assertions may expect blanks.
@@ -196,37 +205,33 @@ skills or `univer help`.
 
 ## Assertion Overlay
 
-- Assertions must be plan-derived and must distinguish the chosen rule from a plausible wrong rule,
-  not merely confirm whatever the migration wrote.
-- For every high-risk semantic decision in the plan, name one plausible wrong output and include at
-  least one assertion or readonly probe that would reject that wrong interpretation.
-- Cover evaluator-facing cells inside `answer_position`.
-- For discontiguous `answer_position`, cover at least one evaluator-facing cell in each separate
-  window and document that window's row anchor.
-- Cover at least one source-to-target mapping when data is transformed, sorted, joined, copied, or reshaped.
-- Cover first/middle/last or boundary rows for large ranges.
-- For aggregate, summarize, report, split, or rebuild tasks, cover the last body row, each
-  summary/footer label, the footer amount/formula or stored value, and the first true blank tail row
-  when such rows exist in the target schema or `answer_position` window.
-- Cover duplicate-key, no-match, missing-result, or tie-break rows when relevant.
-- Cover type-sensitive cells by stored value model when display text can mislead: date, boolean,
-  blank, true zero, text-number, identifier, formula, percentage, currency, and exact text.
-- Cover exact stored text for casing, punctuation, whitespace, NBSP, suffix/prefix text, and joined
-  labels when those values appear in evaluator-facing cells.
+- Assertions must be plan-derived and discriminating; they should catch a plausible wrong
+  interpretation instead of merely confirming whatever the migration wrote.
+- For high-risk semantic decisions that affect changed evaluator-facing cells, use one focused
+  assertion or readonly probe when it would reject a plausible wrong rule. If the workbook evidence
+  stays underdetermined, record the assumption rather than turning it into certainty.
+- Prioritize evaluator-facing cells inside `answer_position`, especially discontiguous windows,
+  transformed source-to-target mappings, large-range boundary rows, duplicate/no-match/tie-break
+  rows, and type-sensitive cells where display text can mislead.
+- For aggregate, summarize, report, split, or rebuild tasks, check the body/footer/blank-tail
+  boundaries that the plan actually chooses. Do not assert blank tails, totals, or preserved labels
+  before the plan has classified the target schema.
+- For exact text decisions, assert ordinary casing, punctuation, whitespace, suffix/prefix text,
+  joined labels, or stored value type from normalized evidence by default. Assert raw/control or
+  rich-cell text only when the plan cites explicit exact storage or cell-model evidence.
 - Cover precision-sensitive outputs with the final evaluator-facing value or string, not a rounded or
   display-pretty approximation, unless that approximation is explicitly required.
-- Cover preservation of nearby source, example/demo, helper/control, lookup/reference, or preserve-only
-  ranges that must not be changed.
 - A verify result with zero assertions, all skipped packs, or an unchecked changed pack is not a pass.
 
-## Formula And Stored Value Risk
+## Formula And Stored Value Decisions
 
-- If formulas are required, preserve or write formulas and prove exported stored/cached values will
-  match the intended result.
-- If formulas are not required and cached values cannot be confidently guaranteed, prefer writing
-  evaluator-needed stored values directly.
-- For uncertain formula families, run one targeted compatibility probe in the workbook runtime or a
-  scratch workbook under `/task/work`, then inspect recalculated `f`, `v`, and `t` cell-model evidence.
+- If formula behavior is required by the instruction or reusable workbook template, preserve or write
+  formulas and gather confidence that exported stored/cached values match the intended result.
+- If only final values are required and formula cache confidence is weak, evaluator-needed stored
+  values can be the simpler correct contract.
+- For uncertain formula families, use one targeted compatibility probe in the workbook runtime or a
+  scratch workbook under `/task/work`, then inspect recalculated `f`, `v`, and `t` cell-model
+  evidence.
 - Do not rely on manually supplied cached `v` next to `f` as proof that formula export will score.
 
 ## Type And API Lookup Budget
@@ -265,14 +270,15 @@ Before exporting:
 
 - The relevant skill-guided SaC verification status is `passed`.
 - `checkedPackCount > 0`.
-- The changed follow-up pack has assertion evidence and evaluator-facing cell model evidence for
-  relevant date, boolean, blank/zero, text-number, formula, percentage/currency, or copied-cell risks.
+- The changed follow-up pack has assertion evidence and evaluator-facing cell model evidence for the
+  date, boolean, blank/zero, text-number, formula, percentage/currency, copied-cell, or text-artifact
+  risks that the plan actually identifies.
 - Readonly probes are auxiliary evidence only.
 - No hidden answer, host evaluation artifact, or raw input file was used.
 
 When case `N` passes the gate, export the managed artifact to exactly
 `/task/outputs/case_N/output.xlsx` once, confirm the file is non-empty, then stop immediately unless
-the plan requires the bounded export compatibility smoke check.
+the plan identifies a bounded export compatibility risk.
 
 For that smoke check only: import the exported file into a temporary `.univer` under `/task/work`,
 inspect only `answer_position` or the specific type-sensitive cells named in the plan, and do not
